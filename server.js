@@ -37,58 +37,13 @@ app.get('/', (req, res) => {
     status: 'running',
     endpoints: {
       health: '/health',
-      'setup-database': '/setup-database (POST)',
       register: '/register (POST)',
       test: '/test'
     }
   });
 });
 
-// Create tables endpoint
-app.post('/setup-database', async (req, res) => {
-  try {
-    // Create users table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
-        role VARCHAR(20) DEFAULT 'renter',
-        first_name VARCHAR(100),
-        last_name VARCHAR(100),
-        email_verified BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP DEFAULT NOW()
-      );
-    `);
-    
-    // Create verification tokens table
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS verification_tokens (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        token VARCHAR(255) UNIQUE NOT NULL,
-        type VARCHAR(50) DEFAULT 'email_verification',
-        expires_at TIMESTAMP NOT NULL,
-        used BOOLEAN DEFAULT FALSE,
-        created_at TIMESTAMP DEFAULT NOW()
-      );
-    `);
-    
-    res.json({ 
-      message: 'Database tables created successfully!',
-      tables: ['users', 'verification_tokens'],
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('Database setup error:', error);
-    res.status(500).json({ 
-      error: 'Failed to create tables', 
-      details: error.message 
-    });
-  }
-});
-
-// Test database connection
+// Test endpoint
 app.get('/test', (req, res) => {
   res.json({
     message: 'Test endpoint working!',
@@ -96,88 +51,10 @@ app.get('/test', (req, res) => {
     port: PORT
   });
 });
-// Simple registration test page (no CSP)
-app.get('/register-test', (req, res) => {
-  res.send(`
-    <html>
-      <head><title>User Registration Test</title></head>
-      <body>
-        <h2>Create New User Account</h2>
-        <div>
-          <p><label>Email: <input type="email" id="email"></label></p>
-          <p><label>Password: <input type="password" id="password"></label></p>
-          <p><label>First Name: <input type="text" id="firstName"></label></p>
-          <p><label>Last Name: <input type="text" id="lastName"></label></p>
-          <p><label>Role: 
-            <select id="role">
-              <option value="renter">Renter</option>
-              <option value="landlord">Landlord</option>
-            </select>
-          </label></p>
-          <button onclick="createUser()">Create Account</button>
-        </div>
-        <div id="result"></div>
-        
-        <script>
-        async function createUser() {
-          const data = {
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value,
-            firstName: document.getElementById('firstName').value,
-            lastName: document.getElementById('lastName').value,
-            role: document.getElementById('role').value
-          };
-          
-          try {
-            const response = await fetch('/register', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(data)
-            });
-            const result = await response.json();
-            document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
-          } catch (error) {
-            document.getElementById('result').innerHTML = 'Error: ' + error.message;
-          }
-        }
-        </script>
-      </body>
-    </html>
-  `);
-});
-  `);
-});
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Auth service running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});// Simple setup page for creating tables
-app.get('/setup', (req, res) => {
-  res.send(`
-    <html>
-      <body>
-        <h2>Database Setup</h2>
-        <button onclick="createTables()">Create Database Tables</button>
-        <div id="result"></div>
-        
-        <script>
-        async function createTables() {
-          try {
-            const response = await fetch('/setup-database', { method: 'POST' });
-            const result = await response.json();
-            document.getElementById('result').innerHTML = 
-              '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
-          } catch (error) {
-            document.getElementById('result').innerHTML = 'Error: ' + error.message;
-          }
-        }
-        </script>
-      </body>
-    </html>
-  `);
-});// GET version for browser testing
+
+// Create tables endpoint (GET version)
 app.get('/setup-database', async (req, res) => {
   try {
-    // Create users table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -191,7 +68,6 @@ app.get('/setup-database', async (req, res) => {
       );
     `);
     
-    // Create verification tokens table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS verification_tokens (
         id SERIAL PRIMARY KEY,
@@ -216,12 +92,13 @@ app.get('/setup-database', async (req, res) => {
       details: error.message 
     });
   }
-});// User registration endpoint
+});
+
+// User registration endpoint
 app.post('/register', async (req, res) => {
   try {
     const { email, password, firstName, lastName, role = 'renter' } = req.body;
     
-    // Basic validation
     if (!email || !password || !firstName || !lastName) {
       return res.status(400).json({
         error: 'Missing required fields',
@@ -229,10 +106,8 @@ app.post('/register', async (req, res) => {
       });
     }
     
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
     
-    // Create user
     const result = await pool.query(
       `INSERT INTO users (email, password_hash, role, first_name, last_name, created_at)
        VALUES ($1, $2, $3, $4, $5, NOW())
@@ -256,7 +131,7 @@ app.post('/register', async (req, res) => {
     });
     
   } catch (error) {
-    if (error.code === '23505') { // Unique constraint violation
+    if (error.code === '23505') {
       return res.status(409).json({
         error: 'User already exists',
         message: 'An account with this email already exists'
@@ -269,4 +144,9 @@ app.post('/register', async (req, res) => {
       message: 'An error occurred while creating your account'
     });
   }
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Auth service running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
