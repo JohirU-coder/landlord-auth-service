@@ -96,7 +96,57 @@ app.get('/test', (req, res) => {
     port: PORT
   });
 });
-
+// Simple registration test page
+app.get('/register-test', (req, res) => {
+  res.send(`
+    <html>
+      <head><title>User Registration Test</title></head>
+      <body>
+        <h2>Create New User Account</h2>
+        <form id="registerForm">
+          <p><label>Email: <input type="email" id="email" required></label></p>
+          <p><label>Password: <input type="password" id="password" required></label></p>
+          <p><label>First Name: <input type="text" id="firstName" required></label></p>
+          <p><label>Last Name: <input type="text" id="lastName" required></label></p>
+          <p><label>Role: 
+            <select id="role">
+              <option value="renter">Renter</option>
+              <option value="landlord">Landlord</option>
+            </select>
+          </label></p>
+          <button type="submit">Create Account</button>
+        </form>
+        <div id="result"></div>
+        
+        <script>
+        document.getElementById('registerForm').onsubmit = async function(e) {
+          e.preventDefault();
+          const data = {
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            role: document.getElementById('role').value
+          };
+          
+          try {
+            const response = await fetch('/register', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            document.getElementById('result').innerHTML = 
+              '<h3>Result:</h3><pre>' + JSON.stringify(result, null, 2) + '</pre>';
+          } catch (error) {
+            document.getElementById('result').innerHTML = 'Error: ' + error.message;
+          }
+        };
+        </script>
+      </body>
+    </html>
+  `);
+});
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Auth service running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
