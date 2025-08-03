@@ -100,4 +100,28 @@ app.get('/test', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Auth service running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});// Simple setup page for creating tables
+app.get('/setup', (req, res) => {
+  res.send(`
+    <html>
+      <body>
+        <h2>Database Setup</h2>
+        <button onclick="createTables()">Create Database Tables</button>
+        <div id="result"></div>
+        
+        <script>
+        async function createTables() {
+          try {
+            const response = await fetch('/setup-database', { method: 'POST' });
+            const result = await response.json();
+            document.getElementById('result').innerHTML = 
+              '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+          } catch (error) {
+            document.getElementById('result').innerHTML = 'Error: ' + error.message;
+          }
+        }
+        </script>
+      </body>
+    </html>
+  `);
 });
