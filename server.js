@@ -96,38 +96,30 @@ app.get('/test', (req, res) => {
     port: PORT
   });
 });
-// Simple registration test page
+// Simple registration test page (no CSP)
 app.get('/register-test', (req, res) => {
   res.send(`
     <html>
-      <head>
-        <title>User Registration Test</title>
-        <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';">
-      </head>
+      <head><title>User Registration Test</title></head>
       <body>
         <h2>Create New User Account</h2>
-        <form id="registerForm">
-          <p><label>Email: <input type="email" id="email" required></label></p>
-          <p><label>Password: <input type="password" id="password" required></label></p>
-          <p><label>First Name: <input type="text" id="firstName" required></label></p>
-          <p><label>Last Name: <input type="text" id="lastName" required></label></p>
+        <div>
+          <p><label>Email: <input type="email" id="email"></label></p>
+          <p><label>Password: <input type="password" id="password"></label></p>
+          <p><label>First Name: <input type="text" id="firstName"></label></p>
+          <p><label>Last Name: <input type="text" id="lastName"></label></p>
           <p><label>Role: 
             <select id="role">
               <option value="renter">Renter</option>
               <option value="landlord">Landlord</option>
             </select>
           </label></p>
-          <button type="submit">Create Account</button>
-        </form>
+          <button onclick="createUser()">Create Account</button>
+        </div>
         <div id="result"></div>
         
         <script>
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
-          e.preventDefault();
-          
-          const resultDiv = document.getElementById('result');
-          resultDiv.innerHTML = '<p>Creating account...</p>';
-          
+        async function createUser() {
           const data = {
             email: document.getElementById('email').value,
             password: document.getElementById('password').value,
@@ -142,18 +134,12 @@ app.get('/register-test', (req, res) => {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(data)
             });
-            
             const result = await response.json();
-            
-            if (response.ok) {
-              resultDiv.innerHTML = '<h3 style="color: green;">Success!</h3><pre>' + JSON.stringify(result, null, 2) + '</pre>';
-            } else {
-              resultDiv.innerHTML = '<h3 style="color: red;">Error:</h3><pre>' + JSON.stringify(result, null, 2) + '</pre>';
-            }
+            document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
           } catch (error) {
-            resultDiv.innerHTML = '<h3 style="color: red;">Network Error:</h3><p>' + error.message + '</p>';
+            document.getElementById('result').innerHTML = 'Error: ' + error.message;
           }
-        });
+        }
         </script>
       </body>
     </html>
