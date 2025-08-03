@@ -100,7 +100,10 @@ app.get('/test', (req, res) => {
 app.get('/register-test', (req, res) => {
   res.send(`
     <html>
-      <head><title>User Registration Test</title></head>
+      <head>
+        <title>User Registration Test</title>
+        <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';">
+      </head>
       <body>
         <h2>Create New User Account</h2>
         <form id="registerForm">
@@ -119,8 +122,12 @@ app.get('/register-test', (req, res) => {
         <div id="result"></div>
         
         <script>
-        document.getElementById('registerForm').onsubmit = async function(e) {
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
           e.preventDefault();
+          
+          const resultDiv = document.getElementById('result');
+          resultDiv.innerHTML = '<p>Creating account...</p>';
+          
           const data = {
             email: document.getElementById('email').value,
             password: document.getElementById('password').value,
@@ -135,16 +142,23 @@ app.get('/register-test', (req, res) => {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(data)
             });
+            
             const result = await response.json();
-            document.getElementById('result').innerHTML = 
-              '<h3>Result:</h3><pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            
+            if (response.ok) {
+              resultDiv.innerHTML = '<h3 style="color: green;">Success!</h3><pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } else {
+              resultDiv.innerHTML = '<h3 style="color: red;">Error:</h3><pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            }
           } catch (error) {
-            document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            resultDiv.innerHTML = '<h3 style="color: red;">Network Error:</h3><p>' + error.message + '</p>';
           }
-        };
+        });
         </script>
       </body>
     </html>
+  `);
+});
   `);
 });
 app.listen(PORT, '0.0.0.0', () => {
