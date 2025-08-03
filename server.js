@@ -124,4 +124,46 @@ app.get('/setup', (req, res) => {
       </body>
     </html>
   `);
+});// GET version for browser testing
+app.get('/setup-database', async (req, res) => {
+  try {
+    // Create users table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password_hash VARCHAR(255) NOT NULL,
+        role VARCHAR(20) DEFAULT 'renter',
+        first_name VARCHAR(100),
+        last_name VARCHAR(100),
+        email_verified BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+    
+    // Create verification tokens table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS verification_tokens (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        token VARCHAR(255) UNIQUE NOT NULL,
+        type VARCHAR(50) DEFAULT 'email_verification',
+        expires_at TIMESTAMP NOT NULL,
+        used BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+    
+    res.json({ 
+      message: 'Database tables created successfully!',
+      tables: ['users', 'verification_tokens'],
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Database setup error:', error);
+    res.status(500).json({ 
+      error: 'Failed to create tables', 
+      details: error.message 
+    });
+  }
 });
