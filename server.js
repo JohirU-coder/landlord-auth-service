@@ -166,4 +166,57 @@ app.get('/setup-database', async (req, res) => {
       details: error.message 
     });
   }
+});// User registration endpoint
+app.post('/register', async (req, res) => {
+  try {
+    const { email, password, firstName, lastName, role = 'renter' } = req.body;
+    
+    // Basic validation
+    if (!email || !password || !firstName || !lastName) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        required: ['email', 'password', 'firstName', 'lastName']
+      });
+    }
+    
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
+    // Create user
+    const result = await pool.query(
+      `INSERT INTO users (email, password_hash, role, first_name, last_name, created_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())
+       RETURNING id, email, role, first_name, last_name, email_verified, created_at`,
+      [email, hashedPassword, role, firstName, lastName]
+    );
+    
+    const user = result.rows[0];
+    
+    res.status(201).json({
+      message: 'User created successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        emailVerified: user.email_verified,
+        createdAt: user.created_at
+      }
+    });
+    
+  } catch (error) {
+    if (error.code === '23505') { // Unique constraint violation
+      return res.status(409).json({
+        error: 'User already exists',
+        message: 'An account with this email already exists'
+      });
+    }
+    
+    console.error('Registration error:', error);
+    res.status(500).json({
+      error: 'Registration failed',
+      message: 'An error occurred while creating your account'
+    });
+  }
 });
