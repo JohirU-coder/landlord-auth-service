@@ -38,6 +38,7 @@ app.get('/', (req, res) => {
     endpoints: {
       health: '/health',
       register: '/register (POST)',
+      login: '/login (POST)',
       test: '/test'
     }
   });
@@ -145,7 +146,65 @@ app.post('/register', async (req, res) => {
     });
   }
 });
-
+// User login endpoint
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    // Basic validation
+    if (!email || !password) {
+      return res.status(400).json({
+        error: 'Missing credentials',
+        message: 'Email and password are required'
+      });
+    }
+    
+    // Find user by email
+    const result = await pool.query(
+      'SELECT * FROM users WHERE email = $1',
+      [email]
+    );
+    
+    const user = result.rows[0];
+    if (!user) {
+      return res.status(401).json({
+        error: 'Invalid credentials',
+        message: 'Email or password is incorrect'
+      });
+    }
+    
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, user.password_hash);
+    if (!isValidPassword) {
+      return res.status(401).json({
+        error: 'Invalid credentials',
+        message: 'Email or password is incorrect'
+      });
+    }
+    
+    // Successful login
+    res.json({
+      message: 'Login successful',
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        emailVerified: user.email_verified,
+        createdAt: user.created_at
+      },
+      loginTime: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      error: 'Login failed',
+      message: 'An error occurred while logging in'
+    });
+  }
+});
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Auth service running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
