@@ -154,7 +154,95 @@ app.get('/', (req, res) => {
     }
   });
 });
-
+// Database Migration Endpoint
+app.get('/migrate', async (req, res) => {
+    try {
+        console.log('Starting database migration...');
+        
+        // Check if account_status column exists
+        const checkColumnQuery = `
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'users' AND column_name = 'account_status';
+        `;
+        
+        const columnExists = await pool.query(checkColumnQuery);
+        
+        if (columnExists.rows.length === 0) {
+            console.log('account_status column does not exist, creating it...');
+            
+            // Add the missing account_status column
+            const addColumnQuery = `
+                ALTER TABLE users 
+                ADD COLUMN account_status VARCHAR(50) DEFAULT 'active';
+            `;
+            
+            await pool.query(addColumnQuery);
+            console.log('account_status column added successfully');
+            
+            // Update existing users to have 'active' status
+            const updateExistingUsers = `
+                UPDATE users 
+                SET account_status = 'active' 
+                WHERE account_status IS NULL;
+            `;
+            
+            await pool.query(updateExistingUsers);
+            console.log('Updated existing users with active status');
+            
+            res.json({
+                success: true,
+                message: 'Database migration completed successfully',
+                changes: [
+                    'Added account_status column to users table',
+                    'Set default value to "active"',
+                    'Updated existing users'
+                ]
+            });
+        } else {
+            console.log('account_status column already exists');
+            res.json({
+                success: true,
+                message: 'Database migration not needed - account_status column already exists'
+            });
+        }
+        
+    } catch (error) {
+        console.error('Migration error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Migration failed',
+            details: error.message
+        });
+    }
+});
+// Additional endpoint to check current table structure
+app.get('/check-schema', async (req, res) => {
+    try {
+        const schemaQuery = `
+            SELECT column_name, data_type, is_nullable, column_default
+            FROM information_schema.columns 
+            WHERE table_name = 'users'
+            ORDER BY ordinal_position;
+        `;
+        
+        const result = await pool.query(schemaQuery);
+        
+        res.json({
+            success: true,
+            table: 'users',
+            columns: result.rows
+        });
+        
+    } catch (error) {
+        console.error('Schema check error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to check schema',
+            details: error.message
+        });
+    }
+});
 // Database setup endpoint
 app.get('/setup-database', async (req, res) => {
   try {
