@@ -61,7 +61,7 @@ app.use('/register', authLimiter);
 app.use(generalLimiter);
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: ['http://localhost:5500', 'http://127.0.0.1:5500'],
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
