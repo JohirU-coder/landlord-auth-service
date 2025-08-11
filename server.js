@@ -20,6 +20,9 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
+// Trust Railway's reverse proxy
+app.set('trust proxy', 1);
+
 // Security Middleware
 app.use(helmet({
   contentSecurityPolicy: {
@@ -32,8 +35,6 @@ app.use(helmet({
     },
   },
 }));
-// Trust Railway's reverse proxy
-app.set('trust proxy', 1);
 
 // Rate Limiting
 const authLimiter = rateLimit({
@@ -60,10 +61,32 @@ app.use('/login', authLimiter);
 app.use('/register', authLimiter);
 app.use(generalLimiter);
 
+// ROBUST CORS Configuration - NO ENVIRONMENT VARIABLES
 app.use(cors({
-  origin: ['http://localhost:5500', 'http://127.0.0.1:5500'],
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Hardcoded allowed origins
+    const allowedOrigins = [
+      'http://localhost:5500',
+      'http://127.0.0.1:5500',
+      'http://localhost:3000',
+      'http://127.0.0.1:3000'
+    ];
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json({ limit: '10mb' }));
 
 // Input Validation Schemas
@@ -129,8 +152,9 @@ app.get('/health', (req, res) => {
     status: 'OK',
     service: 'auth-service',
     timestamp: new Date().toISOString(),
-    version: '2.0.0',
-    security: 'JWT enabled'
+    version: '2.1.0',
+    security: 'JWT enabled',
+    cors: 'Hardcoded origins'
   });
 });
 
@@ -139,23 +163,26 @@ app.get('/', (req, res) => {
   res.json({
     message: 'RentReviews Authentication Service',
     status: 'running',
-    version: '2.0.0',
+    version: '2.1.0',
     endpoints: {
       health: '/health',
       register: '/register (POST)',
       login: '/login (POST)',
       profile: '/profile (GET) - Auth required',
       refresh: '/refresh (POST) - Auth required',
-      'setup-database': '/setup-database (GET)'
+      'setup-database': '/setup-database (GET)',
+      migrate: '/migrate (GET)',
+      'check-schema': '/check-schema (GET)'
     },
     security: {
       rateLimit: 'Enabled',
       helmet: 'Enabled',
       jwt: 'Enabled',
-      cors: 'Configured'
+      cors: 'Hardcoded - No Environment Variables'
     }
   });
 });
+
 // Database Migration Endpoint
 app.get('/migrate', async (req, res) => {
     try {
@@ -218,6 +245,7 @@ app.get('/migrate', async (req, res) => {
         });
     }
 });
+
 // Additional endpoint to check current table structure
 app.get('/check-schema', async (req, res) => {
     try {
@@ -245,6 +273,7 @@ app.get('/check-schema', async (req, res) => {
         });
     }
 });
+
 // Database setup endpoint
 app.get('/setup-database', async (req, res) => {
   try {
@@ -304,9 +333,12 @@ app.get('/setup-database', async (req, res) => {
 // User Registration
 app.post('/register', async (req, res) => {
   try {
+    console.log('Registration attempt:', { email: req.body.email, role: req.body.role });
+    
     // Validate input
     const { error, value } = registerSchema.validate(req.body);
     if (error) {
+      console.log('Validation error:', error.details);
       return res.status(400).json({
         error: 'Validation failed',
         details: error.details.map(detail => detail.message)
@@ -322,6 +354,7 @@ app.post('/register', async (req, res) => {
     );
 
     if (existingUser.rows.length > 0) {
+      console.log('User already exists:', email);
       return res.status(409).json({
         error: 'User already exists',
         message: 'An account with this email address already exists'
@@ -343,6 +376,8 @@ app.post('/register', async (req, res) => {
     const newUser = result.rows[0];
     const token = generateToken(newUser);
 
+    console.log('User created successfully:', { id: newUser.id, email: newUser.email });
+
     res.status(201).json({
       message: 'User created successfully',
       user: sanitizeUser(newUser),
@@ -362,9 +397,12 @@ app.post('/register', async (req, res) => {
 // User Login
 app.post('/login', async (req, res) => {
   try {
+    console.log('Login attempt:', { email: req.body.email });
+    
     // Validate input
     const { error, value } = loginSchema.validate(req.body);
     if (error) {
+      console.log('Login validation error:', error.details);
       return res.status(400).json({
         error: 'Validation failed',
         details: error.details.map(detail => detail.message)
@@ -380,6 +418,7 @@ app.post('/login', async (req, res) => {
     );
 
     if (result.rows.length === 0) {
+      console.log('User not found or inactive:', email);
       return res.status(401).json({
         error: 'Invalid credentials',
         message: 'Email or password is incorrect'
@@ -390,6 +429,7 @@ app.post('/login', async (req, res) => {
 
     // Check if account is locked
     if (user.locked_until && new Date() < new Date(user.locked_until)) {
+      console.log('Account locked:', email);
       return res.status(423).json({
         error: 'Account locked',
         message: 'Too many failed login attempts. Please try again later.'
@@ -400,6 +440,8 @@ app.post('/login', async (req, res) => {
     const passwordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!passwordValid) {
+      console.log('Invalid password for user:', email);
+      
       // Increment failed attempts
       await pool.query(
         `UPDATE users SET 
@@ -429,6 +471,8 @@ app.post('/login', async (req, res) => {
     );
 
     const token = generateToken(user);
+
+    console.log('Login successful:', { id: user.id, email: user.email });
 
     res.json({
       message: 'Login successful',
@@ -513,6 +557,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🔒 Secure Auth service running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`JWT: ${JWT_SECRET ? 'Configured' : 'Warning: Using default secret'}`);
+  console.log(`CORS: Hardcoded origins configured`);
 });
 
 // Graceful shutdown
