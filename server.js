@@ -32,6 +32,8 @@ app.use(helmet({
     },
   },
 }));
+// Trust Railway's reverse proxy
+app.set('trust proxy', 1);
 
 // Rate Limiting
 const authLimiter = rateLimit({
