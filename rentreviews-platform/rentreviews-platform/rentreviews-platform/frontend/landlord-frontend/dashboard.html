@@ -127,28 +127,28 @@
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <!-- Search Properties -->
-                        <button class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all transform hover:scale-105">
+                        <button id="searchPropertiesBtn" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all transform hover:scale-105">
                             <div class="text-2xl mb-2">🔍</div>
                             <div class="font-medium">Search Properties</div>
                             <div class="text-xs opacity-90 mt-1">Find your next home</div>
                         </button>
 
                         <!-- Write Review -->
-                        <button class="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105">
+                        <button id="writeReviewBtn" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105">
                             <div class="text-2xl mb-2">✏️</div>
                             <div class="font-medium">Write Review</div>
                             <div class="text-xs opacity-90 mt-1">Share your experience</div>
                         </button>
 
                         <!-- Market Insights -->
-                        <button class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white p-4 rounded-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105">
+                        <button id="marketInsightsBtn" class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white p-4 rounded-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105">
                             <div class="text-2xl mb-2">📊</div>
                             <div class="font-medium">Market Insights</div>
                             <div class="text-xs opacity-90 mt-1">Rental market trends</div>
                         </button>
 
                         <!-- Upgrade to Pro -->
-                        <button class="bg-gradient-to-r from-orange-500 to-red-600 text-white p-4 rounded-lg hover:from-orange-600 hover:to-red-700 transition-all transform hover:scale-105">
+                        <button id="upgradeProBtn" class="bg-gradient-to-r from-orange-500 to-red-600 text-white p-4 rounded-lg hover:from-orange-600 hover:to-red-700 transition-all transform hover:scale-105">
                             <div class="text-2xl mb-2">⚡</div>
                             <div class="font-medium">Upgrade to Pro</div>
                             <div class="text-xs opacity-90 mt-1">Unlock premium features</div>
@@ -277,33 +277,37 @@
 
             setupQuickActions() {
                 // Search Properties button
-                const searchBtn = document.querySelector('.bg-gradient-to-r.from-indigo-500');
+                const searchBtn = document.getElementById('searchPropertiesBtn');
                 if (searchBtn) {
                     searchBtn.addEventListener('click', () => {
+                        console.log('Search Properties clicked!');
                         window.location.href = './search.html';
                     });
                 }
                 
                 // Write Review button  
-                const writeReviewBtn = document.querySelector('.bg-gradient-to-r.from-green-500');
+                const writeReviewBtn = document.getElementById('writeReviewBtn');
                 if (writeReviewBtn) {
                     writeReviewBtn.addEventListener('click', () => {
+                        console.log('Write Review clicked!');
                         window.location.href = './search.html';
                     });
                 }
                 
                 // Market Insights button
-                const marketBtn = document.querySelector('.bg-gradient-to-r.from-blue-500');
+                const marketBtn = document.getElementById('marketInsightsBtn');
                 if (marketBtn) {
                     marketBtn.addEventListener('click', () => {
+                        console.log('Market Insights clicked!');
                         window.location.href = './search.html';
                     });
                 }
                 
                 // Upgrade to Pro button
-                const proBtn = document.querySelector('.bg-gradient-to-r.from-orange-500');
+                const proBtn = document.getElementById('upgradeProBtn');
                 if (proBtn) {
                     proBtn.addEventListener('click', () => {
+                        console.log('Upgrade to Pro clicked!');
                         alert('Upgrade to Pro feature coming soon!');
                     });
                 }
