@@ -120,45 +120,43 @@
             </div>
 
             <!-- Quick Actions -->
-            // Wait for the page to load
-document.addEventListener('DOMContentLoaded', () => {
-    // Search Properties button
-    const searchBtn = document.querySelector('.bg-gradient-to-r.from-indigo-500');
-    if (searchBtn) {
-        searchBtn.addEventListener('click', () => {
-            window.location.href = './search.html';
-        });
-    }
-    
-    // Write Review button  
-    const writeReviewBtn = document.querySelector('.bg-gradient-to-r.from-green-500');
-    if (writeReviewBtn) {
-        writeReviewBtn.addEventListener('click', () => {
-            // For now, redirect to search page - later we can add a review form
-            window.location.href = './search.html';
-        });
-    }
-    
-    // Market Insights button
-    const marketBtn = document.querySelector('.bg-gradient-to-r.from-blue-500');
-    if (marketBtn) {
-        marketBtn.addEventListener('click', () => {
-            // For now, redirect to search page - later we can add market insights
-            window.location.href = './search.html';
-        });
-    }
-    
-    // Upgrade to Pro button
-    const proBtn = document.querySelector('.bg-gradient-to-r.from-orange-500');
-    if (proBtn) {
-        proBtn.addEventListener('click', () => {
-            alert('Upgrade to Pro feature coming soon!');
-        });
-    }
-});
-            document.querySelector('.bg-gradient-to-r.from-indigo-500').addEventListener('click', () => {
-    window.location.href = 'search.html';
-});
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Search Properties -->
+                        <button class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all transform hover:scale-105">
+                            <div class="text-2xl mb-2">🔍</div>
+                            <div class="font-medium">Search Properties</div>
+                            <div class="text-xs opacity-90 mt-1">Find your next home</div>
+                        </button>
+
+                        <!-- Write Review -->
+                        <button class="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105">
+                            <div class="text-2xl mb-2">✏️</div>
+                            <div class="font-medium">Write Review</div>
+                            <div class="text-xs opacity-90 mt-1">Share your experience</div>
+                        </button>
+
+                        <!-- Market Insights -->
+                        <button class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white p-4 rounded-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105">
+                            <div class="text-2xl mb-2">📊</div>
+                            <div class="font-medium">Market Insights</div>
+                            <div class="text-xs opacity-90 mt-1">Rental market trends</div>
+                        </button>
+
+                        <!-- Upgrade to Pro -->
+                        <button class="bg-gradient-to-r from-orange-500 to-red-600 text-white p-4 rounded-lg hover:from-orange-600 hover:to-red-700 transition-all transform hover:scale-105">
+                            <div class="text-2xl mb-2">⚡</div>
+                            <div class="font-medium">Upgrade to Pro</div>
+                            <div class="text-xs opacity-90 mt-1">Unlock premium features</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Recent Activity (Empty State) -->
             <div class="bg-white shadow-lg rounded-lg overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200">
@@ -168,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="text-gray-400 text-6xl mb-4">📝</div>
                     <h4 class="text-lg font-medium text-gray-900 mb-2">No activity yet</h4>
                     <p class="text-gray-500 mb-6">Start by searching for properties or writing your first review!</p>
-                    <button class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium">
+                    <button id="getStartedBtn" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium">
                         Get Started
                     </button>
                 </div>
@@ -264,6 +262,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (logoutBtn) {
                     logoutBtn.addEventListener('click', () => this.logout());
                 }
+
+                // Quick Actions buttons
+                this.setupQuickActions();
+
+                // Get Started button
+                const getStartedBtn = document.getElementById('getStartedBtn');
+                if (getStartedBtn) {
+                    getStartedBtn.addEventListener('click', () => {
+                        window.location.href = './search.html';
+                    });
+                }
+            }
+
+            setupQuickActions() {
+                // Search Properties button
+                const searchBtn = document.querySelector('.bg-gradient-to-r.from-indigo-500');
+                if (searchBtn) {
+                    searchBtn.addEventListener('click', () => {
+                        window.location.href = './search.html';
+                    });
+                }
+                
+                // Write Review button  
+                const writeReviewBtn = document.querySelector('.bg-gradient-to-r.from-green-500');
+                if (writeReviewBtn) {
+                    writeReviewBtn.addEventListener('click', () => {
+                        window.location.href = './search.html';
+                    });
+                }
+                
+                // Market Insights button
+                const marketBtn = document.querySelector('.bg-gradient-to-r.from-blue-500');
+                if (marketBtn) {
+                    marketBtn.addEventListener('click', () => {
+                        window.location.href = './search.html';
+                    });
+                }
+                
+                // Upgrade to Pro button
+                const proBtn = document.querySelector('.bg-gradient-to-r.from-orange-500');
+                if (proBtn) {
+                    proBtn.addEventListener('click', () => {
+                        alert('Upgrade to Pro feature coming soon!');
+                    });
+                }
             }
 
             logout() {
@@ -283,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             redirectToAuth() {
-                window.location.href = 'auth.html';
+                window.location.href = './auth.html';
             }
         }
 
