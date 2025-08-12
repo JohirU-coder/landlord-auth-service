@@ -120,38 +120,42 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
-                </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <button class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all transform hover:scale-105">
-                            <div class="text-2xl mb-2">🔍</div>
-                            <div class="font-medium">Search Properties</div>
-                            <div class="text-xs opacity-90 mt-1">Find your next home</div>
-                        </button>
-                        
-                        <button class="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105">
-                            <div class="text-2xl mb-2">✍️</div>
-                            <div class="font-medium">Write Review</div>
-                            <div class="text-xs opacity-90 mt-1">Share your experience</div>
-                        </button>
-                        
-                        <button class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white p-4 rounded-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105">
-                            <div class="text-2xl mb-2">📊</div>
-                            <div class="font-medium">Market Insights</div>
-                            <div class="text-xs opacity-90 mt-1">Rental market trends</div>
-                        </button>
-                        
-                        <button class="bg-gradient-to-r from-orange-500 to-red-600 text-white p-4 rounded-lg hover:from-orange-600 hover:to-red-700 transition-all transform hover:scale-105">
-                            <div class="text-2xl mb-2">⚡</div>
-                            <div class="font-medium">Upgrade to Pro</div>
-                            <div class="text-xs opacity-90 mt-1">Unlock premium features</div>
-                        </button>
-                    </div>
-                </div>
-            </div>
+            // Wait for the page to load
+document.addEventListener('DOMContentLoaded', () => {
+    // Search Properties button
+    const searchBtn = document.querySelector('.bg-gradient-to-r.from-indigo-500');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', () => {
+            window.location.href = './search.html';
+        });
+    }
+    
+    // Write Review button  
+    const writeReviewBtn = document.querySelector('.bg-gradient-to-r.from-green-500');
+    if (writeReviewBtn) {
+        writeReviewBtn.addEventListener('click', () => {
+            // For now, redirect to search page - later we can add a review form
+            window.location.href = './search.html';
+        });
+    }
+    
+    // Market Insights button
+    const marketBtn = document.querySelector('.bg-gradient-to-r.from-blue-500');
+    if (marketBtn) {
+        marketBtn.addEventListener('click', () => {
+            // For now, redirect to search page - later we can add market insights
+            window.location.href = './search.html';
+        });
+    }
+    
+    // Upgrade to Pro button
+    const proBtn = document.querySelector('.bg-gradient-to-r.from-orange-500');
+    if (proBtn) {
+        proBtn.addEventListener('click', () => {
+            alert('Upgrade to Pro feature coming soon!');
+        });
+    }
+});
             document.querySelector('.bg-gradient-to-r.from-indigo-500').addEventListener('click', () => {
     window.location.href = 'search.html';
 });
