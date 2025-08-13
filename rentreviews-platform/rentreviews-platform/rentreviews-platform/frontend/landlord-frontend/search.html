@@ -463,24 +463,273 @@ function handleSearch() {
         }
 
         function createPropertyCard(property) {
-            const template = propertyCardTemplate.content.cloneNode(true);
-            
-            // Fill in property data
-            template.querySelector('.price-badge').textContent = `$${property.rent_amount?.toLocaleString() || 'N/A'}`;
-            template.querySelector('.property-address').textContent = property.address || 'Address not available';
-            template.querySelector('.property-location').textContent = `${property.city || ''}, ${property.state || ''} ${property.zip_code || ''}`.trim();
-            template.querySelector('.property-description').textContent = property.description || 'No description available';
-            template.querySelector('.property-bedrooms').textContent = `${property.bedrooms || 0} bed`;
-            template.querySelector('.property-bathrooms').textContent = `${property.bathrooms || 0} bath`;
-            template.querySelector('.property-sqft').textContent = `${property.square_feet || 'N/A'} sqft`;
-            
-            // Landlord info
-            const landlordName = `${property.landlord?.first_name || ''} ${property.landlord?.last_name || 'Unknown'}`.trim();
-            template.querySelector('.landlord-name').textContent = landlordName;
-            template.querySelector('.landlord-initial').textContent = (property.landlord?.first_name || 'U')[0].toUpperCase();
-            
-            return template;
+    const template = propertyCardTemplate.content.cloneNode(true);
+    
+    // Fill in property data
+    template.querySelector('.price-badge').textContent = `$${property.rent_amount?.toLocaleString() || 'N/A'}`;
+    template.querySelector('.property-address').textContent = property.address || 'Address not available';
+    template.querySelector('.property-location').textContent = `${property.city || ''}, ${property.state || ''} ${property.zip_code || ''}`.trim();
+    template.querySelector('.property-description').textContent = property.description || 'No description available';
+    template.querySelector('.property-bedrooms').textContent = `${property.bedrooms || 0} bed`;
+    template.querySelector('.property-bathrooms').textContent = `${property.bathrooms || 0} bath`;
+    template.querySelector('.property-sqft').textContent = `${property.square_feet || 'N/A'} sqft`;
+    
+    // Enhanced review display
+    const reviewStars = template.querySelector('.rating-stars');
+    const reviewCount = template.querySelector('.review-count');
+    
+    // Mock review data (in real app, this would come from your review service)
+    const mockReviewData = generateMockReviewData(property.id);
+    
+    // Update star rating display
+    const fullStars = Math.floor(mockReviewData.averageRating);
+    const hasHalfStar = mockReviewData.averageRating % 1 >= 0.5;
+    
+    let starsHtml = '';
+    for (let i = 0; i < 5; i++) {
+        if (i < fullStars) {
+            starsHtml += '⭐';
+        } else if (i === fullStars && hasHalfStar) {
+            starsHtml += '⭐'; // You could use a half-star icon here
+        } else {
+            starsHtml += '☆';
         }
+    }
+    
+    reviewStars.innerHTML = `${starsHtml} <span class="review-rating">(${mockReviewData.averageRating.toFixed(1)})</span>`;
+    
+    // Update review count
+    if (mockReviewData.reviewCount > 0) {
+        reviewCount.textContent = `${mockReviewData.reviewCount} review${mockReviewData.reviewCount !== 1 ? 's' : ''}`;
+        reviewCount.classList.remove('hidden');
+    } else {
+        reviewCount.textContent = 'No reviews yet';
+        reviewCount.classList.add('text-gray-400');
+    }
+    
+    // Landlord info
+    const landlordName = `${property.landlord?.first_name || ''} ${property.landlord?.last_name || 'Unknown'}`.trim();
+    template.querySelector('.landlord-name').textContent = landlordName;
+    template.querySelector('.landlord-initial').textContent = (property.landlord?.first_name || 'U')[0].toUpperCase();
+    
+    // Add review highlight if rating is good
+    const propertyCard = template.querySelector('.property-card');
+    if (mockReviewData.averageRating >= 4.0) {
+        const badge = document.createElement('div');
+        badge.className = 'absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold';
+        badge.textContent = 'Highly Rated';
+        propertyCard.style.position = 'relative';
+        propertyCard.appendChild(badge);
+    }
+    
+    // Enhanced "View Details" button functionality
+    const viewDetailsBtn = template.querySelector('.view-details-btn');
+    if (viewDetailsBtn) {
+        viewDetailsBtn.addEventListener('click', () => {
+            // For now, we'll create a property detail modal
+            showPropertyDetails(property, mockReviewData);
+        });
+    }
+    
+    // Add "Write Review" button
+    const buttonContainer = template.querySelector('.button-container');
+    if (buttonContainer) {
+        const writeReviewBtn = document.createElement('button');
+        writeReviewBtn.className = 'bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors ml-2';
+        writeReviewBtn.textContent = 'Write Review';
+        writeReviewBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Redirect to write review page with property pre-filled
+            const propertyData = encodeURIComponent(JSON.stringify({
+                id: property.id,
+                address: property.address,
+                city: property.city,
+                state: property.state,
+                zip_code: property.zip_code,
+                landlord_name: landlordName
+            }));
+            window.location.href = `./write-review.html?property=${propertyData}`;
+        });
+        buttonContainer.appendChild(writeReviewBtn);
+    }
+    
+    return template;
+}
+
+// Function to generate mock review data (replace with real API call later)
+function generateMockReviewData(propertyId) {
+    // Simulate different review scenarios based on property ID
+    const scenarios = [
+        { averageRating: 4.8, reviewCount: 12 },
+        { averageRating: 3.2, reviewCount: 7 },
+        { averageRating: 4.5, reviewCount: 23 },
+        { averageRating: 2.1, reviewCount: 4 },
+        { averageRating: 4.0, reviewCount: 8 },
+        { averageRating: 0, reviewCount: 0 } // No reviews
+    ];
+    
+    return scenarios[propertyId % scenarios.length];
+}
+
+// Function to show property details in a modal
+function showPropertyDetails(property, reviewData) {
+    // Create modal overlay
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+    
+    // Create modal content
+    const modalContent = document.createElement('div');
+    modalContent.className = 'bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto';
+    
+    modalContent.innerHTML = `
+        <div class="relative">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-t-2xl">
+                <button class="absolute top-4 right-4 text-white hover:text-gray-200" onclick="this.closest('.fixed').remove()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+                <h2 class="text-2xl font-bold text-white">${property.address}</h2>
+                <p class="text-indigo-100">${property.city}, ${property.state} ${property.zip_code}</p>
+                <div class="mt-4 flex items-center">
+                    <span class="bg-white text-indigo-600 px-3 py-1 rounded-full font-bold text-lg">
+                        $${property.rent_amount?.toLocaleString() || 'N/A'}
+                    </span>
+                    <div class="ml-4 text-white">
+                        ${reviewData.averageRating > 0 ? 
+                            `<div class="flex items-center">
+                                <span class="text-yellow-300">⭐⭐⭐⭐⭐</span>
+                                <span class="ml-2">${reviewData.averageRating.toFixed(1)} (${reviewData.reviewCount} reviews)</span>
+                            </div>` :
+                            '<span class="text-indigo-200">No reviews yet</span>'
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="p-6">
+                <!-- Property Details -->
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-gray-900">${property.bedrooms || 0}</div>
+                        <div class="text-sm text-gray-600">Bedrooms</div>
+                    </div>
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-gray-900">${property.bathrooms || 0}</div>
+                        <div class="text-sm text-gray-600">Bathrooms</div>
+                    </div>
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="text-2xl font-bold text-gray-900">${property.square_feet || 'N/A'}</div>
+                        <div class="text-sm text-gray-600">Sq Ft</div>
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Description</h3>
+                    <p class="text-gray-700">${property.description || 'No description available'}</p>
+                </div>
+                
+                <!-- Landlord -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Landlord</h3>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center">
+                            <span class="text-white font-bold">${(property.landlord?.first_name || 'U')[0].toUpperCase()}</span>
+                        </div>
+                        <div class="ml-3">
+                            <p class="font-medium text-gray-900">${property.landlord?.first_name || ''} ${property.landlord?.last_name || 'Unknown'}</p>
+                            <p class="text-sm text-gray-500">Verified Landlord</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reviews Section -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Recent Reviews</h3>
+                    ${reviewData.reviewCount > 0 ? generateMockReviews(reviewData.reviewCount) : 
+                        '<p class="text-gray-500 text-center py-8">No reviews yet. Be the first to share your experience!</p>'
+                    }
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex gap-4">
+                    <button class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors" 
+                            onclick="window.location.href='./write-review.html?property=${encodeURIComponent(JSON.stringify({
+                                id: property.id,
+                                address: property.address,
+                                city: property.city,
+                                state: property.state,
+                                zip_code: property.zip_code,
+                                landlord_name: '${property.landlord?.first_name || ''} ${property.landlord?.last_name || ''}'
+                            }))}'">
+                        Write a Review
+                    </button>
+                    <button class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                            onclick="this.closest('.fixed').remove()">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    modalOverlay.appendChild(modalContent);
+    document.body.appendChild(modalOverlay);
+    
+    // Close modal when clicking overlay
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            modalOverlay.remove();
+        }
+    });
+}
+
+// Generate mock reviews for display
+function generateMockReviews(count) {
+    const mockReviews = [
+        {
+            name: "Sarah M.",
+            rating: 5,
+            date: "2 weeks ago",
+            text: "Amazing property! The landlord is very responsive and the apartment is exactly as described. Highly recommend!"
+        },
+        {
+            name: "Mike R.",
+            rating: 4,
+            date: "1 month ago", 
+            text: "Great location and fair rent. Had a small maintenance issue that was fixed quickly."
+        },
+        {
+            name: "Jessica L.",
+            rating: 5,
+            date: "2 months ago",
+            text: "Beautiful apartment in a quiet neighborhood. Landlord is professional and respectful."
+        }
+    ];
+    
+    return mockReviews.slice(0, Math.min(count, 3)).map(review => `
+        <div class="border-b border-gray-200 pb-4 mb-4 last:border-b-0">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                        <span class="text-sm font-bold">${review.name[0]}</span>
+                    </div>
+                    <div class="ml-3">
+                        <p class="font-medium text-gray-900">${review.name}</p>
+                        <p class="text-sm text-gray-500">${review.date}</p>
+                    </div>
+                </div>
+                <div class="text-yellow-400">
+                    ${'⭐'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+                </div>
+            </div>
+            <p class="text-gray-700">${review.text}</p>
+        </div>
+    `).join('');
+}
 
         function updateResultsCount(count) {
             resultsCount.textContent = `Found ${count} properties`;
