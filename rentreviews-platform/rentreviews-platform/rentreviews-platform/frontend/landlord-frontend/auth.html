@@ -519,58 +519,67 @@
         
         // Login Form Handler
         loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!email || !password) {
-                showNotification('Missing Information', 'Please enter both email and password', 'error');
-                return;
-            }
-            
-            setLoading(loginBtn, true);
-            
-            try {
-                const response = await ApiClient.makeRequest('/login', {
-                    method: 'POST',
-                    body: JSON.stringify({ email, password })
-                });
-                
-                const data = await response.json();
-                console.log('Login response:', data);
-                
-                if (response.ok && data.success) {
-                    AuthManager.setToken(data.token);
-                    AuthManager.setUser(data.user);
-                    
-                    showNotification('Welcome back!', 'Successfully signed in to your account', 'success');
-                    
-                    setTimeout(() => {
-                        window.location.href = './dashboard.html';
-                    }, 1500);
-                } else {
-                    let errorMessage = 'Login failed';
-                    
-                    if (response.status === 401) {
-                        errorMessage = data.message || 'Invalid email or password';
-                    } else if (response.status === 423) {
-                        errorMessage = 'Account locked due to too many failed attempts. Please try again later.';
-                    } else if (response.status === 429) {
-                        errorMessage = 'Too many login attempts. Please wait 15 minutes before trying again.';
-                    } else if (data.message || data.error) {
-                        errorMessage = data.message || data.error;
-                    }
-                    
-                    showNotification('Sign In Failed', errorMessage, 'error');
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                showNotification('Connection Error', error.message || 'Unable to connect to server. Please try again.', 'error');
-            }
-            
-            setLoading(loginBtn, false);
+    e.preventDefault();
+    
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!email || !password) {
+        showNotification('Missing Information', 'Please enter both email and password', 'error');
+        return;
+    }
+    
+    setLoading(loginBtn, true);
+    
+    try {
+        const response = await ApiClient.makeRequest('/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password })
         });
+        
+        const data = await response.json();
+        
+        // Debug logging
+        console.log('Raw response status:', response.status);
+        console.log('Raw response data:', data);
+        console.log('Response ok:', response.ok);
+        console.log('Data success:', data.success);
+        console.log('Data token:', data.token ? 'Present' : 'Missing');
+        console.log('Data user:', data.user ? 'Present' : 'Missing');
+        
+        // Check if login was successful (either response.ok OR data.success should work)
+        if (response.ok || (data && data.token)) {
+            AuthManager.setToken(data.token);
+            AuthManager.setUser(data.user);
+            
+            showNotification('Welcome back!', 'Successfully signed in to your account', 'success');
+            
+            setTimeout(() => {
+                window.location.href = './dashboard.html';
+            }, 1500);
+        } else {
+            let errorMessage = 'Login failed';
+            
+            if (response.status === 401) {
+                errorMessage = data.message || 'Invalid email or password';
+            } else if (response.status === 423) {
+                errorMessage = 'Account locked due to too many failed attempts. Please try again later.';
+            } else if (response.status === 429) {
+                errorMessage = 'Too many login attempts. Please wait 15 minutes before trying again.';
+            } else if (data && (data.message || data.error)) {
+                errorMessage = data.message || data.error;
+            }
+            
+            console.log('Login failed with error:', errorMessage);
+            showNotification('Sign In Failed', errorMessage, 'error');
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showNotification('Connection Error', error.message || 'Unable to connect to server. Please try again.', 'error');
+    }
+    
+    setLoading(loginBtn, false);
+});
         
         // Signup Form Handler
         signupForm.addEventListener('submit', async (e) => {
