@@ -679,7 +679,7 @@ function showPropertyDetails(property, reviewData) {
                                 city: property.city,
                                 state: property.state,
                                 zip_code: property.zip_code,
-                                landlord_name: '${property.landlord?.first_name || ''} ${property.landlord?.last_name || ''}'
+                                landlord_name: '${property.landlord?.first_name || ','} ${property.landlord?.last_name || ':'}'
                             }))}'">
                         Write a Review
                     </button>
