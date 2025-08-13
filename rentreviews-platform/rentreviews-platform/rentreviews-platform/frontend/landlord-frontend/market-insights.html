@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Insights - RentReviews</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        .insight-card {
+            transition: all 0.3s ease;
+        }
+        
+        .insight-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .trend-up {
+            color: #10b981;
+        }
+        
+        .trend-down {
+            color: #ef4444;
+        }
+        
+        .chart-placeholder {
+            background: linear-gradient(45deg, #f3f4f6 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f3f4f6 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f3f4f6 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f3f4f6 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
+    
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 w-8 h-8 rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">⭐</span>
+                        </div>
+                        <span class="ml-3 text-xl font-bold text-gray-900">RentReviews</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="window.location.href='./dashboard.html'" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                        Dashboard
+                    </button>
+                    <button onclick="window.location.href='./search.html'" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                        Search
+                    </button>
+                    <button id="logoutBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-white mb-4">
+                    Market Insights
+                </h1>
+                <p class="text-xl text-blue-100">
+                    Stay informed with rental market trends and data-driven insights
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Average Rent -->
+            <div class="bg-white rounded-xl shadow-sm p-6 insight-card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Average Rent</p>
+                        <p class="text-3xl font-bold text-gray-900">$2,350</p>
+                        <p class="text-sm trend-up font-medium">↗ +3.2% from last month</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-lg">
+                        <span class="text-blue-600 text-2xl">💰</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Properties Available -->
+            <div class="bg-white rounded-xl shadow-sm p-6 insight-card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Available Properties</p>
+                        <p class="text-3xl font-bold text-gray-900">1,247</p>
+                        <p class="text-sm trend-down font-medium">↘ -8.1% from last month</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-lg">
+                        <span class="text-green-600 text-2xl">🏠</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Average Rating -->
+            <div class="bg-white rounded-xl shadow-sm p-6 insight-card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Average Landlord Rating</p>
+                        <p class="text-3xl font-bold text-gray-900">4.2</p>
+                        <p class="text-sm trend-up font-medium">↗ +0.3 from last month</p>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-lg">
+                        <span class="text-yellow-600 text-2xl">⭐</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Days on Market -->
+            <div class="bg-white rounded-xl shadow-sm p-6 insight-card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500">Avg. Days on Market</p>
+                        <p class="text-3xl font-bold text-gray-900">18</p>
+                        <p class="text-sm trend-down font-medium">↘ -2.1 from last month</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-lg">
+                        <span class="text-purple-600 text-2xl">📅</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Rent Trends Chart -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Rental Price Trends</h3>
+                <div class="chart-placeholder h-64 rounded-lg flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-4xl mb-2">📈</div>
+                        <p class="text-gray-500">Interactive chart showing 12-month rent trends</p>
+                        <p class="text-sm text-gray-400 mt-1">Chart visualization coming soon</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property Types Distribution -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Property Types</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-700">1 Bedroom</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: 35%"></div>
+                            </div>
+                            <span class="text-sm text-gray-500">35%</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-700">2 Bedroom</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                <div class="bg-indigo-600 h-2 rounded-full" style="width: 42%"></div>
+                            </div>
+                            <span class="text-sm text-gray-500">42%</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-700">3+ Bedroom</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-600 h-2 rounded-full" style="width: 15%"></div>
+                            </div>
+                            <span class="text-sm text-gray-500">15%</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-700">Studio</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-32 bg-gray-200 rounded-full h-2">
+                                <div class="bg-pink-600 h-2 rounded-full" style="width: 8%"></div>
+                            </div>
+                            <span class="text-sm text-gray-500">8%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Market Insights Cards -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Top Rated Areas -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Top Rated Areas</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-medium text-gray-900">Manhattan, NY</p>
+                            <p class="text-sm text-gray-500">Upper East Side</p>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-yellow-400">⭐⭐⭐⭐⭐</span>
+                            <span class="ml-2 text-sm text-gray-600">4.8</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-medium text-gray-900">Brooklyn, NY</p>
+                            <p class="text-sm text-gray-500">Park Slope</p>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-yellow-400">⭐⭐⭐⭐⭐</span>
+                            <span class="ml-2 text-sm text-gray-600">4.6</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-medium text-gray-900">Queens, NY</p>
+                            <p class="text-sm text-gray-500">Astoria</p>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-yellow-400">⭐⭐⭐⭐</span>
+                            <span class="ml-2 text-sm text-gray-600">4.3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rent Alerts -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Price Alerts</h3>
+                <div class="space-y-4">
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <span class="text-red-500 text-xl mr-3">🚨</span>
+                            <div>
+                                <p class="font-medium text-red-800">High Rent Area</p>
+                                <p class="text-sm text-red-600">Manhattan avg. rent up 15% this quarter</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <span class="text-green-500 text-xl mr-3">💚</span>
+                            <div>
+                                <p class="font-medium text-green-800">Good Value</p>
+                                <p class="text-sm text-green-600">Queens offers 30% savings vs Manhattan</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <span class="text-blue-500 text-xl mr-3">📊</span>
+                            <div>
+                                <p class="font-medium text-blue-800">Market Trend</p>
+                                <p class="text-sm text-blue-600">Inventory increasing in outer boroughs</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Tips -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Renter Tips</h3>
+                <div class="space-y-4">
+                    <div class="border-l-4 border-indigo-500 pl-4">
+                        <p class="font-medium text-gray-900">Best Time to Search</p>
+                        <p class="text-sm text-gray-600">Late fall and winter typically offer better deals and more landlord flexibility.</p>
+                    </div>
+                    <div class="border-l-4 border-green-500 pl-4">
+                        <p class="font-medium text-gray-900">Negotiation Strategy</p>
+                        <p class="text-sm text-gray-600">Properties on market 30+ days are more likely to accept lower offers.</p>
+                    </div>
+                    <div class="border-l-4 border-purple-500 pl-4">
+                        <p class="font-medium text-gray-900">Red Flags</p>
+                        <p class="text-sm text-gray-600">Avoid landlords with ratings below 3.0 or multiple unresolved complaints.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Neighborhood Spotlight -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6">Neighborhood Spotlight</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Neighborhood 1 -->
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-bold text-lg text-gray-900">Williamsburg</h4>
+                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Trending</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Avg. Rent:</span>
+                            <span class="font-medium">$3,200</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Landlord Rating:</span>
+                            <span class="font-medium">4.1 ⭐</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Available Units:</span>
+                            <span class="font-medium">47</span>
+                        </div>
+                    </div>
+                    <button class="w-full mt-4 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                        View Properties
+                    </button>
+                </div>
+
+                <!-- Neighborhood 2 -->
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-bold text-lg text-gray-900">Lower East Side</h4>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Popular</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Avg. Rent:</span>
+                            <span class="font-medium">$2,800</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Landlord Rating:</span>
+                            <span class="font-medium">3.9 ⭐</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Available Units:</span>
+                            <span class="font-medium">23</span>
+                        </div>
+                    </div>
+                    <button class="w-full mt-4 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                        View Properties
+                    </button>
+                </div>
+
+                <!-- Neighborhood 3 -->
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-bold text-lg text-gray-900">Astoria</h4>
+                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Value</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Avg. Rent:</span>
+                            <span class="font-medium">$2,100</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Landlord Rating:</span>
+                            <span class="font-medium">4.3 ⭐</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Available Units:</span>
+                            <span class="font-medium">89</span>
+                        </div>
+                    </div>
+                    <button class="w-full mt-4 bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                        View Properties
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl p-8 text-center">
+            <h3 class="text-2xl font-bold text-white mb-4">Ready to Find Your Perfect Rental?</h3>
+            <p class="text-indigo-100 mb-6">Use these insights to make informed decisions about your next home.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="window.location.href='./search.html'" class="bg-white text-indigo-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                    🔍 Search Properties
+                </button>
+                <button onclick="window.location.href='./write-review.html'" class="bg-indigo-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-900 transition-colors border border-indigo-700">
+                    ✏️ Write a Review
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add neighborhood button functionality
+        document.querySelectorAll('button:contains("View Properties")').forEach(btn => {
+            if (btn.textContent.includes('View Properties')) {
+                btn.addEventListener('click', () => {
+                    window.location.href = './search.html';
+                });
+            }
+        });
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('rentreviews_token');
+            localStorage.removeItem('rentreviews_user');
+            window.location.href = './auth.html';
+        });
+
+        // Simulate real-time data updates
+        function updateStats() {
+            const elements = document.querySelectorAll('[data-stat]');
+            elements.forEach(el => {
+                // Add subtle animations or data updates here
+                el.style.opacity = '0.8';
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                }, 100);
+            });
+        }
+
+        // Update stats every 30 seconds
+        setInterval(updateStats, 30000);
+    </script>
+</body>
+</html>
