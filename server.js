@@ -12,7 +12,11 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // JWT Secret (add this to your Railway environment variables)
-const JWT_SECRET = process.env.JWT_SECRET || '8dc6b57eab277c653cb93f59b9005ea8dab1f0d2a49ef366b8a7aeb2da8c8097423ed3bfb0d3a9f57df08b5eeee839037335f561c2bdafeebd56c271e7c0486977a843b64872c741b4946947f8f5cd67b5f26718a318d86e67a9dbae25ec606b81ff50eb0dfcd3f7ddb53c4343827f358d68bd5923beaf57c1d0f7d34f2d3ec1';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error('❌ JWT_SECRET environment variable is required');
+  process.exit(1);
+}
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 const pool = new Pool({
