@@ -197,74 +197,90 @@
 
     <!-- Property Card Template (Hidden) -->
     <template id="propertyCardTemplate">
-        <div class="property-card bg-white rounded-2xl overflow-hidden">
-            <!-- Property Image Placeholder -->
-            <div class="h-48 bg-gradient-to-br from-blue-500 to-purple-600 relative">
-                <div class="absolute top-4 left-4">
-                    <span class="price-badge text-white px-3 py-1 rounded-full text-lg font-bold"></span>
+    <div class="property-card bg-white rounded-2xl overflow-hidden">
+        <!-- Property Image Placeholder -->
+        <div class="h-48 bg-gradient-to-br from-blue-500 to-purple-600 relative">
+            <div class="absolute top-4 left-4">
+                <span class="price-badge text-white px-3 py-1 rounded-full text-lg font-bold"></span>
+            </div>
+            <div class="absolute top-4 right-4">
+                <button class="bg-white bg-opacity-20 p-2 rounded-full hover:bg-opacity-30 transition-colors">
+                    <span class="text-white">❤️</span>
+                </button>
+            </div>
+            <div class="absolute bottom-4 left-4 text-white">
+                <div class="flex items-center space-x-1 rating-stars text-yellow-300">
+                    <span>⭐⭐⭐⭐⭐</span>
+                    <span class="text-sm">(4.8)</span>
                 </div>
-                <div class="absolute top-4 right-4">
-                    <button class="bg-white bg-opacity-20 p-2 rounded-full hover:bg-opacity-30 transition-colors">
-                        <span class="text-white">❤️</span>
-                    </button>
+                <div class="review-count text-xs text-white/80 mt-1"></div>
+            </div>
+        </div>
+        
+        <!-- Property Info -->
+        <div class="p-6">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <h3 class="font-bold text-lg text-gray-900 property-address"></h3>
+                    <p class="text-gray-600 property-location"></p>
                 </div>
-                <div class="absolute bottom-4 left-4 text-white">
-                    <div class="flex items-center space-x-1 rating-stars">
-                        <span>⭐⭐⭐⭐⭐</span>
-                        <span class="text-sm">(4.8)</span>
+            </div>
+            
+            <p class="text-gray-700 text-sm mb-4 property-description"></p>
+            
+            <!-- Property Details -->
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex space-x-4 text-sm text-gray-600">
+                    <div class="flex items-center">
+                        <span class="mr-1">🛏️</span>
+                        <span class="property-bedrooms"></span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="mr-1">🚿</span>
+                        <span class="property-bathrooms"></span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="mr-1">📐</span>
+                        <span class="property-sqft"></span>
                     </div>
                 </div>
             </div>
             
-            <!-- Property Info -->
-            <div class="p-6">
-                <div class="flex justify-between items-start mb-3">
-                    <div>
-                        <h3 class="font-bold text-lg text-gray-900 property-address"></h3>
-                        <p class="text-gray-600 property-location"></p>
+            <!-- Review Summary -->
+            <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                <div class="flex items-center justify-between">
+                    <div class="rating-stars text-yellow-400 text-sm">
+                        <!-- Will be filled by JavaScript -->
+                    </div>
+                    <div class="review-count text-sm text-gray-600">
+                        <!-- Will be filled by JavaScript -->
                     </div>
                 </div>
-                
-                <p class="text-gray-700 text-sm mb-4 property-description"></p>
-                
-                <!-- Property Details -->
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex space-x-4 text-sm text-gray-600">
-                        <div class="flex items-center">
-                            <span class="mr-1">🛏️</span>
-                            <span class="property-bedrooms"></span>
+            </div>
+            
+            <!-- Landlord Info -->
+            <div class="border-t pt-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
+                            <span class="text-white text-sm font-bold landlord-initial"></span>
                         </div>
-                        <div class="flex items-center">
-                            <span class="mr-1">🚿</span>
-                            <span class="property-bathrooms"></span>
-                        </div>
-                        <div class="flex items-center">
-                            <span class="mr-1">📐</span>
-                            <span class="property-sqft"></span>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900 landlord-name"></p>
+                            <p class="text-xs text-gray-500">Verified Landlord</p>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Landlord Info -->
-                <div class="border-t pt-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
-                                <span class="text-white text-sm font-bold landlord-initial"></span>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm font-medium text-gray-900 landlord-name"></p>
-                                <p class="text-xs text-gray-500">Verified Landlord</p>
-                            </div>
-                        </div>
-                        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+                    <div class="button-container flex">
+                        <button class="view-details-btn bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
                             View Details
                         </button>
+                        <!-- Write Review button will be added by JavaScript -->
                     </div>
                 </div>
             </div>
         </div>
-    </template>
+    </div>
+</template>
 
     <script>
         // API Configuration

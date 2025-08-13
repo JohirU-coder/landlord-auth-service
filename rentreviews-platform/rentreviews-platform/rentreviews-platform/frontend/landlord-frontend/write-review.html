@@ -266,6 +266,46 @@
     </div>
 
     <script>
+        // Get property data from URL parameters
+        function getPropertyFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const propertyParam = urlParams.get('property');
+            
+            if (propertyParam) {
+                try {
+                    return JSON.parse(decodeURIComponent(propertyParam));
+                } catch (error) {
+                    console.error('Error parsing property data:', error);
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        // Pre-fill form with property data
+        function prefillPropertyData() {
+            const propertyData = getPropertyFromURL();
+            
+            if (propertyData) {
+                document.getElementById('propertyAddress').value = propertyData.address || '';
+                document.getElementById('propertyCity').value = propertyData.city || '';
+                document.getElementById('propertyState').value = propertyData.state || '';
+                document.getElementById('propertyZip').value = propertyData.zip_code || '';
+                document.getElementById('landlordName').value = propertyData.landlord_name || '';
+                
+                // Show a helpful message
+                const header = document.querySelector('h1');
+                if (header && propertyData.address) {
+                    header.innerHTML = `Write a Review<br><span class="text-lg font-normal text-indigo-200">for ${propertyData.address}</span>`;
+                }
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            prefillPropertyData();
+        });
+
         // Star rating functionality
         const ratingGroups = document.querySelectorAll('.rating-stars');
         const ratings = {};
@@ -311,11 +351,14 @@
             });
         });
 
-        // Form submission
-        document.getElementById('submitReview').addEventListener('click', () => {
+        // Enhanced form submission with property connection
+        document.getElementById('submitReview').addEventListener('click', async () => {
+            const propertyData = getPropertyFromURL();
+            
             // Get form data
             const formData = {
                 property: {
+                    id: propertyData?.id || null,
                     address: document.getElementById('propertyAddress').value,
                     city: document.getElementById('propertyCity').value,
                     state: document.getElementById('propertyState').value,
@@ -350,9 +393,18 @@
                 return;
             }
 
-            // For now, just show success message
-            alert('Thank you for your review! It will be published after verification.');
-            window.location.href = './dashboard.html';
+            // Enhanced success message
+            const propertyAddress = formData.property.address;
+            alert(`Thank you for your review of ${propertyAddress}! Your review helps other renters make informed decisions. It will be published after verification.`);
+            
+            // Redirect back to search or dashboard
+            if (propertyData?.id) {
+                // If we came from a specific property, go back to search
+                window.location.href = './search.html';
+            } else {
+                // Otherwise go to dashboard
+                window.location.href = './dashboard.html';
+            }
         });
 
         // Logout functionality
