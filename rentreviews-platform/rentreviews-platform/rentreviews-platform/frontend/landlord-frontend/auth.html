@@ -342,7 +342,7 @@
     </div>
 
     <script>
-        // Secure Authentication Configuration
+        // 🔧 FIXED: Secure Authentication Configuration with Profile API Integration
         const API_BASE_URL = 'https://landlord-auth-service-production.up.railway.app';
         
         // Enhanced API Client with better error handling
@@ -374,7 +374,7 @@
             }
         }
         
-        // Token Management
+        // 🔧 FIXED: Enhanced Token Management with Profile Integration
         class AuthManager {
             static TOKEN_KEY = 'rentreviews_token';
             static USER_KEY = 'rentreviews_user';
@@ -410,6 +410,35 @@
                     return payload.exp * 1000 > Date.now();
                 } catch {
                     return false;
+                }
+            }
+
+            // 🔧 NEW: Fetch full profile data after login
+            static async fetchAndStoreProfile(token) {
+                try {
+                    console.log('Fetching user profile data...');
+                    
+                    const response = await ApiClient.makeRequest('/profile', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && data.user) {
+                            console.log('Profile data fetched successfully:', data.user);
+                            this.setUser(data.user);
+                            return data.user;
+                        }
+                    }
+                    
+                    console.warn('Failed to fetch profile data');
+                    return null;
+                } catch (error) {
+                    console.error('Error fetching profile:', error);
+                    return null;
                 }
             }
         }
@@ -517,71 +546,83 @@
             }
         }
         
-        // Login Form Handler
+        // 🔧 FIXED: Login Form Handler with Profile Integration
         loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    
-    if (!email || !password) {
-        showNotification('Missing Information', 'Please enter both email and password', 'error');
-        return;
-    }
-    
-    setLoading(loginBtn, true);
-    
-    try {
-        const response = await ApiClient.makeRequest('/login', {
-            method: 'POST',
-            body: JSON.stringify({ email, password })
-        });
-        
-        const data = await response.json();
-        
-        // Debug logging
-        console.log('Raw response status:', response.status);
-        console.log('Raw response data:', data);
-        console.log('Response ok:', response.ok);
-        console.log('Data success:', data.success);
-        console.log('Data token:', data.token ? 'Present' : 'Missing');
-        console.log('Data user:', data.user ? 'Present' : 'Missing');
-        
-        // Check if login was successful (either response.ok OR data.success should work)
-        if (response.ok || (data && data.token)) {
-            AuthManager.setToken(data.token);
-            AuthManager.setUser(data.user);
+            e.preventDefault();
             
-            showNotification('Welcome back!', 'Successfully signed in to your account', 'success');
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
             
-            setTimeout(() => {
-                window.location.href = './dashboard.html';
-            }, 1500);
-        } else {
-            let errorMessage = 'Login failed';
-            
-            if (response.status === 401) {
-                errorMessage = data.message || 'Invalid email or password';
-            } else if (response.status === 423) {
-                errorMessage = 'Account locked due to too many failed attempts. Please try again later.';
-            } else if (response.status === 429) {
-                errorMessage = 'Too many login attempts. Please wait 15 minutes before trying again.';
-            } else if (data && (data.message || data.error)) {
-                errorMessage = data.message || data.error;
+            if (!email || !password) {
+                showNotification('Missing Information', 'Please enter both email and password', 'error');
+                return;
             }
             
-            console.log('Login failed with error:', errorMessage);
-            showNotification('Sign In Failed', errorMessage, 'error');
-        }
-    } catch (error) {
-        console.error('Login error:', error);
-        showNotification('Connection Error', error.message || 'Unable to connect to server. Please try again.', 'error');
-    }
-    
-    setLoading(loginBtn, false);
-});
+            setLoading(loginBtn, true);
+            
+            try {
+                console.log('🔐 Starting login process...');
+                
+                // Step 1: Login and get JWT token
+                const response = await ApiClient.makeRequest('/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                console.log('Login response:', data);
+                
+                if (response.ok && data.token) {
+                    console.log('✅ Login successful, JWT received');
+                    
+                    // Store the JWT token
+                    AuthManager.setToken(data.token);
+                    
+                    // Step 2: Fetch full profile data using the token
+                    const profileData = await AuthManager.fetchAndStoreProfile(data.token);
+                    
+                    if (profileData) {
+                        console.log('✅ Profile data fetched and stored');
+                        showNotification('Welcome back!', `Hello ${profileData.first_name}! Redirecting to dashboard...`, 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = './dashboard.html';
+                        }, 1500);
+                    } else {
+                        // Fallback: use basic user data from login response if profile fetch fails
+                        console.log('⚠️  Profile fetch failed, using basic login data');
+                        AuthManager.setUser(data.user);
+                        
+                        showNotification('Welcome back!', 'Successfully signed in! Redirecting...', 'success');
+                        setTimeout(() => {
+                            window.location.href = './dashboard.html';
+                        }, 1500);
+                    }
+                } else {
+                    let errorMessage = 'Login failed';
+                    
+                    if (response.status === 401) {
+                        errorMessage = data.message || 'Invalid email or password';
+                    } else if (response.status === 423) {
+                        errorMessage = 'Account locked due to too many failed attempts. Please try again later.';
+                    } else if (response.status === 429) {
+                        errorMessage = 'Too many login attempts. Please wait 15 minutes before trying again.';
+                    } else if (data && (data.message || data.error)) {
+                        errorMessage = data.message || data.error;
+                    }
+                    
+                    console.log('❌ Login failed:', errorMessage);
+                    showNotification('Sign In Failed', errorMessage, 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showNotification('Connection Error', error.message || 'Unable to connect to server. Please try again.', 'error');
+            }
+            
+            setLoading(loginBtn, false);
+        });
         
-        // Signup Form Handler
+        // Signup Form Handler (already correct)
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -605,6 +646,8 @@
             setLoading(signupBtn, true);
             
             try {
+                console.log('🔐 Starting registration process...');
+                
                 const response = await ApiClient.makeRequest('/register', {
                     method: 'POST',
                     body: JSON.stringify({
@@ -619,11 +662,23 @@
                 const data = await response.json();
                 console.log('Signup response:', data);
                 
-                if (response.ok && data.success) {
-                    AuthManager.setToken(data.token);
-                    AuthManager.setUser(data.user);
+                if (response.ok && data.success && data.token) {
+                    console.log('✅ Registration successful, JWT received');
                     
-                    showNotification('Account Created!', 'Welcome to RentReviews! Redirecting to your dashboard...', 'success');
+                    // Store the JWT token
+                    AuthManager.setToken(data.token);
+                    
+                    // Fetch full profile data
+                    const profileData = await AuthManager.fetchAndStoreProfile(data.token);
+                    
+                    if (profileData) {
+                        console.log('✅ Profile data fetched and stored');
+                        showNotification('Account Created!', `Welcome ${profileData.first_name}! Redirecting to dashboard...`, 'success');
+                    } else {
+                        // Fallback: use basic user data from registration response
+                        AuthManager.setUser(data.user);
+                        showNotification('Account Created!', 'Welcome to RentReviews! Redirecting...', 'success');
+                    }
                     
                     setTimeout(() => {
                         window.location.href = './dashboard.html';
@@ -656,7 +711,7 @@
         
         // Enhanced error handling and debugging
         function debugAuth() {
-            console.log('Auth Debug Info:');
+            console.log('🔍 Auth Debug Info:');
             console.log('API Base URL:', API_BASE_URL);
             console.log('Current token:', AuthManager.getToken());
             console.log('Current user:', AuthManager.getUser());
@@ -669,7 +724,7 @@
         // Test API connectivity on page load
         async function testApiConnection() {
             try {
-                console.log('Testing API connection...');
+                console.log('🔗 Testing API connection...');
                 const response = await fetch(`${API_BASE_URL}/health`, {
                     method: 'GET',
                     mode: 'cors'
@@ -730,7 +785,7 @@
         
         // Check if user is already logged in
         if (AuthManager.isAuthenticated()) {
-            console.log('User already authenticated, redirecting to dashboard...');
+            console.log('👤 User already authenticated, redirecting to dashboard...');
             window.location.href = './dashboard.html';
         }
         
