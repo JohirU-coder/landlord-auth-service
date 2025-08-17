@@ -274,12 +274,25 @@
                     if (response.ok) {
                         const data = await response.json();
                         
+                        // 🔧 FIXED: Handle different response formats
+                        let userData = null;
                         if (data.success && data.user) {
-                            console.log('✅ Fresh profile data received:', data.user);
+                            // Format: { success: true, user: {...} }
+                            userData = data.user;
+                        } else if (data.user) {
+                            // Format: { user: {...} }
+                            userData = data.user;
+                        } else if (data.id) {
+                            // Format: direct user object
+                            userData = data;
+                        }
+                        
+                        if (userData) {
+                            console.log('✅ Fresh profile data received:', userData);
                             
                             // Update stored user data
-                            this.user = data.user;
-                            localStorage.setItem('rentreviews_user', JSON.stringify(data.user));
+                            this.user = userData;
+                            localStorage.setItem('rentreviews_user', JSON.stringify(userData));
                             
                             // Update UI with fresh data
                             this.updateUI();
