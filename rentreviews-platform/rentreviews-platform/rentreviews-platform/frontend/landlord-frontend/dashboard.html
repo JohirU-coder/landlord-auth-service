@@ -8,9 +8,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-50 via-white to-cyan-50 min-h-screen">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+            <p class="text-gray-600 font-medium">Loading your dashboard...</p>
+        </div>
+    </div>
+
     <!-- Navigation -->
     <nav class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,9 +55,9 @@
                     <div class="relative">
                         <button id="userMenuButton" class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             <div class="bg-gradient-to-r from-indigo-500 to-purple-600 w-8 h-8 rounded-full flex items-center justify-center">
-                                <span id="userInitials" class="text-white font-medium text-sm">?</span>
+                                <span id="userInitials" class="text-white font-medium text-sm loading-skeleton w-4 h-4 rounded"></span>
                             </div>
-                            <span id="userNameNav" class="ml-3 text-gray-700 font-medium">Loading...</span>
+                            <span id="userNameNav" class="ml-3 text-gray-700 font-medium loading-skeleton w-20 h-4 rounded"></span>
                         </button>
                     </div>
                     <button id="logoutBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
@@ -52,7 +80,7 @@
                         </div>
                         <div class="ml-6">
                             <h1 id="welcomeMessage" class="text-3xl font-bold text-white">
-                                Welcome back, Loading...!
+                                <span class="loading-skeleton w-64 h-8 rounded inline-block"></span>
                             </h1>
                             <p class="text-indigo-100 mt-2 text-lg">
                                 Here's what's happening with your rental search
@@ -112,7 +140,9 @@
                             <div class="ml-4">
                                 <div class="text-sm font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">ACTIVE</div>
                                 <div class="text-sm font-medium text-gray-500 mt-1">Account Status</div>
-                                <div id="userRole" class="text-xs text-gray-400 mt-1">Renter Account</div>
+                                <div id="userRole" class="text-xs text-gray-400 mt-1">
+                                    <span class="loading-skeleton w-20 h-3 rounded inline-block"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -163,7 +193,7 @@
                     <h3 class="text-lg font-medium text-gray-900">Recent Activity</h3>
                 </div>
                 <div class="p-12 text-center">
-                    <div class="text-gray-400 text-6xl mb-4">📝</div>
+                    <div class="text-gray-400 text-6xl mb-4">📋</div>
                     <h4 class="text-lg font-medium text-gray-900 mb-2">No activity yet</h4>
                     <p class="text-gray-500 mb-6">Start by searching for properties or writing your first review!</p>
                     <button id="getStartedBtn" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium">
@@ -175,84 +205,191 @@
     </main>
 
     <script>
-        // Dashboard JavaScript with Correct localStorage Keys
+        // 🔧 FIXED: Dashboard with Profile API Integration
         class Dashboard {
             constructor() {
                 this.user = null;
                 this.token = null;
+                this.API_BASE_URL = 'https://landlord-auth-service-production.up.railway.app';
                 this.init();
             }
 
-            init() {
-                console.log('Dashboard loaded successfully!');
-                this.loadUserData();
+            async init() {
+                console.log('🏠 Dashboard initializing...');
+                await this.loadUserData();
                 this.setupEventListeners();
-                this.updateUI();
+                this.hideLoadingOverlay();
             }
 
-            loadUserData() {
+            async loadUserData() {
                 try {
-                    // Use the correct localStorage keys
-                    const tokenData = localStorage.getItem('rentreviews_token');
-                    const userData = localStorage.getItem('rentreviews_user');
-
-                    if (!tokenData || !userData) {
-                        console.warn('No authentication data found, redirecting to login...');
+                    // Get token from localStorage
+                    this.token = localStorage.getItem('rentreviews_token');
+                    
+                    if (!this.token) {
+                        console.warn('❌ No authentication token found');
                         this.redirectToAuth();
                         return;
                     }
 
-                    this.token = tokenData;
-                    this.user = JSON.parse(userData);
+                    // Check if token is still valid
+                    if (!this.isTokenValid(this.token)) {
+                        console.warn('❌ Token expired');
+                        this.redirectToAuth();
+                        return;
+                    }
 
-                    console.log('User data loaded:', this.user);
+                    console.log('✅ Valid token found, fetching profile...');
+
+                    // Try to get cached user data first
+                    const cachedUser = localStorage.getItem('rentreviews_user');
+                    if (cachedUser) {
+                        this.user = JSON.parse(cachedUser);
+                        console.log('📱 Using cached user data:', this.user);
+                        this.updateUIImmediately();
+                    }
+
+                    // Always fetch fresh profile data from API
+                    await this.fetchProfileData();
 
                 } catch (error) {
-                    console.error('Error loading user data:', error);
+                    console.error('❌ Error loading user data:', error);
                     this.redirectToAuth();
+                }
+            }
+
+            async fetchProfileData() {
+                try {
+                    console.log('🔄 Fetching fresh profile data from API...');
+                    
+                    const response = await fetch(`${this.API_BASE_URL}/profile`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${this.token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        mode: 'cors'
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (data.success && data.user) {
+                            console.log('✅ Fresh profile data received:', data.user);
+                            
+                            // Update stored user data
+                            this.user = data.user;
+                            localStorage.setItem('rentreviews_user', JSON.stringify(data.user));
+                            
+                            // Update UI with fresh data
+                            this.updateUI();
+                        } else {
+                            console.warn('⚠️ Invalid profile response format:', data);
+                        }
+                    } else if (response.status === 401 || response.status === 403) {
+                        console.warn('❌ Authentication failed, token invalid');
+                        this.redirectToAuth();
+                    } else {
+                        console.warn('⚠️ Profile fetch failed:', response.status);
+                        // Continue with cached data if available
+                        if (this.user) {
+                            console.log('📱 Continuing with cached user data');
+                            this.updateUI();
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error fetching profile:', error);
+                    
+                    // Continue with cached data if available
+                    if (this.user) {
+                        console.log('📱 Using cached data due to fetch error');
+                        this.updateUI();
+                    } else {
+                        this.redirectToAuth();
+                    }
+                }
+            }
+
+            isTokenValid(token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    return payload.exp * 1000 > Date.now();
+                } catch {
+                    return false;
+                }
+            }
+
+            updateUIImmediately() {
+                // Quick update for cached data to remove skeleton loaders
+                if (this.user) {
+                    this.updateBasicUI();
+                }
+            }
+
+            updateBasicUI() {
+                if (!this.user) return;
+
+                try {
+                    // Update user initials (remove skeleton)
+                    const userInitials = document.getElementById('userInitials');
+                    if (userInitials && this.user.first_name && this.user.last_name) {
+                        userInitials.className = 'text-white font-medium text-sm';
+                        userInitials.textContent = `${this.user.first_name.charAt(0)}${this.user.last_name.charAt(0)}`.toUpperCase();
+                    }
+
+                    // Update navigation name (remove skeleton)
+                    const userNameNav = document.getElementById('userNameNav');
+                    if (userNameNav) {
+                        userNameNav.className = 'ml-3 text-gray-700 font-medium';
+                        const firstName = this.user.first_name || '';
+                        const lastName = this.user.last_name || '';
+                        userNameNav.textContent = `${firstName} ${lastName}`.trim() || 'User';
+                    }
+                } catch (error) {
+                    console.error('❌ Error in updateBasicUI:', error);
                 }
             }
 
             updateUI() {
                 if (!this.user) {
-                    console.warn('No user data available');
+                    console.warn('⚠️ No user data available for UI update');
                     return;
                 }
 
                 try {
-                    // Update welcome message with actual name (using correct field names)
+                    // Update welcome message
                     const welcomeMessage = document.getElementById('welcomeMessage');
                     if (welcomeMessage) {
-                        const firstName = this.user.first_name || this.user.firstName || 'User';
+                        welcomeMessage.className = 'text-3xl font-bold text-white fade-in';
+                        const firstName = this.user.first_name || 'User';
                         welcomeMessage.textContent = `Welcome back, ${firstName}!`;
                     }
 
-                    // Update navigation user name
-                    const userNameNav = document.getElementById('userNameNav');
-                    if (userNameNav) {
-                        const firstName = this.user.first_name || this.user.firstName || '';
-                        const lastName = this.user.last_name || this.user.lastName || '';
-                        userNameNav.textContent = `${firstName} ${lastName}`.trim();
-                    }
-
-                    // Update user initials
-                    const userInitials = document.getElementById('userInitials');
-                    const firstName = this.user.first_name || this.user.firstName;
-                    const lastName = this.user.last_name || this.user.lastName;
-                    if (userInitials && firstName && lastName) {
-                        userInitials.textContent = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-                    }
+                    // Update navigation elements
+                    this.updateBasicUI();
 
                     // Update user role
                     const userRole = document.getElementById('userRole');
                     if (userRole) {
-                        userRole.textContent = `${this.user.role === 'renter' ? 'Renter' : 'Landlord'} Account`;
+                        userRole.className = 'text-xs text-gray-400 mt-1';
+                        const role = this.user.role || 'user';
+                        userRole.textContent = `${role.charAt(0).toUpperCase() + role.slice(1)} Account`;
                     }
 
-                    console.log('UI updated successfully');
+                    console.log('✅ UI updated successfully');
 
                 } catch (error) {
-                    console.error('Error updating UI:', error);
+                    console.error('❌ Error updating UI:', error);
+                }
+            }
+
+            hideLoadingOverlay() {
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                    }, 300);
                 }
             }
 
@@ -280,7 +417,7 @@
                 const searchBtn = document.getElementById('searchPropertiesBtn');
                 if (searchBtn) {
                     searchBtn.addEventListener('click', () => {
-                        console.log('Search Properties clicked!');
+                        console.log('🔍 Search Properties clicked!');
                         window.location.href = './search.html';
                     });
                 }
@@ -289,7 +426,7 @@
                 const writeReviewBtn = document.getElementById('writeReviewBtn');
                 if (writeReviewBtn) {
                     writeReviewBtn.addEventListener('click', () => {
-                        console.log('Write Review clicked!');
+                        console.log('✏️ Write Review clicked!');
                         window.location.href = './write-review.html';
                     });
                 }
@@ -298,7 +435,7 @@
                 const marketBtn = document.getElementById('marketInsightsBtn');
                 if (marketBtn) {
                     marketBtn.addEventListener('click', () => {
-                        console.log('Market Insights clicked!');
+                        console.log('📊 Market Insights clicked!');
                         window.location.href = './market-insights.html';
                     });
                 }
@@ -307,7 +444,7 @@
                 const proBtn = document.getElementById('upgradeProBtn');
                 if (proBtn) {
                     proBtn.addEventListener('click', () => {
-                        console.log('Upgrade to Pro clicked!');
+                        console.log('⚡ Upgrade to Pro clicked!');
                         alert('Upgrade to Pro feature coming soon!');
                     });
                 }
@@ -315,16 +452,18 @@
 
             logout() {
                 try {
+                    console.log('👋 Logging out...');
+                    
                     // Clear all authentication data
                     localStorage.removeItem('rentreviews_token');
                     localStorage.removeItem('rentreviews_user');
                     localStorage.removeItem('token'); // Clear old format too
                     localStorage.removeItem('user'); // Clear old format too
                     
-                    console.log('Logout successful');
+                    console.log('✅ Logout successful');
                     this.redirectToAuth();
                 } catch (error) {
-                    console.error('Logout error:', error);
+                    console.error('❌ Logout error:', error);
                     this.redirectToAuth();
                 }
             }
