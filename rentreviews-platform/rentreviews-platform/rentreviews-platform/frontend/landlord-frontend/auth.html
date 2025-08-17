@@ -660,9 +660,27 @@
                 });
                 
                 const data = await response.json();
-                console.log('Signup response:', data);
                 
-                if (response.ok && data.success && data.token) {
+                // 🔧 ENHANCED: Detailed response logging
+                console.log('📊 Complete signup response:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    ok: response.ok,
+                    headers: Object.fromEntries(response.headers.entries()),
+                    data: data
+                });
+                
+                // 🔧 FIXED: More robust response checking
+                console.log('📊 Signup response details:', {
+                    status: response.status,
+                    ok: response.ok,
+                    hasToken: !!data.token,
+                    hasSuccess: !!data.success,
+                    hasUser: !!data.user
+                });
+
+                // Check for successful registration (multiple conditions for robustness)
+                if ((response.ok || response.status === 201) && data.token) {
                     console.log('✅ Registration successful, JWT received');
                     
                     // Store the JWT token
