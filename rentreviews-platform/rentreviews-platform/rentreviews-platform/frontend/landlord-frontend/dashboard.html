@@ -177,11 +177,11 @@
                             <div class="text-xs opacity-90 mt-1">Rental market trends</div>
                         </button>
 
-                        <!-- Upgrade to Pro -->
-                        <button id="upgradeProBtn" class="bg-gradient-to-r from-orange-500 to-red-600 text-white p-4 rounded-lg hover:from-orange-600 hover:to-red-700 transition-all transform hover:scale-105">
-                            <div class="text-2xl mb-2">⚡</div>
-                            <div class="font-medium">Upgrade to Pro</div>
-                            <div class="text-xs opacity-90 mt-1">Unlock premium features</div>
+                        <!-- Add Property -->
+                        <button id="addPropertyBtn" class="bg-gradient-to-r from-emerald-500 to-green-600 text-white p-4 rounded-lg hover:from-emerald-600 hover:to-green-700 transition-all transform hover:scale-105">
+                            <div class="text-2xl mb-2">🏠</div>
+                            <div class="font-medium">Add Property</div>
+                            <div class="text-xs opacity-90 mt-1">List your rental</div>
                         </button>
                     </div>
                 </div>
@@ -367,6 +367,17 @@
                 if (!this.user) {
                     console.warn('⚠️ No user data available for UI update');
                     return;
+                    // Show/hide Add Property button based on user role
+const addPropertyBtn = document.getElementById('addPropertyBtn');
+if (addPropertyBtn) {
+    if (this.user && this.user.role === 'landlord') {
+        addPropertyBtn.style.display = 'block';
+        addPropertyBtn.style.opacity = '1';
+    } else {
+        addPropertyBtn.style.display = 'none';
+        addPropertyBtn.style.opacity = '0.5';
+    }
+}
                 }
 
                 try {
@@ -393,6 +404,16 @@
 
                 } catch (error) {
                     console.error('❌ Error updating UI:', error);
+                    // Show/hide Add Property button based on user role (for cached data)
+const addPropertyBtn = document.getElementById('addPropertyBtn');
+if (addPropertyBtn && this.user) {
+    if (this.user.role === 'landlord') {
+        addPropertyBtn.style.display = 'block';
+        addPropertyBtn.style.opacity = '1';
+    } else {
+        addPropertyBtn.style.display = 'none';
+    }
+}
                 }
             }
 
@@ -453,15 +474,19 @@
                     });
                 }
                 
-                // Upgrade to Pro button
-                const proBtn = document.getElementById('upgradeProBtn');
-                if (proBtn) {
-                    proBtn.addEventListener('click', () => {
-                        console.log('⚡ Upgrade to Pro clicked!');
-                        alert('Upgrade to Pro feature coming soon!');
-                    });
-                }
-            }
+                // Add Property button
+                const addPropertyBtn = document.getElementById('addPropertyBtn');
+                if (addPropertyBtn) {
+                    addPropertyBtn.addEventListener('click', () => {
+                        console.log('🏠 Add Property clicked!');
+                        // Check if user is a landlord (double-check for security)
+                        if (this.user && this.user.role === 'landlord') {
+                            window.location.href = './add-property.html';
+                            } else {
+                        alert('Only landlords can add properties. Contact support to upgrade your account.');
+                    }
+    });
+}
 
             logout() {
                 try {
