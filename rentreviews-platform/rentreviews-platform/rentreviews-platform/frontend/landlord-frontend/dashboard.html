@@ -178,7 +178,7 @@
                         </button>
 
                         <!-- Add Property -->
-                        <button id="addPropertyBtn" class="bg-gradient-to-r from-emerald-500 to-green-600 text-white p-4 rounded-lg hover:from-emerald-600 hover:to-green-700 transition-all transform hover:scale-105">
+                        <button id="addPropertyBtn" class="bg-gradient-to-r from-emerald-500 to-green-600 text-white p-4 rounded-lg hover:from-emerald-600 hover:to-green-700 transition-all transform hover:scale-105" style="display: none;">
                             <div class="text-2xl mb-2">🏠</div>
                             <div class="font-medium">Add Property</div>
                             <div class="text-xs opacity-90 mt-1">List your rental</div>
@@ -227,14 +227,14 @@
                     this.token = localStorage.getItem('rentreviews_token');
                     
                     if (!this.token) {
-                        console.warn('❌ No authentication token found');
+                        console.warn('⚠ No authentication token found');
                         this.redirectToAuth();
                         return;
                     }
 
                     // Check if token is still valid
                     if (!this.isTokenValid(this.token)) {
-                        console.warn('❌ Token expired');
+                        console.warn('⚠ Token expired');
                         this.redirectToAuth();
                         return;
                     }
@@ -253,7 +253,7 @@
                     await this.fetchProfileData();
 
                 } catch (error) {
-                    console.error('❌ Error loading user data:', error);
+                    console.error('⚠ Error loading user data:', error);
                     this.redirectToAuth();
                 }
             }
@@ -300,7 +300,7 @@
                             console.warn('⚠️ Invalid profile response format:', data);
                         }
                     } else if (response.status === 401 || response.status === 403) {
-                        console.warn('❌ Authentication failed, token invalid');
+                        console.warn('⚠ Authentication failed, token invalid');
                         this.redirectToAuth();
                     } else {
                         console.warn('⚠️ Profile fetch failed:', response.status);
@@ -311,7 +311,7 @@
                         }
                     }
                 } catch (error) {
-                    console.error('❌ Error fetching profile:', error);
+                    console.error('⚠ Error fetching profile:', error);
                     
                     // Continue with cached data if available
                     if (this.user) {
@@ -358,8 +358,19 @@
                         const lastName = this.user.last_name || '';
                         userNameNav.textContent = `${firstName} ${lastName}`.trim() || 'User';
                     }
+
+                    // Show/hide Add Property button based on user role (for cached data)
+                    const addPropertyBtn = document.getElementById('addPropertyBtn');
+                    if (addPropertyBtn && this.user) {
+                        if (this.user.role === 'landlord') {
+                            addPropertyBtn.style.display = 'block';
+                            addPropertyBtn.style.opacity = '1';
+                        } else {
+                            addPropertyBtn.style.display = 'none';
+                        }
+                    }
                 } catch (error) {
-                    console.error('❌ Error in updateBasicUI:', error);
+                    console.error('⚠ Error in updateBasicUI:', error);
                 }
             }
 
@@ -367,17 +378,6 @@
                 if (!this.user) {
                     console.warn('⚠️ No user data available for UI update');
                     return;
-                    // Show/hide Add Property button based on user role
-const addPropertyBtn = document.getElementById('addPropertyBtn');
-if (addPropertyBtn) {
-    if (this.user && this.user.role === 'landlord') {
-        addPropertyBtn.style.display = 'block';
-        addPropertyBtn.style.opacity = '1';
-    } else {
-        addPropertyBtn.style.display = 'none';
-        addPropertyBtn.style.opacity = '0.5';
-    }
-}
                 }
 
                 try {
@@ -400,20 +400,22 @@ if (addPropertyBtn) {
                         userRole.textContent = `${role.charAt(0).toUpperCase() + role.slice(1)} Account`;
                     }
 
+                    // Show/hide Add Property button based on user role
+                    const addPropertyBtn = document.getElementById('addPropertyBtn');
+                    if (addPropertyBtn) {
+                        if (this.user && this.user.role === 'landlord') {
+                            addPropertyBtn.style.display = 'block';
+                            addPropertyBtn.style.opacity = '1';
+                        } else {
+                            addPropertyBtn.style.display = 'none';
+                            addPropertyBtn.style.opacity = '0.5';
+                        }
+                    }
+
                     console.log('✅ UI updated successfully');
 
                 } catch (error) {
-                    console.error('❌ Error updating UI:', error);
-                    // Show/hide Add Property button based on user role (for cached data)
-const addPropertyBtn = document.getElementById('addPropertyBtn');
-if (addPropertyBtn && this.user) {
-    if (this.user.role === 'landlord') {
-        addPropertyBtn.style.display = 'block';
-        addPropertyBtn.style.opacity = '1';
-    } else {
-        addPropertyBtn.style.display = 'none';
-    }
-}
+                    console.error('⚠ Error updating UI:', error);
                 }
             }
 
@@ -474,7 +476,7 @@ if (addPropertyBtn && this.user) {
                     });
                 }
                 
-                // Add Property button
+                // Add Property button (FIXED)
                 const addPropertyBtn = document.getElementById('addPropertyBtn');
                 if (addPropertyBtn) {
                     addPropertyBtn.addEventListener('click', () => {
@@ -482,11 +484,12 @@ if (addPropertyBtn && this.user) {
                         // Check if user is a landlord (double-check for security)
                         if (this.user && this.user.role === 'landlord') {
                             window.location.href = './add-property.html';
-                            } else {
-                        alert('Only landlords can add properties. Contact support to upgrade your account.');
-                    }
-    });
-}
+                        } else {
+                            alert('Only landlords can add properties. Contact support to upgrade your account.');
+                        }
+                    });
+                }
+            }
 
             logout() {
                 try {
@@ -501,7 +504,7 @@ if (addPropertyBtn && this.user) {
                     console.log('✅ Logout successful');
                     this.redirectToAuth();
                 } catch (error) {
-                    console.error('❌ Logout error:', error);
+                    console.error('⚠ Logout error:', error);
                     this.redirectToAuth();
                 }
             }
