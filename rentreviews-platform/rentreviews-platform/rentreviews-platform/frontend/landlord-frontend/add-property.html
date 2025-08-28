@@ -780,41 +780,82 @@
             try {
                 const token = localStorage.getItem('rentreviews_token');
                 
+                if (!token) {
+                    alert('Authentication required. Please log in again.');
+                    window.location.href = './auth.html';
+                    return;
+                }
+
+                console.log('Submitting property data:', propertyData);
+                console.log('Using token:', token ? 'Token present' : 'No token');
+                
                 const response = await fetch(`${API_BASE_URL}/properties`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
                     },
+                    mode: 'cors',
                     body: JSON.stringify(propertyData)
                 });
 
+                console.log('Response status:', response.status);
+                console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
                 const data = await response.json();
+                console.log('Response data:', data);
 
                 if (response.ok && data.success) {
                     // Success!
                     showSuccessMessage(data.property);
                 } else {
-                    // Handle API errors
+                    // Handle API errors with detailed logging
                     let errorMessage = 'Failed to create property.';
                     
-                    if (response.status === 409) {
+                    console.error('API Error Details:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        data: data
+                    });
+
+                    if (response.status === 401) {
+                        errorMessage = 'Authentication failed. Please log in again.';
+                        setTimeout(() => {
+                            window.location.href = './auth.html';
+                        }, 2000);
+                    } else if (response.status === 403) {
+                        errorMessage = 'You need landlord permissions to add properties. Contact support to upgrade your account.';
+                    } else if (response.status === 409) {
                         errorMessage = 'You have already listed a property with this address and zip code.';
                     } else if (response.status === 400) {
-                        errorMessage = data.details ? data.details.join(', ') : (data.message || errorMessage);
-                    } else if (response.status === 403) {
-                        errorMessage = 'You need landlord permissions to add properties.';
+                        if (data.details && Array.isArray(data.details)) {
+                            errorMessage = data.details.join(', ');
+                        } else if (data.message) {
+                            errorMessage = data.message;
+                        } else if (data.error) {
+                            errorMessage = data.error;
+                        }
+                        
+                        // Special handling for landlord_id error
+                        if (errorMessage.toLowerCase().includes('landlord') && errorMessage.toLowerCase().includes('required')) {
+                            errorMessage = 'Authentication issue: Your landlord account needs to be verified. Please log out and log back in.';
+                        }
                     } else if (response.status === 429) {
-                        errorMessage = 'You have reached the maximum number of properties you can add per hour. Please try again later.';
+                        errorMessage = 'You have reached the maximum number of properties you can add per hour (10). Please try again later.';
                     } else if (data.message) {
                         errorMessage = data.message;
+                    } else if (data.error) {
+                        errorMessage = data.error;
                     }
 
-                    alert(errorMessage);
+                    // Show detailed error for debugging
+                    console.error('Showing error to user:', errorMessage);
+                    alert(`Error: ${errorMessage}\n\nIf this persists, please try logging out and logging back in.`);
                 }
             } catch (error) {
-                console.error('Error creating property:', error);
-                alert('Network error. Please check your connection and try again.');
+                console.error('Network/JavaScript error:', error);
+                alert('Network error. Please check your connection and try again.\n\nError details: ' + error.message);
             }
 
             // Remove loading state
