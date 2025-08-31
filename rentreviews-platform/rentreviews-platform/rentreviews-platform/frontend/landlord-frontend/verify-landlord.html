@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Landlord Account - RentReviews</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        .document-upload-zone {
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+        
+        .document-upload-zone:hover {
+            border-color: #6366f1;
+            background: #f8faff;
+        }
+        
+        .document-upload-zone.dragover {
+            border-color: #6366f1;
+            background: #f0f4ff;
+            transform: scale(1.02);
+        }
+        
+        .document-preview {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: between;
+        }
+        
+        .document-preview:hover {
+            border-color: #6366f1;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-under-review {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .verification-step {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .verification-step.completed {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        
+        .verification-step.active {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        .btn-loading {
+            position: relative;
+            color: transparent;
+        }
+        
+        .btn-loading::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 min-h-screen">
+    
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 w-8 h-8 rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-sm">⭐</span>
+                        </div>
+                        <span class="ml-3 text-xl font-bold text-gray-900">RentReviews</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="window.location.href='./dashboard.html'" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                        Dashboard
+                    </button>
+                    <button id="logoutBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 py-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-bold text-white mb-4">
+                    Verify Your Landlord Account
+                </h1>
+                <p class="text-xl text-indigo-100">
+                    Upload documents to verify your property ownership and unlock landlord features
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Current Status Card -->
+        <div id="statusCard" class="verification-step mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-gray-900">Verification Status</h2>
+                <div id="statusBadge" class="status-badge status-pending">Pending</div>
+            </div>
+            <div id="statusMessage" class="text-gray-600 mb-4">
+                Your landlord verification is pending. Complete the steps below to verify your account.
+            </div>
+            <div id="statusDetails" class="text-sm text-gray-500">
+                Verified landlords can list properties and respond to reviews. Verification typically takes 1-3 business days.
+            </div>
+        </div>
+
+        <!-- Step 1: Basic Information -->
+        <div class="verification-step active">
+            <div class="flex items-center mb-6">
+                <div class="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3">1</div>
+                <h3 class="text-xl font-bold text-gray-900">Basic Information</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Legal Name *</label>
+                    <input type="text" id="fullName" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                           placeholder="John Smith">
+                    <p class="text-xs text-gray-500 mt-1">Must match name on property documents</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                    <input type="tel" id="phoneNumber" required
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                           placeholder="(555) 123-4567">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Business Address</label>
+                    <input type="text" id="businessAddress"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                           placeholder="123 Main St, City, State, ZIP (optional)">
+                    <p class="text-xs text-gray-500 mt-1">If you operate as a business, include your business address</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Document Upload -->
+        <div class="verification-step active">
+            <div class="flex items-center mb-6">
+                <div class="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3">2</div>
+                <h3 class="text-xl font-bold text-gray-900">Upload Verification Documents</h3>
+            </div>
+            
+            <div class="mb-6">
+                <p class="text-gray-600 mb-4">Please upload at least two of the following documents to verify your property ownership:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                    <div class="flex items-center">
+                        <span class="text-green-500 mr-2">✓</span>
+                        Property deed or title
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-green-500 mr-2">✓</span>
+                        Current mortgage statement
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-green-500 mr-2">✓</span>
+                        Property tax records
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-green-500 mr-2">✓</span>
+                        Rental/business license
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-green-500 mr-2">✓</span>
+                        Government-issued ID
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-green-500 mr-2">✓</span>
+                        Property insurance documents
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Upload Zone -->
+            <div id="documentUploadZone" class="document-upload-zone mb-6">
+                <div class="text-6xl text-gray-400 mb-4">📄</div>
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">Upload Documents</h3>
+                <p class="text-gray-500 mb-4">Drag and drop files here, or click to browse</p>
+                <input type="file" id="documentInput" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" multiple class="hidden">
+                <button type="button" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                    Choose Files
+                </button>
+                <p class="text-xs text-gray-500 mt-2">Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB per file)</p>
+            </div>
+
+            <!-- Uploaded Documents List -->
+            <div id="uploadedDocuments" class="hidden">
+                <h4 class="font-semibold text-gray-900 mb-3">Uploaded Documents</h4>
+                <div id="documentsList">
+                    <!-- Documents will be listed here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Additional Information -->
+        <div class="verification-step">
+            <div class="flex items-center mb-6">
+                <div class="bg-gray-400 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3">3</div>
+                <h3 class="text-xl font-bold text-gray-900">Additional Information</h3>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">How many properties do you currently manage?</label>
+                    <select id="propertyCount" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Select...</option>
+                        <option value="1">1 property</option>
+                        <option value="2-5">2-5 properties</option>
+                        <option value="6-10">6-10 properties</option>
+                        <option value="11-25">11-25 properties</option>
+                        <option value="25+">25+ properties</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Years of experience as a landlord</label>
+                    <select id="experience" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Select...</option>
+                        <option value="new">New landlord (less than 1 year)</option>
+                        <option value="1-2">1-2 years</option>
+                        <option value="3-5">3-5 years</option>
+                        <option value="6-10">6-10 years</option>
+                        <option value="10+">10+ years</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Additional Notes (Optional)</label>
+                    <textarea id="additionalNotes" rows="3" 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                              placeholder="Any additional information you'd like to provide..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terms and Submit -->
+        <div class="verification-step">
+            <div class="mb-6">
+                <label class="flex items-start space-x-3 cursor-pointer">
+                    <input type="checkbox" id="agreeTerms" required class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1">
+                    <div class="text-sm text-gray-700">
+                        I certify that all information provided is accurate and that I am the legal owner or authorized representative of the properties I manage. I understand that providing false information may result in account suspension or termination. I agree to the 
+                        <a href="#" class="text-indigo-600 hover:text-indigo-800">Landlord Terms of Service</a> and 
+                        <a href="#" class="text-indigo-600 hover:text-indigo-800">Verification Policy</a>.
+                    </div>
+                </label>
+            </div>
+
+            <div class="text-center">
+                <button id="submitVerification" class="bg-green-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-green-700 transition-colors">
+                    Submit for Verification
+                </button>
+                <p class="text-sm text-gray-500 mt-4">
+                    Our team will review your documents within 1-3 business days and notify you via email.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'https://landlord-auth-service-production.up.railway.app';
+        
+        // State
+        let uploadedDocuments = [];
+        let currentUser = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuthentication();
+            setupEventListeners();
+            loadVerificationStatus();
+        });
+
+        function checkAuthentication() {
+            const token = localStorage.getItem('rentreviews_token');
+            const user = JSON.parse(localStorage.getItem('rentreviews_user') || '{}');
+            
+            if (!token) {
+                alert('Please log in to access verification.');
+                window.location.href = './auth.html';
+                return;
+            }
+
+            if (user.role !== 'landlord') {
+                alert('Only landlord accounts can be verified. Please contact support to upgrade your account.');
+                window.location.href = './dashboard.html';
+                return;
+            }
+
+            currentUser = user;
+            prefillUserData();
+        }
+
+        function prefillUserData() {
+            if (currentUser) {
+                const fullName = document.getElementById('fullName');
+                if (fullName && currentUser.first_name && currentUser.last_name) {
+                    fullName.value = `${currentUser.first_name} ${currentUser.last_name}`;
+                }
+            }
+        }
+
+        function setupEventListeners() {
+            // Document upload
+            setupDocumentUpload();
+            
+            // Form submission
+            document.getElementById('submitVerification').addEventListener('click', submitVerification);
+            
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        }
+
+        function loadVerificationStatus() {
+            // In a real implementation, this would fetch from your backend
+            // For now, we'll simulate the status based on localStorage
+            const verificationData = JSON.parse(localStorage.getItem('landlord_verification') || '{}');
+            
+            updateStatusDisplay(verificationData.status || 'pending', verificationData.message);
+        }
+
+        function updateStatusDisplay(status, message) {
+            const statusBadge = document.getElementById('statusBadge');
+            const statusMessage = document.getElementById('statusMessage');
+            const statusCard = document.getElementById('statusCard');
+            
+            // Remove existing status classes
+            statusBadge.className = 'status-badge';
+            statusCard.className = 'verification-step mb-8';
+            
+            switch(status) {
+                case 'approved':
+                    statusBadge.classList.add('status-approved');
+                    statusBadge.textContent = 'Approved';
+                    statusCard.classList.add('completed');
+                    statusMessage.textContent = message || 'Congratulations! Your landlord account has been verified. You can now list properties and access all landlord features.';
+                    break;
+                case 'rejected':
+                    statusBadge.classList.add('status-rejected');
+                    statusBadge.textContent = 'Rejected';
+                    statusMessage.textContent = message || 'Your verification was rejected. Please review the feedback and submit additional documentation.';
+                    break;
+                case 'under-review':
+                    statusBadge.classList.add('status-under-review');
+                    statusBadge.textContent = 'Under Review';
+                    statusMessage.textContent = message || 'Your documents are currently being reviewed by our team. We will notify you within 1-3 business days.';
+                    break;
+                default: // pending
+                    statusBadge.classList.add('status-pending');
+                    statusBadge.textContent = 'Pending';
+                    statusMessage.textContent = message || 'Your landlord verification is pending. Complete the steps below to verify your account.';
+            }
+        }
+
+        function setupDocumentUpload() {
+            const uploadZone = document.getElementById('documentUploadZone');
+            const documentInput = document.getElementById('documentInput');
+            
+            // Click to upload
+            uploadZone.addEventListener('click', () => {
+                documentInput.click();
+            });
+
+            // File input change
+            documentInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+
+            // Drag and drop
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('dragover');
+            });
+
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('dragover');
+            });
+
+            uploadZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadZone.classList.remove('dragover');
+                handleFiles(e.dataTransfer.files);
+            });
+        }
+
+        function handleFiles(files) {
+            const validFiles = Array.from(files).filter(file => {
+                // Check file type
+                const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 
+                                    'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert(`${file.name} is not a supported file type.`);
+                    return false;
+                }
+                
+                // Check file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert(`${file.name} is too large. Maximum size is 10MB.`);
+                    return false;
+                }
+                
+                return true;
+            });
+
+            if (uploadedDocuments.length + validFiles.length > 10) {
+                alert('Maximum 10 documents allowed.');
+                return;
+            }
+
+            validFiles.forEach(file => {
+                const docId = Date.now() + Math.random();
+                uploadedDocuments.push({
+                    id: docId,
+                    file: file,
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    uploadedAt: new Date()
+                });
+            });
+            
+            updateDocumentsList();
+        }
+
+        function updateDocumentsList() {
+            const uploadedContainer = document.getElementById('uploadedDocuments');
+            const documentsList = document.getElementById('documentsList');
+            
+            if (uploadedDocuments.length === 0) {
+                uploadedContainer.classList.add('hidden');
+                return;
+            }
+
+            uploadedContainer.classList.remove('hidden');
+            documentsList.innerHTML = '';
+
+            uploadedDocuments.forEach(doc => {
+                const docElement = document.createElement('div');
+                docElement.className = 'document-preview';
+                
+                const fileIcon = getFileIcon(doc.type);
+                const fileSize = formatFileSize(doc.size);
+                
+                docElement.innerHTML = `
+                    <div class="flex items-center flex-1">
+                        <div class="text-2xl mr-3">${fileIcon}</div>
+                        <div class="flex-1">
+                            <div class="font-medium text-gray-900">${doc.name}</div>
+                            <div class="text-sm text-gray-500">${fileSize}</div>
+                        </div>
+                    </div>
+                    <button onclick="removeDocument(${doc.id})" class="text-red-500 hover:text-red-700 ml-4">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                `;
+                
+                documentsList.appendChild(docElement);
+            });
+        }
+
+        function getFileIcon(fileType) {
+            if (fileType.includes('pdf')) return '📄';
+            if (fileType.includes('image')) return '🖼️';
+            if (fileType.includes('word')) return '📝';
+            return '📎';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function removeDocument(docId) {
+            uploadedDocuments = uploadedDocuments.filter(doc => doc.id !== docId);
+            updateDocumentsList();
+        }
+
+        async function submitVerification() {
+            const submitBtn = document.getElementById('submitVerification');
+            const agreeTerms = document.getElementById('agreeTerms');
+
+            // Validation
+            if (!agreeTerms.checked) {
+                alert('Please agree to the terms and conditions.');
+                return;
+            }
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const phoneNumber = document.getElementById('phoneNumber').value.trim();
+
+            if (!fullName || !phoneNumber) {
+                alert('Please fill in all required fields (Full Name and Phone Number).');
+                return;
+            }
+
+            if (uploadedDocuments.length < 2) {
+                alert('Please upload at least 2 verification documents.');
+                return;
+            }
+
+            // Prepare verification data
+            const verificationData = {
+                fullName: fullName,
+                phoneNumber: phoneNumber,
+                businessAddress: document.getElementById('businessAddress').value.trim(),
+                propertyCount: document.getElementById('propertyCount').value,
+                experience: document.getElementById('experience').value,
+                additionalNotes: document.getElementById('additionalNotes').value.trim(),
+                documentsCount: uploadedDocuments.length,
+                submittedAt: new Date().toISOString()
+            };
+
+            // Add loading state
+            submitBtn.classList.add('btn-loading');
+            submitBtn.disabled = true;
+
+            try {
+                // In a real implementation, you would upload files and data to your backend
+                // For now, we'll simulate success and store in localStorage
+                
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Store verification data
+                const verificationRecord = {
+                    ...verificationData,
+                    status: 'under-review',
+                    message: 'Thank you for submitting your verification documents. Our team will review them within 1-3 business days.',
+                    submissionId: 'VER-' + Date.now()
+                };
+                
+                localStorage.setItem('landlord_verification', JSON.stringify(verificationRecord));
+                
+                // Update status display
+                updateStatusDisplay('under-review', verificationRecord.message);
+                
+                // Show success message
+                showSuccessModal(verificationRecord.submissionId);
+                
+            } catch (error) {
+                console.error('Verification submission error:', error);
+                alert('Error submitting verification. Please try again.');
+            }
+
+            // Remove loading state
+            submitBtn.classList.remove('btn-loading');
+            submitBtn.disabled = false;
+        }
+
+        function showSuccessModal(submissionId) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl max-w-md w-full p-8 text-center">
+                    <div class="text-6xl mb-4">✅</div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Verification Submitted!</h2>
+                    <p class="text-gray-600 mb-4">Your landlord verification has been submitted successfully.</p>
+                    <p class="text-sm text-gray-500 mb-6">Submission ID: ${submissionId}</p>
+                    <div class="space-y-3">
+                        <p class="text-sm text-gray-600">Our team will review your documents within 1-3 business days. You'll receive an email notification once the review is complete.</p>
+                        <button onclick="window.location.href='./dashboard.html'" 
+                                class="w-full bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+                            Return to Dashboard
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function logout() {
+            localStorage.removeItem('rentreviews_token');
+            localStorage.removeItem('rentreviews_user');
+            window.location.href = './auth.html';
+        }
+
+        // Make removeDocument available globally
+        window.removeDocument = removeDocument;
+    </script>
+</body>
+</html>
