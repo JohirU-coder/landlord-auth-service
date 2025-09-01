@@ -315,7 +315,7 @@ app.get('/setup-database', async (req, res) => {
   }
 });
 
-// POST /properties - Create a new property (PROTECTED)
+// POST /properties - Create a new property (PROTECTED) - WITH VERIFICATION CHECK
 app.post('/properties', authenticateToken, requireRole(['landlord']), createPropertyLimiter, async (req, res) => {
   try {
     // Validate request body
@@ -339,6 +339,54 @@ app.post('/properties', authenticateToken, requireRole(['landlord']), createProp
 
     // Use authenticated user's ID as landlord_id
     const landlord_id = req.user.id;
+
+    // 🔥 NEW: Check landlord verification status
+    console.log(`Checking verification status for landlord ${landlord_id}...`);
+    
+    const userVerificationQuery = `
+      SELECT landlord_verified, verification_status 
+      FROM users WHERE id = $1
+    `;
+
+    const userCheck = await pool.query(userVerificationQuery, [landlord_id]);
+    
+    if (userCheck.rows.length === 0) {
+      return sendErrorResponse(res, 404, 'User not found', 'Landlord account does not exist');
+    }
+    
+    const userData = userCheck.rows[0];
+    console.log(`Verification check result:`, userData);
+
+    // Block unverified landlords
+    if (!userData.landlord_verified) {
+      const verificationStatus = userData.verification_status || 'pending';
+      
+      let message = 'Please verify your landlord account before listing properties.';
+      let details = {
+        redirect_url: './verify-landlord.html',
+        verification_status: verificationStatus
+      };
+
+      // Customize message based on verification status
+      switch (verificationStatus) {
+        case 'under-review':
+          message = 'Your landlord verification is under review. You can list properties once approved.';
+          details.estimated_time = '1-3 business days';
+          break;
+        case 'rejected':
+          message = 'Your landlord verification was rejected. Please resubmit your verification documents.';
+          break;
+        case 'pending':
+        default:
+          message = 'Please verify your landlord account before listing properties.';
+      }
+
+      console.log(`❌ Verification failed for landlord ${landlord_id}: ${verificationStatus}`);
+      
+      return sendErrorResponse(res, 403, 'Verification required', message, details);
+    }
+
+    console.log(`✅ Landlord ${landlord_id} is verified, proceeding with property creation...`);
 
     // Check for duplicate property (same address + zip for this landlord)
     const duplicateCheck = await pool.query(
@@ -368,7 +416,7 @@ app.post('/properties', authenticateToken, requireRole(['landlord']), createProp
 
     const newProperty = result.rows[0];
 
-    console.log(`✅ Property created by user ${landlord_id}: ${address}`);
+    console.log(`✅ Property created by verified landlord ${landlord_id}: ${address}`);
 
     sendSuccessResponse(res, 201, {
       property: {
