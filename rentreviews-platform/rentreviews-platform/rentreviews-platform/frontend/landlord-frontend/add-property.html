@@ -826,6 +826,15 @@
                         }, 2000);
                     } else if (response.status === 403) {
                         errorMessage = 'You need landlord permissions to add properties. Contact support to upgrade your account.';
+                        if (response.status === 403) {
+    const data = await response.json();
+    if (data.redirect_url) {
+        alert('Please verify your landlord account first.');
+        window.location.href = './verify-landlord.html';
+    } else {
+        errorMessage = 'You need landlord permissions to add properties.';
+    }
+}
                     } else if (response.status === 409) {
                         errorMessage = 'You have already listed a property with this address and zip code.';
                     } else if (response.status === 400) {
