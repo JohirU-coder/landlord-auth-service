@@ -571,6 +571,21 @@ function handleSearch() {
     
     return template;
 }
+// Add "Claim Property" button for landlords
+const currentUser = JSON.parse(localStorage.getItem('rentreviews_user') || '{}');
+if (currentUser.role === 'landlord') {
+    // Check if property is community-added (unclaimed)
+    if (!property.landlord_verified || property.description?.includes('[Community Added Property]')) {
+        const claimBtn = document.createElement('button');
+        claimBtn.className = 'bg-orange-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors ml-2';
+        claimBtn.textContent = 'Claim Property';
+        claimBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showClaimModal(property);
+        });
+        buttonContainer.appendChild(claimBtn);
+    }
+}
 
 // Function to generate mock review data (replace with real API call later)
 function generateMockReviewData(propertyId) {
