@@ -283,6 +283,131 @@
 </template>
 
     <script>
+        function showClaimModal(property) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+    
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl max-w-md w-full p-6">
+            <div class="text-center mb-6">
+                <div class="text-4xl mb-4">🏠</div>
+                <h2 class="text-xl font-bold text-gray-900">Claim This Property</h2>
+                <p class="text-gray-600 mt-2">Are you the owner or manager of this property?</p>
+            </div>
+            
+            <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                <h3 class="font-medium text-gray-900">${property.address}</h3>
+                <p class="text-sm text-gray-600">${property.city}, ${property.state} ${property.zip_code}</p>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Verification Details
+                </label>
+                <textarea id="claimDetails" rows="3" 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                          placeholder="Please provide any details that prove you manage this property (lease agreements, utility bills, property management license, etc.)"></textarea>
+            </div>
+            
+            <div class="text-xs text-gray-500 mb-6">
+                By claiming this property, you confirm that you are the legal owner or authorized manager. 
+                False claims may result in account suspension.
+            </div>
+            
+            <div class="flex space-x-3">
+                <button onclick="this.closest('.fixed').remove()" 
+                        class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300">
+                    Cancel
+                </button>
+                <button onclick="submitPropertyClaim(${property.id}, document.getElementById('claimDetails').value, this)" 
+                        class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700">
+                    Submit Claim
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+async function submitPropertyClaim(propertyId, details, legalConfirmation, button) {
+    if (!details.trim()) {
+        alert('Please provide documentation details.');
+        return;
+    }
+    
+    if (!legalConfirmation) {
+        alert('You must confirm the legal statement to proceed.');
+        return;
+    }
+    
+    button.textContent = 'Submitting...';
+    button.disabled = true;
+    
+    try {
+        // Store claims with enhanced verification data
+        const claims = JSON.parse(localStorage.getItem('property_claims') || '[]');
+        const newClaim = {
+            id: Date.now(),
+            propertyId: propertyId,
+            userId: JSON.parse(localStorage.getItem('rentreviews_user')).id,
+            userEmail: JSON.parse(localStorage.getItem('rentreviews_user')).email,
+            documentationDetails: details,
+            legalConfirmation: true,
+            status: 'pending_documentation',
+            submittedAt: new Date().toISOString(),
+            reviewRequired: true
+        };
+        
+        claims.push(newClaim);
+        localStorage.setItem('property_claims', JSON.stringify(claims));
+        
+        // Close modal and show success
+        button.closest('.fixed').remove();
+        
+        showClaimSuccessMessage();
+        
+    } catch (error) {
+        console.error('Error submitting claim:', error);
+        alert('Error submitting claim. Please try again.');
+        button.textContent = 'Submit Claim';
+        button.disabled = false;
+    }
+}
+
+function showClaimSuccessMessage() {
+    const successModal = document.createElement('div');
+    successModal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+    
+    successModal.innerHTML = `
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 text-center">
+            <div class="text-4xl mb-4">✅</div>
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Claim Submitted!</h2>
+            <p class="text-gray-600 mb-6">
+                Your property claim has been submitted for review. We'll verify your ownership and 
+                notify you within 1-3 business days.
+            </p>
+            <div class="bg-blue-50 p-4 rounded-lg mb-6">
+                <p class="text-sm text-blue-800">
+                    <strong>Next Steps:</strong> Complete your landlord verification in your dashboard 
+                    to speed up the claim process.
+                </p>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="this.closest('.fixed').remove()" 
+                        class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg">
+                    Close
+                </button>
+                <button onclick="window.location.href='./verify-landlord.html'" 
+                        class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg">
+                    Verify Account
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(successModal);
+}
         // API Configuration
         const API_BASE_URL = 'https://landlord-property-service-production.up.railway.app';
         
