@@ -41,7 +41,7 @@
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
                     <div class="bg-gradient-to-r from-indigo-600 to-purple-600 w-8 h-8 rounded-lg flex items-center justify-center">
-                        <span class="text-white font-bold text-sm">★</span>
+                        <span class="text-white font-bold text-sm">⭐</span>
                     </div>
                     <span class="ml-3 text-xl font-bold text-gray-900">RentReviews Admin</span>
                 </div>
@@ -56,8 +56,24 @@
             <h1 class="text-2xl font-bold text-gray-900 mb-4">Seed Properties for Bootstrap</h1>
             <p class="text-gray-600 mb-6">
                 Quickly add properties from public listings to give renters something to browse and review. 
-                These will be marked as "Community Added" until landlords claim them.
+                These will be marked as "Community-Submitted" until landlords claim them.
             </p>
+            
+            <!-- Enhanced Status Display -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div class="flex items-center">
+                    <div class="text-blue-600 mr-3">ℹ️</div>
+                    <div>
+                        <h4 class="font-semibold text-blue-800">Community Property Guidelines</h4>
+                        <div class="text-sm text-blue-700 mt-1">
+                            <p>• Only add properties from legitimate public listings</p>
+                            <p>• Include accurate source attribution</p>
+                            <p>• Properties will be marked as claimable by verified landlords</p>
+                            <p>• All community properties include legal disclaimers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <!-- Quick Add Form -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -135,16 +151,19 @@
                 </div>
             </div>
 
-            <!-- Source Tracking -->
+            <!-- Enhanced Source Tracking -->
             <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Source</label>
-                    <select id="source" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Source *</label>
+                    <select id="source" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Select Source</option>
                         <option value="craigslist">Craigslist</option>
                         <option value="zillow">Zillow</option>
                         <option value="apartments.com">Apartments.com</option>
                         <option value="rentals.com">Rentals.com</option>
-                        <option value="other">Other</option>
+                        <option value="streeteasy">StreetEasy</option>
+                        <option value="padmapper">PadMapper</option>
+                        <option value="other">Other Public Listing</option>
                     </select>
                 </div>
                 <div>
@@ -158,14 +177,14 @@
             <!-- Submit Button -->
             <div class="mt-8 flex justify-between items-center">
                 <div class="text-sm text-gray-500">
-                    Properties added: <span id="propertiesCount" class="font-medium text-indigo-600">0</span>
+                    Properties seeded: <span id="propertiesCount" class="font-medium text-indigo-600">0</span>
                 </div>
                 <div class="flex space-x-4">
                     <button id="clearForm" class="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors">
                         Clear Form
                     </button>
                     <button id="addProperty" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
-                        Add Property
+                        Add Community Property
                     </button>
                 </div>
             </div>
@@ -175,7 +194,7 @@
         <div class="bg-white rounded-lg shadow p-6">
             <h2 class="text-xl font-bold text-gray-900 mb-4">Recent Additions</h2>
             <div id="recentProperties" class="space-y-3">
-                <p class="text-gray-500 text-center py-8">No properties added yet.</p>
+                <p class="text-gray-500 text-center py-8">No properties seeded yet.</p>
             </div>
         </div>
     </div>
@@ -197,7 +216,7 @@
             document.getElementById('charCount').textContent = '0';
         });
 
-        // Add property function
+        // Enhanced property seeding function
         document.getElementById('addProperty').addEventListener('click', async () => {
             const addBtn = document.getElementById('addProperty');
             
@@ -206,13 +225,14 @@
             const city = document.getElementById('city').value.trim();
             const state = document.getElementById('state').value.trim();
             const zipCode = document.getElementById('zipCode').value.trim();
+            const source = document.getElementById('source').value;
 
-            if (!address || !city || !state || !zipCode) {
-                alert('Please fill in all required fields (address, city, state, zip code)');
+            if (!address || !city || !state || !zipCode || !source) {
+                alert('Please fill in all required fields (address, city, state, zip code, and source)');
                 return;
             }
 
-            // Prepare property data
+            // Prepare enhanced property data with proper tracking
             const propertyData = {
                 address: address,
                 city: city,
@@ -222,9 +242,20 @@
                 bedrooms: document.getElementById('bedrooms').value ? parseInt(document.getElementById('bedrooms').value) : null,
                 bathrooms: document.getElementById('bathrooms').value ? parseFloat(document.getElementById('bathrooms').value) : null,
                 square_feet: document.getElementById('squareFeet').value ? parseInt(document.getElementById('squareFeet').value) : null,
-                description: document.getElementById('description').value.trim() + ' [Community-Submitted Property - Unverified by Landlord]',
-                source: document.getElementById('source').value,
-                source_url: document.getElementById('sourceUrl').value.trim()
+                
+                // Enhanced description with clear community marker
+                description: (document.getElementById('description').value.trim() + ' [Community-Submitted Property - Unverified by Landlord]').trim(),
+                
+                // Enhanced source tracking
+                data_source: source,
+                source_url: document.getElementById('sourceUrl').value.trim() || null,
+                verification_status: 'community_submitted',
+                
+                // Additional metadata for tracking
+                seeded_by: 'admin_tool',
+                seeded_at: new Date().toISOString(),
+                requires_verification: true,
+                claimable: true
             };
 
             // Add loading state
@@ -232,19 +263,21 @@
             addBtn.disabled = true;
 
             try {
-                // Since we need a landlord_id, we'll create a system landlord account
-                // For now, we'll use your admin account or create a dedicated system account
+                // Use your admin token
                 const token = prompt('Enter admin token (your landlord account token):');
                 
                 if (!token) {
-                    throw new Error('Admin token required');
+                    throw new Error('Admin token required for property seeding');
                 }
+
+                console.log('Seeding property with enhanced data:', propertyData);
 
                 const response = await fetch(`${API_BASE_URL}/properties`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token}`,
+                        'X-Admin-Seeder': 'true' // Flag for backend to recognize admin seeding
                     },
                     body: JSON.stringify(propertyData)
                 });
@@ -254,22 +287,30 @@
                     propertiesAdded++;
                     document.getElementById('propertiesCount').textContent = propertiesAdded;
                     
-                    // Add to recent properties list
-                    addToRecentList(data.property);
+                    // Enhanced success tracking
+                    console.log('Property seeded successfully:', data.property);
+                    
+                    // Add to recent properties list with enhanced display
+                    addToRecentListEnhanced(data.property);
                     
                     // Clear form
                     document.getElementById('clearForm').click();
                     
-                    // Success message
-                    showMessage('Property added successfully!', 'success');
+                    // Success message with guidance
+                    showMessage('Community property added successfully! Property can now be claimed by verified landlords.', 'success');
+                    
+                    // Log seeding activity for admin tracking
+                    logSeedingActivity(data.property, propertyData.data_source);
+                    
                 } else {
                     const error = await response.json();
-                    throw new Error(error.message || 'Failed to add property');
+                    console.error('Seeding failed:', error);
+                    throw new Error(error.message || 'Failed to seed property');
                 }
                 
             } catch (error) {
-                console.error('Error adding property:', error);
-                showMessage('Error: ' + error.message, 'error');
+                console.error('Error seeding property:', error);
+                showMessage('Error: ' + error.message + '. Ensure you have admin/landlord permissions.', 'error');
             }
 
             // Remove loading state
@@ -277,7 +318,7 @@
             addBtn.disabled = false;
         });
 
-        function addToRecentList(property) {
+        function addToRecentListEnhanced(property) {
             const recentList = document.getElementById('recentProperties');
             
             // Remove "no properties" message
@@ -286,22 +327,49 @@
             }
             
             const propertyElement = document.createElement('div');
-            propertyElement.className = 'border border-gray-200 rounded-lg p-4';
+            propertyElement.className = 'border border-gray-200 rounded-lg p-4 bg-yellow-50 border-yellow-200';
             propertyElement.innerHTML = `
                 <div class="flex justify-between items-start">
-                    <div>
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium mr-2">
+                                📍 Community-Submitted
+                            </span>
+                            <span class="text-xs text-gray-500">Claimable by landlords</span>
+                        </div>
                         <h3 class="font-medium text-gray-900">${property.address}</h3>
                         <p class="text-sm text-gray-600">${property.city}, ${property.state} ${property.zip_code}</p>
                         ${property.rent_amount ? `<p class="text-sm text-green-600 font-medium">$${property.rent_amount.toLocaleString()}/month</p>` : ''}
+                        <p class="text-xs text-gray-500 mt-1">Source: ${property.data_source || 'Unknown'}</p>
                     </div>
                     <div class="text-right text-sm text-gray-500">
-                        <p>ID: ${property.id}</p>
-                        <p>Just added</p>
+                        <p class="font-mono">ID: ${property.id}</p>
+                        <p>Just seeded</p>
+                        <span class="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
                     </div>
                 </div>
             `;
             
             recentList.insertBefore(propertyElement, recentList.firstChild);
+        }
+
+        function logSeedingActivity(property, source) {
+            // Store seeding activity for admin tracking
+            const seedingLog = JSON.parse(localStorage.getItem('admin_seeding_log') || '[]');
+            seedingLog.push({
+                property_id: property.id,
+                address: property.address,
+                source: source,
+                seeded_at: new Date().toISOString(),
+                status: 'active_awaiting_claim'
+            });
+            
+            // Keep last 50 entries
+            if (seedingLog.length > 50) {
+                seedingLog.splice(0, seedingLog.length - 50);
+            }
+            
+            localStorage.setItem('admin_seeding_log', JSON.stringify(seedingLog));
         }
 
         function showMessage(message, type) {
@@ -320,8 +388,12 @@
 
         // Load existing properties count on page load
         document.addEventListener('DOMContentLoaded', () => {
-            // You could fetch recent properties here to show them
             console.log('Property seeder loaded. Ready to bootstrap your platform!');
+            
+            // Load seeding log to display count
+            const seedingLog = JSON.parse(localStorage.getItem('admin_seeding_log') || '[]');
+            propertiesAdded = seedingLog.length;
+            document.getElementById('propertiesCount').textContent = propertiesAdded;
         });
     </script>
 </body>
