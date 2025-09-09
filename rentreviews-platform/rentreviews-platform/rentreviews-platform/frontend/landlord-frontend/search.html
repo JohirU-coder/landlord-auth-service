@@ -195,405 +195,93 @@
         </div>
     </div>
 
-    <!-- Property Card Template (Hidden) -->
+    <!-- Property Card Template -->
     <template id="propertyCardTemplate">
-    <div class="property-card bg-white rounded-2xl overflow-hidden">
-        <!-- Property Image Placeholder -->
-        <div class="h-48 bg-gradient-to-br from-blue-500 to-purple-600 relative">
-            <div class="absolute top-4 left-4">
-                <span class="price-badge text-white px-3 py-1 rounded-full text-lg font-bold"></span>
-            </div>
-            <div class="absolute top-4 right-4">
-                <button class="bg-white bg-opacity-20 p-2 rounded-full hover:bg-opacity-30 transition-colors">
-                    <span class="text-white">❤️</span>
-                </button>
-            </div>
-            <div class="absolute bottom-4 left-4 text-white">
-                <div class="flex items-center space-x-1 rating-stars text-yellow-300">
-                    <span>⭐⭐⭐⭐⭐</span>
-                    <span class="text-sm">(4.8)</span>
+        <div class="property-card bg-white rounded-2xl overflow-hidden">
+            <!-- Property Image Placeholder -->
+            <div class="h-48 bg-gradient-to-br from-blue-500 to-purple-600 relative">
+                <div class="absolute top-4 left-4">
+                    <span class="price-badge text-white px-3 py-1 rounded-full text-lg font-bold"></span>
                 </div>
-                <div class="review-count text-xs text-white/80 mt-1"></div>
-            </div>
-        </div>
-        function addPropertyStatusBadge(property, propertyCard) {
-    const badgeContainer = document.createElement('div');
-    badgeContainer.className = 'absolute top-2 left-2 z-10';
-    
-    let badgeHTML = '';
-    
-    // Check if property is community-submitted
-    if (property.description?.includes('[Community-Submitted Property - Unverified by Landlord]')) {
-        badgeHTML = `
-            <div class="bg-orange-100 border border-orange-300 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
-                📍 Community-Submitted
-            </div>
-        `;
-    } else if (property.landlord_verified) {
-        badgeHTML = `
-            <div class="bg-green-100 border border-green-300 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
-                ✅ Verified Landlord
-            </div>
-        `;
-    } else {
-        badgeHTML = `
-            <div class="bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">
-                ⏳ Pending Verification
-            </div>
-        `;
-    }
-    
-    badgeContainer.innerHTML = badgeHTML;
-    
-    // Add to property card (make sure card has relative positioning)
-    propertyCard.style.position = 'relative';
-    propertyCard.appendChild(badgeContainer);
-}
-
-function addPropertyDisclaimer(property, propertyCard) {
-    // Only add disclaimers for community-submitted properties
-    if (property.description?.includes('[Community-Submitted Property - Unverified by Landlord]')) {
-        const disclaimerDiv = document.createElement('div');
-        disclaimerDiv.className = 'bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4';
-        disclaimerDiv.innerHTML = `
-            <div class="flex items-start">
-                <span class="text-yellow-600 text-sm mr-2">⚠️</span>
-                <div class="text-xs text-yellow-800">
-                    <strong>Community-Submitted Property:</strong> This property information was submitted by the community 
-                    and has not been verified by the landlord. Data accuracy cannot be guaranteed. 
-                    Please verify all details independently before making rental decisions.
-                </div>
-            </div>
-        `;
-        
-        // Add to property card content area
-        const cardContent = propertyCard.querySelector('.p-6');
-        if (cardContent) {
-            cardContent.appendChild(disclaimerDiv);
-        }
-    }
-}
-
-// Enhanced property detail modal with disclaimers
-function showPropertyDetailsWithDisclaimer(property, reviewData) {
-    const modalOverlay = document.createElement('div');
-    modalOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
-    
-    const isUnverified = property.description?.includes('[Community-Submitted Property - Unverified by Landlord]');
-    
-    const modalContent = document.createElement('div');
-    modalContent.className = 'bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto';
-    
-    modalContent.innerHTML = `
-        <div class="relative">
-            <!-- Header with Status Badge -->
-            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-t-2xl">
-                <button class="absolute top-4 right-4 text-white hover:text-gray-200" onclick="this.closest('.fixed').remove()">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-                
-                ${isUnverified ? `
-                <div class="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-medium mb-3 inline-block">
-                    📍 Community-Submitted - Unverified
-                </div>
-                ` : ''}
-                
-                <h2 class="text-2xl font-bold text-white">${property.address}</h2>
-                <p class="text-indigo-100">${property.city}, ${property.state} ${property.zip_code}</p>
-                
-                <div class="mt-4 flex items-center">
-                    <span class="bg-white text-indigo-600 px-3 py-1 rounded-full font-bold text-lg">
-                        $${property.rent_amount?.toLocaleString() || 'N/A'}
-                    </span>
-                    <div class="ml-4 text-white">
-                        ${reviewData.averageRating > 0 ? 
-                            `<div class="flex items-center">
-                                <span class="text-yellow-300">★★★★★</span>
-                                <span class="ml-2">${reviewData.averageRating.toFixed(1)} (${reviewData.reviewCount} reviews)</span>
-                            </div>` :
-                            '<span class="text-indigo-200">No reviews yet</span>'
-                        }
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Content -->
-            <div class="p-6">
-                <!-- Legal Disclaimer for Unverified Properties -->
-                ${isUnverified ? `
-                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                    <div class="flex items-start">
-                        <span class="text-red-600 text-xl mr-3">⚠️</span>
-                        <div>
-                            <h4 class="font-semibold text-red-800 mb-2">Unverified Property Information</h4>
-                            <div class="text-sm text-red-700 space-y-1">
-                                <p>• This property was submitted by community members, not the landlord</p>
-                                <p>• Property details may be inaccurate or outdated</p>
-                                <p>• Always verify information independently before making decisions</p>
-                                <p>• Contact the property directly to confirm availability and details</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                ` : ''}
-                
-                <!-- Rest of property details... -->
-                <div class="grid grid-cols-3 gap-4 mb-6">
-                    <div class="text-center p-4 bg-gray-50 rounded-lg">
-                        <div class="text-2xl font-bold text-gray-900">${property.bedrooms || 0}</div>
-                        <div class="text-sm text-gray-600">Bedrooms</div>
-                    </div>
-                    <div class="text-center p-4 bg-gray-50 rounded-lg">
-                        <div class="text-2xl font-bold text-gray-900">${property.bathrooms || 0}</div>
-                        <div class="text-sm text-gray-600">Bathrooms</div>
-                    </div>
-                    <div class="text-center p-4 bg-gray-50 rounded-lg">
-                        <div class="text-2xl font-bold text-gray-900">${property.square_feet || 'N/A'}</div>
-                        <div class="text-sm text-gray-600">Sq Ft</div>
-                    </div>
-                </div>
-                
-                <!-- Description -->
-                <div class="mb-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">Description</h3>
-                    <p class="text-gray-700">${property.description?.replace('[Community-Submitted Property - Unverified by Landlord]', '') || 'No description available'}</p>
-                </div>
-                
-                <!-- Data Source Attribution -->
-                ${isUnverified ? `
-                <div class="mb-6 text-xs text-gray-500 border-t pt-4">
-                    <p><strong>Data Source:</strong> Community-submitted from public rental listings</p>
-                    <p><strong>Last Updated:</strong> ${new Date(property.created_at || Date.now()).toLocaleDateString()}</p>
-                    <p><strong>Accuracy:</strong> Not verified by property owner/manager</p>
-                </div>
-                ` : ''}
-                
-                <!-- Action Buttons -->
-                <div class="flex gap-4">
-                    ${isUnverified ? `
-                        <button class="flex-1 bg-yellow-600 text-white py-3 rounded-lg font-semibold hover:bg-yellow-700 transition-colors" 
-                                onclick="alert('Please verify this property information independently before writing a review.')">
-                            ⚠️ Verify Before Reviewing
-                        </button>
-                    ` : `
-                        <button class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors" 
-                                onclick="window.location.href='./write-review.html?property=${encodeURIComponent(JSON.stringify(property))}'">
-                            Write a Review
-                        </button>
-                    `}
-                    <button class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
-                            onclick="this.closest('.fixed').remove()">
-                        Close
+                <div class="absolute top-4 right-4">
+                    <button class="bg-white bg-opacity-20 p-2 rounded-full hover:bg-opacity-30 transition-colors">
+                        <span class="text-white">❤️</span>
                     </button>
                 </div>
-            </div>
-        </div>
-    `;
-    
-    modalOverlay.appendChild(modalContent);
-    document.body.appendChild(modalOverlay);
-    
-    // Close modal when clicking overlay
-    modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) {
-            modalOverlay.remove();
-        }
-    });
-}
-        
-        <!-- Property Info -->
-        <div class="p-6">
-            <div class="flex justify-between items-start mb-3">
-                <div>
-                    <h3 class="font-bold text-lg text-gray-900 property-address"></h3>
-                    <p class="text-gray-600 property-location"></p>
+                <div class="absolute bottom-4 left-4 text-white">
+                    <div class="flex items-center space-x-1 rating-stars text-yellow-300">
+                        <span>⭐⭐⭐⭐⭐</span>
+                        <span class="text-sm">(4.8)</span>
+                    </div>
+                    <div class="review-count text-xs text-white/80 mt-1"></div>
                 </div>
             </div>
             
-            <p class="text-gray-700 text-sm mb-4 property-description"></p>
-            
-            <!-- Property Details -->
-            <div class="flex justify-between items-center mb-4">
-                <div class="flex space-x-4 text-sm text-gray-600">
-                    <div class="flex items-center">
-                        <span class="mr-1">🛏️</span>
-                        <span class="property-bedrooms"></span>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="mr-1">🚿</span>
-                        <span class="property-bathrooms"></span>
-                    </div>
-                    <div class="flex items-center">
-                        <span class="mr-1">📐</span>
-                        <span class="property-sqft"></span>
+            <!-- Property Info -->
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <h3 class="font-bold text-lg text-gray-900 property-address"></h3>
+                        <p class="text-gray-600 property-location"></p>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Review Summary -->
-            <div class="bg-gray-50 p-3 rounded-lg mb-4">
-                <div class="flex items-center justify-between">
-                    <div class="rating-stars text-yellow-400 text-sm">
-                        <!-- Will be filled by JavaScript -->
-                    </div>
-                    <div class="review-count text-sm text-gray-600">
-                        <!-- Will be filled by JavaScript -->
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Landlord Info -->
-            <div class="border-t pt-4">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
-                            <span class="text-white text-sm font-bold landlord-initial"></span>
+                
+                <p class="text-gray-700 text-sm mb-4 property-description"></p>
+                
+                <!-- Property Details -->
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex space-x-4 text-sm text-gray-600">
+                        <div class="flex items-center">
+                            <span class="mr-1">🛏️</span>
+                            <span class="property-bedrooms"></span>
                         </div>
-                        <div class="ml-3">
-                            <p class="text-sm font-medium text-gray-900 landlord-name"></p>
-                            <p class="text-xs text-gray-500">Verified Landlord</p>
+                        <div class="flex items-center">
+                            <span class="mr-1">🚿</span>
+                            <span class="property-bathrooms"></span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="mr-1">📐</span>
+                            <span class="property-sqft"></span>
                         </div>
                     </div>
-                    <div class="button-container flex">
-                        <button class="view-details-btn bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
-                            View Details
-                        </button>
-                        <!-- Write Review button will be added by JavaScript -->
+                </div>
+                
+                <!-- Review Summary -->
+                <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                    <div class="flex items-center justify-between">
+                        <div class="rating-stars text-yellow-400 text-sm">
+                            <!-- Will be filled by JavaScript -->
+                        </div>
+                        <div class="review-count text-sm text-gray-600">
+                            <!-- Will be filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Landlord Info -->
+                <div class="border-t pt-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
+                                <span class="text-white text-sm font-bold landlord-initial"></span>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900 landlord-name"></p>
+                                <p class="text-xs text-gray-500">Verified Landlord</p>
+                            </div>
+                        </div>
+                        <div class="button-container flex">
+                            <button class="view-details-btn bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+                                View Details
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</template>
+    </template>
 
     <script>
-        function showClaimModal(property) {
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
-    
-    modal.innerHTML = `
-        <div class="bg-white rounded-2xl max-w-md w-full p-6">
-            <div class="text-center mb-6">
-                <div class="text-4xl mb-4">🏠</div>
-                <h2 class="text-xl font-bold text-gray-900">Claim This Property</h2>
-                <p class="text-gray-600 mt-2">Are you the owner or manager of this property?</p>
-            </div>
-            
-            <div class="bg-gray-50 p-4 rounded-lg mb-6">
-                <h3 class="font-medium text-gray-900">${property.address}</h3>
-                <p class="text-sm text-gray-600">${property.city}, ${property.state} ${property.zip_code}</p>
-            </div>
-            
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Verification Details
-                </label>
-                <textarea id="claimDetails" rows="3" 
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                          placeholder="Please provide any details that prove you manage this property (lease agreements, utility bills, property management license, etc.)"></textarea>
-            </div>
-            
-            <div class="text-xs text-gray-500 mb-6">
-                By claiming this property, you confirm that you are the legal owner or authorized manager. 
-                False claims may result in account suspension.
-            </div>
-            
-            <div class="flex space-x-3">
-                <button onclick="this.closest('.fixed').remove()" 
-                        class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300">
-                    Cancel
-                </button>
-                <button onclick="submitPropertyClaim(${property.id}, document.getElementById('claimDetails').value, this)" 
-                        class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700">
-                    Submit Claim
-                </button>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-}
-
-async function submitPropertyClaim(propertyId, details, legalConfirmation, button) {
-    if (!details.trim()) {
-        alert('Please provide documentation details.');
-        return;
-    }
-    
-    if (!legalConfirmation) {
-        alert('You must confirm the legal statement to proceed.');
-        return;
-    }
-    
-    button.textContent = 'Submitting...';
-    button.disabled = true;
-    
-    try {
-        // Store claims with enhanced verification data
-        const claims = JSON.parse(localStorage.getItem('property_claims') || '[]');
-        const newClaim = {
-            id: Date.now(),
-            propertyId: propertyId,
-            userId: JSON.parse(localStorage.getItem('rentreviews_user')).id,
-            userEmail: JSON.parse(localStorage.getItem('rentreviews_user')).email,
-            documentationDetails: details,
-            legalConfirmation: true,
-            status: 'pending_documentation',
-            submittedAt: new Date().toISOString(),
-            reviewRequired: true
-        };
-        
-        claims.push(newClaim);
-        localStorage.setItem('property_claims', JSON.stringify(claims));
-        
-        // Close modal and show success
-        button.closest('.fixed').remove();
-        
-        showClaimSuccessMessage();
-        
-    } catch (error) {
-        console.error('Error submitting claim:', error);
-        alert('Error submitting claim. Please try again.');
-        button.textContent = 'Submit Claim';
-        button.disabled = false;
-    }
-}
-
-function showClaimSuccessMessage() {
-    const successModal = document.createElement('div');
-    successModal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
-    
-    successModal.innerHTML = `
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 text-center">
-            <div class="text-4xl mb-4">✅</div>
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Claim Submitted!</h2>
-            <p class="text-gray-600 mb-6">
-                Your property claim has been submitted for review. We'll verify your ownership and 
-                notify you within 1-3 business days.
-            </p>
-            <div class="bg-blue-50 p-4 rounded-lg mb-6">
-                <p class="text-sm text-blue-800">
-                    <strong>Next Steps:</strong> Complete your landlord verification in your dashboard 
-                    to speed up the claim process.
-                </p>
-            </div>
-            <div class="flex space-x-3">
-                <button onclick="this.closest('.fixed').remove()" 
-                        class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg">
-                    Close
-                </button>
-                <button onclick="window.location.href='./verify-landlord.html'" 
-                        class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg">
-                    Verify Account
-                </button>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(successModal);
-}
         // API Configuration
         const API_BASE_URL = 'https://landlord-property-service-production.up.railway.app';
         
@@ -646,110 +334,107 @@ function showClaimSuccessMessage() {
         }
 
         async function loadProperties(append = false) {
-    if (isLoading) return;
-    
-    isLoading = true;
-    
-    if (!append) {
-        showLoadingSkeleton();
-        currentPage = 1;
-    }
+            if (isLoading) return;
+            
+            isLoading = true;
+            
+            if (!append) {
+                showLoadingSkeleton();
+                currentPage = 1;
+            }
 
-    try {
-        // Build query parameters based on current filters
-        const queryParams = new URLSearchParams();
-        
-        // Add pagination
-        queryParams.append('limit', '6');
-        queryParams.append('offset', ((currentPage - 1) * 6).toString());
-        
-        // Add filters if they exist
-        if (currentFilters.location) {
-            // For location, we'll search in city, state, or address
-            // Since the API supports city search, we'll use that
-            queryParams.append('city', currentFilters.location);
-        }
-        
-        if (currentFilters.maxPrice) {
-            queryParams.append('max_rent', currentFilters.maxPrice);
-        }
-        
-        if (currentFilters.bedrooms) {
-            if (currentFilters.bedrooms === '4') {
-                queryParams.append('min_bedrooms', '4');
-            } else {
-                queryParams.append('min_bedrooms', currentFilters.bedrooms);
-                queryParams.append('max_bedrooms', currentFilters.bedrooms);
-            }
-        }
-        
-        const url = `${API_BASE_URL}/properties?${queryParams.toString()}`;
-        console.log('Making request to:', url);
-        
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        console.log('Response status:', response.status);
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('Response data:', data);
-        
-        if (data.success && data.properties) {
-            if (append) {
-                currentProperties = [...currentProperties, ...data.properties];
-            } else {
-                currentProperties = data.properties;
+            try {
+                // Build query parameters based on current filters
+                const queryParams = new URLSearchParams();
+                
+                // Add pagination
+                queryParams.append('limit', '6');
+                queryParams.append('offset', ((currentPage - 1) * 6).toString());
+                
+                // Add filters if they exist
+                if (currentFilters.location) {
+                    queryParams.append('city', currentFilters.location);
+                }
+                
+                if (currentFilters.maxPrice) {
+                    queryParams.append('max_rent', currentFilters.maxPrice);
+                }
+                
+                if (currentFilters.bedrooms) {
+                    if (currentFilters.bedrooms === '4') {
+                        queryParams.append('min_bedrooms', '4');
+                    } else {
+                        queryParams.append('min_bedrooms', currentFilters.bedrooms);
+                        queryParams.append('max_bedrooms', currentFilters.bedrooms);
+                    }
+                }
+                
+                const url = `${API_BASE_URL}/properties?${queryParams.toString()}`;
+                console.log('Making request to:', url);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (data.success && data.properties) {
+                    if (append) {
+                        currentProperties = [...currentProperties, ...data.properties];
+                    } else {
+                        currentProperties = data.properties;
+                    }
+                    
+                    displayProperties(currentProperties, append);
+                    updateResultsCount(data.pagination?.total_count || currentProperties.length);
+                    
+                    // Show/hide load more button
+                    if (data.pagination?.has_next) {
+                        loadMoreBtn.classList.remove('hidden');
+                    } else {
+                        loadMoreBtn.classList.add('hidden');
+                    }
+                } else {
+                    console.log('No properties found or invalid response format');
+                    displayNoResults();
+                }
+            } catch (error) {
+                console.error('Error loading properties:', error);
+                displayError();
             }
             
-            displayProperties(currentProperties, append);
-            updateResultsCount(data.pagination?.total_count || currentProperties.length);
-            
-            // Show/hide load more button
-            if (data.pagination?.has_next) {
-                loadMoreBtn.classList.remove('hidden');
-            } else {
-                loadMoreBtn.classList.add('hidden');
-            }
-        } else {
-            console.log('No properties found or invalid response format');
-            displayNoResults();
+            isLoading = false;
         }
-    } catch (error) {
-        console.error('Error loading properties:', error);
-        displayError();
-    }
-    
-    isLoading = false;
-}
 
-// Also update the handleSearch function to properly set filters:
-function handleSearch() {
-    const location = document.getElementById('locationSearch').value.trim();
-    const maxPrice = document.getElementById('maxPrice').value;
-    const bedrooms = document.getElementById('bedrooms').value;
-    
-    console.log('Search triggered with:', { location, maxPrice, bedrooms });
-    
-    // Update filters - now these will be used in the API call
-    currentFilters = {
-        location: location || null,
-        maxPrice: maxPrice || null,
-        bedrooms: bedrooms || null
-    };
-    
-    console.log('Current filters set to:', currentFilters);
-    
-    updateActiveFilters();
-    loadProperties(); // This will now use the filters in the API call
-}
+        function handleSearch() {
+            const location = document.getElementById('locationSearch').value.trim();
+            const maxPrice = document.getElementById('maxPrice').value;
+            const bedrooms = document.getElementById('bedrooms').value;
+            
+            console.log('Search triggered with:', { location, maxPrice, bedrooms });
+            
+            // Update filters
+            currentFilters = {
+                location: location || null,
+                maxPrice: maxPrice || null,
+                bedrooms: bedrooms || null
+            };
+            
+            console.log('Current filters set to:', currentFilters);
+            
+            updateActiveFilters();
+            loadProperties();
+        }
 
         function showLoadingSkeleton() {
             propertyGrid.innerHTML = '';
@@ -790,288 +475,606 @@ function handleSearch() {
         }
 
         function createPropertyCard(property) {
-    const template = propertyCardTemplate.content.cloneNode(true);
-    
-    // Fill in property data
-    template.querySelector('.price-badge').textContent = `$${property.rent_amount?.toLocaleString() || 'N/A'}`;
-    template.querySelector('.property-address').textContent = property.address || 'Address not available';
-    template.querySelector('.property-location').textContent = `${property.city || ''}, ${property.state || ''} ${property.zip_code || ''}`.trim();
-    template.querySelector('.property-description').textContent = property.description || 'No description available';
-    template.querySelector('.property-bedrooms').textContent = `${property.bedrooms || 0} bed`;
-    template.querySelector('.property-bathrooms').textContent = `${property.bathrooms || 0} bath`;
-    template.querySelector('.property-sqft').textContent = `${property.square_feet || 'N/A'} sqft`;
-    
-    // Enhanced review display
-    const reviewStars = template.querySelector('.rating-stars');
-    const reviewCount = template.querySelector('.review-count');
-    
-    // Mock review data (in real app, this would come from your review service)
-    const mockReviewData = generateMockReviewData(property.id);
-    
-    // Update star rating display
-    const fullStars = Math.floor(mockReviewData.averageRating);
-    const hasHalfStar = mockReviewData.averageRating % 1 >= 0.5;
-    
-    let starsHtml = '';
-    for (let i = 0; i < 5; i++) {
-        if (i < fullStars) {
-            starsHtml += '⭐';
-        } else if (i === fullStars && hasHalfStar) {
-            starsHtml += '⭐'; // You could use a half-star icon here
-        } else {
-            starsHtml += '☆';
-        }
-    }
-    
-    reviewStars.innerHTML = `${starsHtml} <span class="review-rating">(${mockReviewData.averageRating.toFixed(1)})</span>`;
-    
-    // Update review count
-    if (mockReviewData.reviewCount > 0) {
-        reviewCount.textContent = `${mockReviewData.reviewCount} review${mockReviewData.reviewCount !== 1 ? 's' : ''}`;
-        reviewCount.classList.remove('hidden');
-    } else {
-        reviewCount.textContent = 'No reviews yet';
-        reviewCount.classList.add('text-gray-400');
-    }
-    
-    // Landlord info
-    const landlordName = `${property.landlord?.first_name || ''} ${property.landlord?.last_name || 'Unknown'}`.trim();
-    template.querySelector('.landlord-name').textContent = landlordName;
-    template.querySelector('.landlord-initial').textContent = (property.landlord?.first_name || 'U')[0].toUpperCase();
-    
-    // Add review highlight if rating is good
-    const propertyCard = template.querySelector('.property-card');
-    if (mockReviewData.averageRating >= 4.0) {
-        const badge = document.createElement('div');
-        badge.className = 'absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold';
-        badge.textContent = 'Highly Rated';
-        propertyCard.style.position = 'relative';
-        propertyCard.appendChild(badge);
-    }
-    
-    // Enhanced "View Details" button functionality
-    const viewDetailsBtn = template.querySelector('.view-details-btn');
-    if (viewDetailsBtn) {
-        viewDetailsBtn.addEventListener('click', () => {
-            // For now, we'll create a property detail modal
-            showPropertyDetails(property, mockReviewData);
-        });
-    }
-    
-    // Add "Write Review" button
-    const buttonContainer = template.querySelector('.button-container');
-    if (buttonContainer) {
-        const writeReviewBtn = document.createElement('button');
-        writeReviewBtn.className = 'bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors ml-2';
-        writeReviewBtn.textContent = 'Write Review';
-        writeReviewBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            // Redirect to write review page with property pre-filled
-            const propertyData = encodeURIComponent(JSON.stringify({
-                id: property.id,
-                address: property.address,
-                city: property.city,
-                state: property.state,
-                zip_code: property.zip_code,
-                landlord_name: landlordName
-            }));
-            window.location.href = `./write-review.html?property=${propertyData}`;
-        });
-        buttonContainer.appendChild(writeReviewBtn);
-    }
-    
-    return template;
-}
-// Add "Claim Property" button for landlords
-const currentUser = JSON.parse(localStorage.getItem('rentreviews_user') || '{}');
-if (currentUser.role === 'landlord') {
-    // Check if property is community-added (unclaimed)
-    if (!property.landlord_verified || property.description?.includes('[Community Added Property]')) {
-        const claimBtn = document.createElement('button');
-        claimBtn.className = 'bg-orange-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors ml-2';
-        claimBtn.textContent = 'Claim Property';
-        claimBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            showClaimModal(property);
-        });
-        buttonContainer.appendChild(claimBtn);
-    }
-}
-
-// Function to generate mock review data (replace with real API call later)
-function generateMockReviewData(propertyId) {
-    // Simulate different review scenarios based on property ID
-    const scenarios = [
-        { averageRating: 4.8, reviewCount: 12 },
-        { averageRating: 3.2, reviewCount: 7 },
-        { averageRating: 4.5, reviewCount: 23 },
-        { averageRating: 2.1, reviewCount: 4 },
-        { averageRating: 4.0, reviewCount: 8 },
-        { averageRating: 0, reviewCount: 0 } // No reviews
-    ];
-    
-    return scenarios[propertyId % scenarios.length];
-}
-
-// Function to show property details in a modal
-function showPropertyDetails(property, reviewData) {
-    // Create modal overlay
-    const modalOverlay = document.createElement('div');
-    modalOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
-    
-    // Create modal content
-    const modalContent = document.createElement('div');
-    modalContent.className = 'bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto';
-    
-    modalContent.innerHTML = `
-        <div class="relative">
-            <!-- Header -->
-            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-t-2xl">
-                <button class="absolute top-4 right-4 text-white hover:text-gray-200" onclick="this.closest('.fixed').remove()">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-                <h2 class="text-2xl font-bold text-white">${property.address}</h2>
-                <p class="text-indigo-100">${property.city}, ${property.state} ${property.zip_code}</p>
-                <div class="mt-4 flex items-center">
-                    <span class="bg-white text-indigo-600 px-3 py-1 rounded-full font-bold text-lg">
-                        $${property.rent_amount?.toLocaleString() || 'N/A'}
-                    </span>
-                    <div class="ml-4 text-white">
-                        ${reviewData.averageRating > 0 ? 
-                            `<div class="flex items-center">
-                                <span class="text-yellow-300">⭐⭐⭐⭐⭐</span>
-                                <span class="ml-2">${reviewData.averageRating.toFixed(1)} (${reviewData.reviewCount} reviews)</span>
-                            </div>` :
-                            '<span class="text-indigo-200">No reviews yet</span>'
-                        }
-                    </div>
-                </div>
-            </div>
+            const template = propertyCardTemplate.content.cloneNode(true);
             
-            <!-- Content -->
-            <div class="p-6">
-                <!-- Property Details -->
-                <div class="grid grid-cols-3 gap-4 mb-6">
-                    <div class="text-center p-4 bg-gray-50 rounded-lg">
-                        <div class="text-2xl font-bold text-gray-900">${property.bedrooms || 0}</div>
-                        <div class="text-sm text-gray-600">Bedrooms</div>
-                    </div>
-                    <div class="text-center p-4 bg-gray-50 rounded-lg">
-                        <div class="text-2xl font-bold text-gray-900">${property.bathrooms || 0}</div>
-                        <div class="text-sm text-gray-600">Bathrooms</div>
-                    </div>
-                    <div class="text-center p-4 bg-gray-50 rounded-lg">
-                        <div class="text-2xl font-bold text-gray-900">${property.square_feet || 'N/A'}</div>
-                        <div class="text-sm text-gray-600">Sq Ft</div>
-                    </div>
-                </div>
-                
-                <!-- Description -->
-                <div class="mb-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">Description</h3>
-                    <p class="text-gray-700">${property.description || 'No description available'}</p>
-                </div>
-                
-                <!-- Landlord -->
-                <div class="mb-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-2">Landlord</h3>
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center">
-                            <span class="text-white font-bold">${(property.landlord?.first_name || 'U')[0].toUpperCase()}</span>
-                        </div>
-                        <div class="ml-3">
-                            <p class="font-medium text-gray-900">${property.landlord?.first_name || ''} ${property.landlord?.last_name || 'Unknown'}</p>
-                            <p class="text-sm text-gray-500">Verified Landlord</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Reviews Section -->
-                <div class="mb-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Recent Reviews</h3>
-                    ${reviewData.reviewCount > 0 ? generateMockReviews(reviewData.reviewCount) : 
-                        '<p class="text-gray-500 text-center py-8">No reviews yet. Be the first to share your experience!</p>'
-                    }
-                </div>
-                
-                <!-- Action Buttons -->
-                <div class="flex gap-4">
-                    <button class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors" 
-                            onclick="window.location.href='./write-review.html?property=${encodeURIComponent(JSON.stringify({
+            // Fill in property data
+            template.querySelector('.price-badge').textContent = `$${property.rent_amount?.toLocaleString() || 'N/A'}`;
+            template.querySelector('.property-address').textContent = property.address || 'Address not available';
+            template.querySelector('.property-location').textContent = `${property.city || ''}, ${property.state || ''} ${property.zip_code || ''}`.trim();
+            
+            // Clean description and check for community-submitted status
+            let cleanDescription = property.description || 'No description available';
+            const isCommunitySubmitted = cleanDescription.includes('[Community-Submitted Property - Unverified by Landlord]');
+            
+            if (isCommunitySubmitted) {
+                cleanDescription = cleanDescription.replace('[Community-Submitted Property - Unverified by Landlord]', '').trim();
+            }
+            
+            template.querySelector('.property-description').textContent = cleanDescription;
+            template.querySelector('.property-bedrooms').textContent = `${property.bedrooms || 0} bed`;
+            template.querySelector('.property-bathrooms').textContent = `${property.bathrooms || 0} bath`;
+            template.querySelector('.property-sqft').textContent = `${property.square_feet || 'N/A'} sqft`;
+            
+            // Enhanced review display
+            const reviewStars = template.querySelector('.rating-stars');
+            const reviewCount = template.querySelector('.review-count');
+            
+            // Mock review data (in real app, this would come from your review service)
+            const mockReviewData = generateMockReviewData(property.id);
+            
+            // Update star rating display
+            const fullStars = Math.floor(mockReviewData.averageRating);
+            const hasHalfStar = mockReviewData.averageRating % 1 >= 0.5;
+            
+            let starsHtml = '';
+            for (let i = 0; i < 5; i++) {
+                if (i < fullStars) {
+                    starsHtml += '★';
+                } else if (i === fullStars && hasHalfStar) {
+                    starsHtml += '★';
+                } else {
+                    starsHtml += '☆';
+                }
+            }
+            
+            reviewStars.innerHTML = `${starsHtml} <span class="review-rating">(${mockReviewData.averageRating.toFixed(1)})</span>`;
+            
+            // Update review count
+            if (mockReviewData.reviewCount > 0) {
+                reviewCount.textContent = `${mockReviewData.reviewCount} review${mockReviewData.reviewCount !== 1 ? 's' : ''}`;
+                reviewCount.classList.remove('hidden');
+            } else {
+                reviewCount.textContent = 'No reviews yet';
+                reviewCount.classList.add('text-gray-400');
+            }
+            
+            // Landlord info
+            const landlordName = `${property.landlord?.first_name || ''} ${property.landlord?.last_name || 'Unknown'}`.trim();
+            template.querySelector('.landlord-name').textContent = landlordName;
+            template.querySelector('.landlord-initial').textContent = (property.landlord?.first_name || 'U')[0].toUpperCase();
+            
+            // Get the property card element
+            const propertyCard = template.querySelector('.property-card');
+            
+            // Add verification status badge
+            addPropertyStatusBadge(property, propertyCard, isCommunitySubmitted);
+            
+            // Add review highlight if rating is good
+            if (mockReviewData.averageRating >= 4.0) {
+                const badge = document.createElement('div');
+                badge.className = 'absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold z-10';
+                badge.textContent = 'Highly Rated';
+                propertyCard.style.position = 'relative';
+                propertyCard.appendChild(badge);
+            }
+            
+            // Enhanced "View Details" button functionality
+            const viewDetailsBtn = template.querySelector('.view-details-btn');
+            if (viewDetailsBtn) {
+                viewDetailsBtn.addEventListener('click', () => {
+                    showPropertyDetailsWithDisclaimer(property, mockReviewData);
+                });
+            }
+            
+            // Add action buttons based on user role and property status
+            const buttonContainer = template.querySelector('.button-container');
+            if (buttonContainer) {
+                // Write Review button with appropriate warning for unverified properties
+                const writeReviewBtn = document.createElement('button');
+                if (isCommunitySubmitted) {
+                    writeReviewBtn.className = 'bg-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors ml-2';
+                    writeReviewBtn.textContent = '⚠️ Review (Unverified)';
+                    writeReviewBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const confirmReview = confirm('This property is community-submitted and unverified. Please verify property details independently before writing a review. Continue?');
+                        if (confirmReview) {
+                            const propertyData = encodeURIComponent(JSON.stringify({
                                 id: property.id,
                                 address: property.address,
                                 city: property.city,
                                 state: property.state,
                                 zip_code: property.zip_code,
-                                landlord_name: '${property.landlord?.first_name || ','} ${property.landlord?.last_name || ':'}'
-                            }))}'">
-                        Write a Review
-                    </button>
-                    <button class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
-                            onclick="this.closest('.fixed').remove()">
-                        Close
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    modalOverlay.appendChild(modalContent);
-    document.body.appendChild(modalOverlay);
-    
-    // Close modal when clicking overlay
-    modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) {
-            modalOverlay.remove();
+                                landlord_name: landlordName,
+                                unverified: true
+                            }));
+                            window.location.href = `./write-review.html?property=${propertyData}`;
+                        }
+                    });
+                } else {
+                    writeReviewBtn.className = 'bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors ml-2';
+                    writeReviewBtn.textContent = 'Write Review';
+                    writeReviewBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const propertyData = encodeURIComponent(JSON.stringify({
+                            id: property.id,
+                            address: property.address,
+                            city: property.city,
+                            state: property.state,
+                            zip_code: property.zip_code,
+                            landlord_name: landlordName
+                        }));
+                        window.location.href = `./write-review.html?property=${propertyData}`;
+                    });
+                }
+                buttonContainer.appendChild(writeReviewBtn);
+                
+                // Add "Claim Property" button for landlords on unverified properties
+                const currentUser = JSON.parse(localStorage.getItem('rentreviews_user') || '{}');
+                if (currentUser.role === 'landlord' && isCommunitySubmitted) {
+                    const claimBtn = document.createElement('button');
+                    claimBtn.className = 'bg-orange-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors ml-2';
+                    claimBtn.textContent = 'Claim Property';
+                    claimBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        showClaimModal(property);
+                    });
+                    buttonContainer.appendChild(claimBtn);
+                }
+            }
+            
+            // Add disclaimer for community-submitted properties
+            if (isCommunitySubmitted) {
+                addPropertyDisclaimer(property, propertyCard);
+            }
+            
+            return template;
         }
-    });
-}
 
-// Generate mock reviews for display
-function generateMockReviews(count) {
-    const mockReviews = [
-        {
-            name: "Sarah M.",
-            rating: 5,
-            date: "2 weeks ago",
-            text: "Amazing property! The landlord is very responsive and the apartment is exactly as described. Highly recommend!"
-        },
-        {
-            name: "Mike R.",
-            rating: 4,
-            date: "1 month ago", 
-            text: "Great location and fair rent. Had a small maintenance issue that was fixed quickly."
-        },
-        {
-            name: "Jessica L.",
-            rating: 5,
-            date: "2 months ago",
-            text: "Beautiful apartment in a quiet neighborhood. Landlord is professional and respectful."
+        function addPropertyStatusBadge(property, propertyCard, isCommunitySubmitted) {
+            const badgeContainer = document.createElement('div');
+            badgeContainer.className = 'absolute top-2 left-2 z-10';
+            
+            let badgeHTML = '';
+            
+            if (isCommunitySubmitted) {
+                badgeHTML = `
+                    <div class="bg-orange-100 border border-orange-300 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
+                        📍 Community-Submitted
+                    </div>
+                `;
+            } else if (property.landlord_verified) {
+                badgeHTML = `
+                    <div class="bg-green-100 border border-green-300 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+                        ✅ Verified Landlord
+                    </div>
+                `;
+            } else {
+                badgeHTML = `
+                    <div class="bg-gray-100 border border-gray-300 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">
+                        ⏳ Pending Verification
+                    </div>
+                `;
+            }
+            
+            badgeContainer.innerHTML = badgeHTML;
+            
+            // Add to property card
+            propertyCard.style.position = 'relative';
+            propertyCard.appendChild(badgeContainer);
         }
-    ];
-    
-    return mockReviews.slice(0, Math.min(count, 3)).map(review => `
-        <div class="border-b border-gray-200 pb-4 mb-4 last:border-b-0">
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center">
-                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                        <span class="text-sm font-bold">${review.name[0]}</span>
-                    </div>
-                    <div class="ml-3">
-                        <p class="font-medium text-gray-900">${review.name}</p>
-                        <p class="text-sm text-gray-500">${review.date}</p>
+
+        function addPropertyDisclaimer(property, propertyCard) {
+            const disclaimerDiv = document.createElement('div');
+            disclaimerDiv.className = 'bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-4';
+            disclaimerDiv.innerHTML = `
+                <div class="flex items-start">
+                    <span class="text-yellow-600 text-sm mr-2">⚠️</span>
+                    <div class="text-xs text-yellow-800">
+                        <strong>Community-Submitted Property:</strong> This property information was submitted by the community 
+                        and has not been verified by the landlord. Data accuracy cannot be guaranteed. 
+                        Please verify all details independently before making rental decisions.
                     </div>
                 </div>
-                <div class="text-yellow-400">
-                    ${'⭐'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+            `;
+            
+            // Add to property card content area
+            const cardContent = propertyCard.querySelector('.p-6');
+            if (cardContent) {
+                cardContent.appendChild(disclaimerDiv);
+            }
+        }
+
+        function showPropertyDetailsWithDisclaimer(property, reviewData) {
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            
+            const isCommunitySubmitted = property.description?.includes('[Community-Submitted Property - Unverified by Landlord]');
+            
+            const modalContent = document.createElement('div');
+            modalContent.className = 'bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto';
+            
+            modalContent.innerHTML = `
+                <div class="relative">
+                    <!-- Header with Status Badge -->
+                    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-t-2xl">
+                        <button class="absolute top-4 right-4 text-white hover:text-gray-200" onclick="this.closest('.fixed').remove()">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                        
+                        ${isCommunitySubmitted ? `
+                        <div class="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-medium mb-3 inline-block">
+                            📍 Community-Submitted - Unverified
+                        </div>
+                        ` : ''}
+                        
+                        <h2 class="text-2xl font-bold text-white">${property.address}</h2>
+                        <p class="text-indigo-100">${property.city}, ${property.state} ${property.zip_code}</p>
+                        
+                        <div class="mt-4 flex items-center">
+                            <span class="bg-white text-indigo-600 px-3 py-1 rounded-full font-bold text-lg">
+                                ${property.rent_amount?.toLocaleString() || 'N/A'}
+                            </span>
+                            <div class="ml-4 text-white">
+                                ${reviewData.averageRating > 0 ? 
+                                    `<div class="flex items-center">
+                                        <span class="text-yellow-300">★★★★★</span>
+                                        <span class="ml-2">${reviewData.averageRating.toFixed(1)} (${reviewData.reviewCount} reviews)</span>
+                                    </div>` :
+                                    '<span class="text-indigo-200">No reviews yet</span>'
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="p-6">
+                        <!-- Legal Disclaimer for Unverified Properties -->
+                        ${isCommunitySubmitted ? `
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                            <div class="flex items-start">
+                                <span class="text-red-600 text-xl mr-3">⚠️</span>
+                                <div>
+                                    <h4 class="font-semibold text-red-800 mb-2">Unverified Property Information</h4>
+                                    <div class="text-sm text-red-700 space-y-1">
+                                        <p>• This property was submitted by community members, not the landlord</p>
+                                        <p>• Property details may be inaccurate or outdated</p>
+                                        <p>• Always verify information independently before making decisions</p>
+                                        <p>• Contact the property directly to confirm availability and details</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Property Details -->
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <div class="text-2xl font-bold text-gray-900">${property.bedrooms || 0}</div>
+                                <div class="text-sm text-gray-600">Bedrooms</div>
+                            </div>
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <div class="text-2xl font-bold text-gray-900">${property.bathrooms || 0}</div>
+                                <div class="text-sm text-gray-600">Bathrooms</div>
+                            </div>
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <div class="text-2xl font-bold text-gray-900">${property.square_feet || 'N/A'}</div>
+                                <div class="text-sm text-gray-600">Sq Ft</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold text-gray-900 mb-2">Description</h3>
+                            <p class="text-gray-700">${property.description?.replace('[Community-Submitted Property - Unverified by Landlord]', '').trim() || 'No description available'}</p>
+                        </div>
+                        
+                        <!-- Landlord Info -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold text-gray-900 mb-2">Landlord</h3>
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-bold">${(property.landlord?.first_name || 'U')[0].toUpperCase()}</span>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="font-medium text-gray-900">${property.landlord?.first_name || ''} ${property.landlord?.last_name || 'Unknown'}</p>
+                                    <p class="text-sm text-gray-500">${property.landlord_verified ? 'Verified Landlord' : 'Pending Verification'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Data Source Attribution for Community Properties -->
+                        ${isCommunitySubmitted ? `
+                        <div class="mb-6 text-xs text-gray-500 border-t pt-4">
+                            <p><strong>Data Source:</strong> Community-submitted from public rental listings</p>
+                            <p><strong>Last Updated:</strong> ${new Date(property.created_at || Date.now()).toLocaleDateString()}</p>
+                            <p><strong>Accuracy:</strong> Not verified by property owner/manager</p>
+                        </div>
+                        ` : ''}
+                        
+                        <!-- Reviews Section -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Recent Reviews</h3>
+                            ${reviewData.reviewCount > 0 ? generateMockReviews(reviewData.reviewCount) : 
+                                '<p class="text-gray-500 text-center py-8">No reviews yet. Be the first to share your experience!</p>'
+                            }
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="flex gap-4">
+                            ${isCommunitySubmitted ? `
+                                <button class="flex-1 bg-yellow-600 text-white py-3 rounded-lg font-semibold hover:bg-yellow-700 transition-colors" 
+                                        onclick="showUnverifiedReviewWarning('${encodeURIComponent(JSON.stringify({
+                                            id: property.id,
+                                            address: property.address,
+                                            city: property.city,
+                                            state: property.state,
+                                            zip_code: property.zip_code,
+                                            landlord_name: `${property.landlord?.first_name || ''} ${property.landlord?.last_name || ''}`,
+                                            unverified: true
+                                        }))}')">
+                                    ⚠️ Verify Before Reviewing
+                                </button>
+                            ` : `
+                                <button class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors" 
+                                        onclick="window.location.href='./write-review.html?property=${encodeURIComponent(JSON.stringify({
+                                            id: property.id,
+                                            address: property.address,
+                                            city: property.city,
+                                            state: property.state,
+                                            zip_code: property.zip_code,
+                                            landlord_name: `${property.landlord?.first_name || ''} ${property.landlord?.last_name || ''}`
+                                        }))}'">
+                                    Write a Review
+                                </button>
+                            `}
+                            <button class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
+                                    onclick="this.closest('.fixed').remove()">
+                                Close
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <p class="text-gray-700">${review.text}</p>
-        </div>
-    `).join('');
-}
+            `;
+            
+            modalOverlay.appendChild(modalContent);
+            document.body.appendChild(modalOverlay);
+            
+            // Close modal when clicking overlay
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    modalOverlay.remove();
+                }
+            });
+        }
+
+        function showUnverifiedReviewWarning(propertyDataEncoded) {
+            const warningModal = document.createElement('div');
+            warningModal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            
+            warningModal.innerHTML = `
+                <div class="bg-white rounded-2xl max-w-md w-full p-6">
+                    <div class="text-center mb-6">
+                        <div class="text-4xl mb-4">⚠️</div>
+                        <h2 class="text-xl font-bold text-gray-900">Review Unverified Property</h2>
+                        <p class="text-gray-600 mt-2">This property information hasn't been verified by the landlord</p>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <h3 class="font-semibold text-yellow-800 mb-2">Before writing a review:</h3>
+                        <div class="text-sm text-yellow-700 space-y-1">
+                            <p>• Verify the property address and details independently</p>
+                            <p>• Confirm you actually lived at this exact property</p>
+                            <p>• Ensure the landlord information is accurate</p>
+                            <p>• Be aware that property details may be outdated</p>
+                        </div>
+                    </div>
+                    
+                    <div class="text-xs text-gray-500 mb-6">
+                        By proceeding, you confirm that you have independently verified this property 
+                        information and that your review is based on your actual rental experience.
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button onclick="this.closest('.fixed').remove()" 
+                                class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300">
+                            Cancel
+                        </button>
+                        <button onclick="proceedToReview('${propertyDataEncoded}', this)" 
+                                class="flex-1 bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700">
+                            I Understand - Continue
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(warningModal);
+        }
+
+        function proceedToReview(propertyDataEncoded, button) {
+            button.closest('.fixed').remove();
+            window.location.href = `./write-review.html?property=${propertyDataEncoded}`;
+        }
+
+        function showClaimModal(property) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl max-w-md w-full p-6">
+                    <div class="text-center mb-6">
+                        <div class="text-4xl mb-4">🏠</div>
+                        <h2 class="text-xl font-bold text-gray-900">Claim This Property</h2>
+                        <p class="text-gray-600 mt-2">Are you the owner or manager of this property?</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                        <h3 class="font-medium text-gray-900">${property.address}</h3>
+                        <p class="text-sm text-gray-600">${property.city}, ${property.state} ${property.zip_code}</p>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Verification Details
+                        </label>
+                        <textarea id="claimDetails" rows="3" 
+                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                  placeholder="Please provide any details that prove you manage this property (lease agreements, utility bills, property management license, etc.)"></textarea>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="flex items-start space-x-3 cursor-pointer">
+                            <input type="checkbox" id="legalConfirmation" required class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1">
+                            <div class="text-xs text-gray-700">
+                                I confirm under penalty of perjury that I am the legal owner or authorized manager of this property. 
+                                I understand that false claims may result in account suspension.
+                            </div>
+                        </label>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button onclick="this.closest('.fixed').remove()" 
+                                class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300">
+                            Cancel
+                        </button>
+                        <button onclick="submitPropertyClaim(${property.id}, document.getElementById('claimDetails').value, document.getElementById('legalConfirmation').checked, this)" 
+                                class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700">
+                            Submit Claim
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        async function submitPropertyClaim(propertyId, details, legalConfirmation, button) {
+            if (!details.trim()) {
+                alert('Please provide documentation details.');
+                return;
+            }
+            
+            if (!legalConfirmation) {
+                alert('You must confirm the legal statement to proceed.');
+                return;
+            }
+            
+            button.textContent = 'Submitting...';
+            button.disabled = true;
+            
+            try {
+                // Store claims with enhanced verification data
+                const claims = JSON.parse(localStorage.getItem('property_claims') || '[]');
+                const newClaim = {
+                    id: Date.now(),
+                    propertyId: propertyId,
+                    userId: JSON.parse(localStorage.getItem('rentreviews_user')).id,
+                    userEmail: JSON.parse(localStorage.getItem('rentreviews_user')).email,
+                    documentationDetails: details,
+                    legalConfirmation: true,
+                    status: 'pending_documentation',
+                    submittedAt: new Date().toISOString(),
+                    reviewRequired: true
+                };
+                
+                claims.push(newClaim);
+                localStorage.setItem('property_claims', JSON.stringify(claims));
+                
+                // Close modal and show success
+                button.closest('.fixed').remove();
+                
+                showClaimSuccessMessage();
+                
+            } catch (error) {
+                console.error('Error submitting claim:', error);
+                alert('Error submitting claim. Please try again.');
+                button.textContent = 'Submit Claim';
+                button.disabled = false;
+            }
+        }
+
+        function showClaimSuccessMessage() {
+            const successModal = document.createElement('div');
+            successModal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
+            
+            successModal.innerHTML = `
+                <div class="bg-white rounded-2xl max-w-md w-full p-6 text-center">
+                    <div class="text-4xl mb-4">✅</div>
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Claim Submitted!</h2>
+                    <p class="text-gray-600 mb-6">
+                        Your property claim has been submitted for review. We'll verify your ownership and 
+                        notify you within 1-3 business days.
+                    </p>
+                    <div class="bg-blue-50 p-4 rounded-lg mb-6">
+                        <p class="text-sm text-blue-800">
+                            <strong>Next Steps:</strong> Complete your landlord verification in your dashboard 
+                            to speed up the claim process.
+                        </p>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="this.closest('.fixed').remove()" 
+                                class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg">
+                            Close
+                        </button>
+                        <button onclick="window.location.href='./verify-landlord.html'" 
+                                class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg">
+                            Verify Account
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(successModal);
+        }
+
+        // Function to generate mock review data
+        function generateMockReviewData(propertyId) {
+            const scenarios = [
+                { averageRating: 4.8, reviewCount: 12 },
+                { averageRating: 3.2, reviewCount: 7 },
+                { averageRating: 4.5, reviewCount: 23 },
+                { averageRating: 2.1, reviewCount: 4 },
+                { averageRating: 4.0, reviewCount: 8 },
+                { averageRating: 0, reviewCount: 0 }
+            ];
+            
+            return scenarios[propertyId % scenarios.length];
+        }
+
+        // Generate mock reviews for display
+        function generateMockReviews(count) {
+            const mockReviews = [
+                {
+                    name: "Sarah M.",
+                    rating: 5,
+                    date: "2 weeks ago",
+                    text: "Amazing property! The landlord is very responsive and the apartment is exactly as described. Highly recommend!"
+                },
+                {
+                    name: "Mike R.",
+                    rating: 4,
+                    date: "1 month ago", 
+                    text: "Great location and fair rent. Had a small maintenance issue that was fixed quickly."
+                },
+                {
+                    name: "Jessica L.",
+                    rating: 5,
+                    date: "2 months ago",
+                    text: "Beautiful apartment in a quiet neighborhood. Landlord is professional and respectful."
+                }
+            ];
+            
+            return mockReviews.slice(0, Math.min(count, 3)).map(review => `
+                <div class="border-b border-gray-200 pb-4 mb-4 last:border-b-0">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                                <span class="text-sm font-bold">${review.name[0]}</span>
+                            </div>
+                            <div class="ml-3">
+                                <p class="font-medium text-gray-900">${review.name}</p>
+                                <p class="text-sm text-gray-500">${review.date}</p>
+                            </div>
+                        </div>
+                        <div class="text-yellow-400">
+                            ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+                        </div>
+                    </div>
+                    <p class="text-gray-700">${review.text}</p>
+                </div>
+            `).join('');
+        }
 
         function updateResultsCount(count) {
             resultsCount.textContent = `Found ${count} properties`;
@@ -1098,22 +1101,6 @@ function generateMockReviews(count) {
                     </button>
                 </div>
             `;
-        }
-
-        function handleSearch() {
-            const location = document.getElementById('locationSearch').value;
-            const maxPrice = document.getElementById('maxPrice').value;
-            const bedrooms = document.getElementById('bedrooms').value;
-            
-            // Update filters
-            currentFilters = {
-                location: location || null,
-                maxPrice: maxPrice || null,
-                bedrooms: bedrooms || null
-            };
-            
-            updateActiveFilters();
-            loadProperties(); // This will be enhanced to use filters in a real implementation
         }
 
         function updateActiveFilters() {
@@ -1160,7 +1147,6 @@ function generateMockReviews(count) {
 
         function handleSort() {
             const sortBy = document.getElementById('sortBy').value;
-            // Sort current properties (in a real app, this would be handled by the backend)
             currentProperties.sort((a, b) => {
                 switch (sortBy) {
                     case 'price_low':
@@ -1179,6 +1165,12 @@ function generateMockReviews(count) {
             currentPage++;
             loadProperties(true);
         }
+
+        // Make functions globally available
+        window.showUnverifiedReviewWarning = showUnverifiedReviewWarning;
+        window.proceedToReview = proceedToReview;
+        window.showClaimModal = showClaimModal;
+        window.submitPropertyClaim = submitPropertyClaim;
 
         // Security warning
         console.warn(
