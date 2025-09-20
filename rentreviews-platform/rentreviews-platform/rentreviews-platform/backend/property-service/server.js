@@ -130,7 +130,10 @@ const createPropertySchema = Joi.object({
   bedrooms: Joi.number().integer().min(0).max(20),
   bathrooms: Joi.number().positive().precision(1).max(20),
   square_feet: Joi.number().integer().positive().max(50000),
-  description: Joi.string().trim().max(2000).allow('').default('')
+  description: Joi.string().trim().max(2000).allow('').default(''),
+  data_source: Joi.string().valid('landlord_submitted', 'community_submitted').default('landlord_submitted'),
+  source_url: Joi.string().uri().allow('').default(''),
+  verification_status: Joi.string().valid('verified', 'community_submitted', 'pending_verification').default('verified')
 });
 
 // Enhanced validation schema for property updates
@@ -160,6 +163,7 @@ const searchPropertiesSchema = Joi.object({
   min_sqft: Joi.number().integer().positive().max(50000),
   max_sqft: Joi.number().integer().positive().max(50000),
   landlord_verified: Joi.boolean(),
+  verification_status: Joi.string().valid('verified', 'community_submitted', 'pending_verification'),
   sort_by: Joi.string().valid('rent_asc', 'rent_desc', 'newest', 'oldest', 'sqft_asc', 'sqft_desc'),
   limit: Joi.number().integer().min(1).max(100).default(20),
   offset: Joi.number().integer().min(0).default(0)
@@ -225,7 +229,7 @@ app.get('/health', async (req, res) => {
       status: 'OK',
       service: 'property-service',
       timestamp: new Date().toISOString(),
-      version: '2.0.0',
+      version: '2.1.0',
       database: 'Connected',
       authentication: 'Enabled'
     });
@@ -240,7 +244,7 @@ app.get('/', (req, res) => {
   res.json({
     message: 'RentReviews Property Service API',
     status: 'running',
-    version: '2.0.0',
+    version: '2.1.0',
     endpoints: {
       health: '/health (GET)',
       'setup-database': '/setup-database (GET)',
@@ -272,9 +276,10 @@ app.get('/test', (req, res) => {
   });
 });
 
-// Database setup endpoint
+// Database setup endpoint - UPDATED with new columns
 app.get('/setup-database', async (req, res) => {
   try {
+    // Create properties table with new tracking columns
     await pool.query(`
       CREATE TABLE IF NOT EXISTS properties (
         id SERIAL PRIMARY KEY,
@@ -289,10 +294,25 @@ app.get('/setup-database', async (req, res) => {
         description TEXT,
         landlord_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
         landlord_verified BOOLEAN DEFAULT FALSE,
+        data_source VARCHAR(50) DEFAULT 'landlord_submitted',
+        source_url TEXT DEFAULT '',
+        verification_status VARCHAR(20) DEFAULT 'verified',
+        last_verified_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
       );
     `);
+
+    // Add new columns if they don't exist (for existing databases)
+    try {
+      await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS data_source VARCHAR(50) DEFAULT 'landlord_submitted';`);
+      await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS source_url TEXT DEFAULT '';`);
+      await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS verification_status VARCHAR(20) DEFAULT 'verified';`);
+      await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS last_verified_at TIMESTAMP;`);
+    } catch (error) {
+      // Columns might already exist, continue
+      console.log('Some columns already exist, continuing...');
+    }
 
     // Create indexes for better performance
     await pool.query(`
@@ -302,12 +322,19 @@ app.get('/setup-database', async (req, res) => {
       CREATE INDEX IF NOT EXISTS idx_properties_landlord_id ON properties(landlord_id);
       CREATE INDEX IF NOT EXISTS idx_properties_rent_amount ON properties(rent_amount);
       CREATE INDEX IF NOT EXISTS idx_properties_bedrooms ON properties(bedrooms);
+      CREATE INDEX IF NOT EXISTS idx_properties_verification_status ON properties(verification_status);
+      CREATE INDEX IF NOT EXISTS idx_properties_data_source ON properties(data_source);
     `);
     
     sendSuccessResponse(res, 200, { 
       tables: ['properties'],
-      indexes: ['idx_properties_city', 'idx_properties_state', 'idx_properties_zip_code', 'idx_properties_landlord_id', 'idx_properties_rent_amount', 'idx_properties_bedrooms']
-    }, 'Properties table and indexes created successfully');
+      indexes: [
+        'idx_properties_city', 'idx_properties_state', 'idx_properties_zip_code', 
+        'idx_properties_landlord_id', 'idx_properties_rent_amount', 'idx_properties_bedrooms',
+        'idx_properties_verification_status', 'idx_properties_data_source'
+      ],
+      new_columns: ['data_source', 'source_url', 'verification_status', 'last_verified_at']
+    }, 'Properties table, indexes, and tracking columns created successfully');
     
   } catch (error) {
     console.error('Database setup error:', error);
@@ -315,7 +342,7 @@ app.get('/setup-database', async (req, res) => {
   }
 });
 
-// POST /properties - Create a new property (PROTECTED) - WITH VERIFICATION CHECK
+// POST /properties - Create a new property (PROTECTED) - ENHANCED VERIFICATION CHECK
 app.post('/properties', authenticateToken, requireRole(['landlord']), createPropertyLimiter, async (req, res) => {
   try {
     // Validate request body
@@ -334,14 +361,17 @@ app.post('/properties', authenticateToken, requireRole(['landlord']), createProp
       bedrooms,
       bathrooms,
       square_feet,
-      description
+      description,
+      data_source,
+      source_url,
+      verification_status
     } = value;
 
     // Use authenticated user's ID as landlord_id
     const landlord_id = req.user.id;
 
-    // 🔥 NEW: Check landlord verification status
-    console.log(`Checking verification status for landlord ${landlord_id}...`);
+    // ENHANCED VERIFICATION CHECK
+    console.log(`🔍 Checking verification status for landlord ${landlord_id}...`);
     
     const userVerificationQuery = `
       SELECT landlord_verified, verification_status 
@@ -355,33 +385,37 @@ app.post('/properties', authenticateToken, requireRole(['landlord']), createProp
     }
     
     const userData = userCheck.rows[0];
-    console.log(`Verification check result:`, userData);
+    console.log(`📋 Verification check result:`, userData);
 
-    // Block unverified landlords
+    // Block unverified landlords from creating verified properties
     if (!userData.landlord_verified) {
-      const verificationStatus = userData.verification_status || 'pending';
+      const userVerificationStatus = userData.verification_status || 'pending';
       
       let message = 'Please verify your landlord account before listing properties.';
       let details = {
         redirect_url: './verify-landlord.html',
-        verification_status: verificationStatus
+        verification_status: userVerificationStatus,
+        action_required: 'complete_verification'
       };
 
       // Customize message based on verification status
-      switch (verificationStatus) {
+      switch (userVerificationStatus) {
         case 'under-review':
           message = 'Your landlord verification is under review. You can list properties once approved.';
           details.estimated_time = '1-3 business days';
+          details.action_required = 'wait_for_approval';
           break;
         case 'rejected':
           message = 'Your landlord verification was rejected. Please resubmit your verification documents.';
+          details.action_required = 'resubmit_verification';
           break;
         case 'pending':
         default:
           message = 'Please verify your landlord account before listing properties.';
+          details.action_required = 'complete_verification';
       }
 
-      console.log(`❌ Verification failed for landlord ${landlord_id}: ${verificationStatus}`);
+      console.log(`❌ Verification failed for landlord ${landlord_id}: ${userVerificationStatus}`);
       
       return sendErrorResponse(res, 403, 'Verification required', message, details);
     }
@@ -400,18 +434,23 @@ app.post('/properties', authenticateToken, requireRole(['landlord']), createProp
         { existing_property_id: duplicateCheck.rows[0].id });
     }
 
-    // Insert the new property
+    // Set verification timestamp for verified properties
+    const last_verified_at = verification_status === 'verified' ? new Date() : null;
+
+    // Insert the new property with enhanced tracking
     const insertQuery = `
       INSERT INTO properties (
         address, city, state, zip_code, rent_amount, 
-        bedrooms, bathrooms, square_feet, description, landlord_id
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        bedrooms, bathrooms, square_feet, description, landlord_id,
+        data_source, source_url, verification_status, last_verified_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
       RETURNING *
     `;
 
     const result = await pool.query(insertQuery, [
       address, city, state, zip_code, rent_amount,
-      bedrooms, bathrooms, square_feet, description, landlord_id
+      bedrooms, bathrooms, square_feet, description, landlord_id,
+      data_source, source_url, verification_status, last_verified_at
     ]);
 
     const newProperty = result.rows[0];
@@ -432,6 +471,10 @@ app.post('/properties', authenticateToken, requireRole(['landlord']), createProp
         description: newProperty.description,
         landlord_id: newProperty.landlord_id,
         landlord_verified: newProperty.landlord_verified,
+        data_source: newProperty.data_source,
+        source_url: newProperty.source_url,
+        verification_status: newProperty.verification_status,
+        last_verified_at: newProperty.last_verified_at,
         created_at: newProperty.created_at
       }
     }, 'Property created successfully');
@@ -523,6 +566,10 @@ app.put('/properties/:id', authenticateToken, requireRole(['landlord']), async (
         square_feet: updatedProperty.square_feet,
         description: updatedProperty.description,
         landlord_verified: updatedProperty.landlord_verified,
+        data_source: updatedProperty.data_source,
+        source_url: updatedProperty.source_url,
+        verification_status: updatedProperty.verification_status,
+        last_verified_at: updatedProperty.last_verified_at,
         created_at: updatedProperty.created_at,
         updated_at: updatedProperty.updated_at
       }
@@ -601,6 +648,10 @@ app.get('/properties/my', authenticateToken, requireRole(['landlord']), async (r
       square_feet: property.square_feet,
       description: property.description,
       landlord_verified: property.landlord_verified,
+      data_source: property.data_source,
+      source_url: property.source_url,
+      verification_status: property.verification_status,
+      last_verified_at: property.last_verified_at,
       created_at: property.created_at,
       updated_at: property.updated_at,
       review_count: parseInt(property.review_count) || 0,
@@ -664,6 +715,10 @@ app.get('/properties/:id', async (req, res) => {
         square_feet: property.square_feet,
         description: property.description,
         landlord_verified: property.landlord_verified,
+        data_source: property.data_source,
+        source_url: property.source_url,
+        verification_status: property.verification_status,
+        last_verified_at: property.last_verified_at,
         created_at: property.created_at,
         landlord: {
           id: property.landlord_id,
@@ -697,7 +752,7 @@ app.get('/properties', async (req, res) => {
     const {
       city, state, zip_code, min_rent, max_rent, min_bedrooms, max_bedrooms,
       min_bathrooms, max_bathrooms, min_sqft, max_sqft, landlord_verified,
-      sort_by = 'newest', limit = 20, offset = 0
+      verification_status, sort_by = 'newest', limit = 20, offset = 0
     } = value;
 
     // Build dynamic WHERE clause
@@ -708,74 +763,80 @@ app.get('/properties', async (req, res) => {
     // Add filters based on provided parameters
     if (city) {
       paramCount++;
-      whereConditions.push(`LOWER(p.city) LIKE LOWER($${paramCount})`);
+      whereConditions.push(`LOWER(p.city) LIKE LOWER(${paramCount})`);
       queryParams.push(`%${city}%`);
     }
 
     if (state) {
       paramCount++;
-      whereConditions.push(`LOWER(p.state) = LOWER($${paramCount})`);
+      whereConditions.push(`LOWER(p.state) = LOWER(${paramCount})`);
       queryParams.push(state);
     }
 
     if (zip_code) {
       paramCount++;
-      whereConditions.push(`p.zip_code = $${paramCount}`);
+      whereConditions.push(`p.zip_code = ${paramCount}`);
       queryParams.push(zip_code);
     }
 
     if (min_rent !== undefined) {
       paramCount++;
-      whereConditions.push(`p.rent_amount >= $${paramCount}`);
+      whereConditions.push(`p.rent_amount >= ${paramCount}`);
       queryParams.push(min_rent);
     }
 
     if (max_rent !== undefined) {
       paramCount++;
-      whereConditions.push(`p.rent_amount <= $${paramCount}`);
+      whereConditions.push(`p.rent_amount <= ${paramCount}`);
       queryParams.push(max_rent);
     }
 
     if (min_bedrooms !== undefined) {
       paramCount++;
-      whereConditions.push(`p.bedrooms >= $${paramCount}`);
+      whereConditions.push(`p.bedrooms >= ${paramCount}`);
       queryParams.push(min_bedrooms);
     }
 
     if (max_bedrooms !== undefined) {
       paramCount++;
-      whereConditions.push(`p.bedrooms <= $${paramCount}`);
+      whereConditions.push(`p.bedrooms <= ${paramCount}`);
       queryParams.push(max_bedrooms);
     }
 
     if (min_bathrooms !== undefined) {
       paramCount++;
-      whereConditions.push(`p.bathrooms >= $${paramCount}`);
+      whereConditions.push(`p.bathrooms >= ${paramCount}`);
       queryParams.push(min_bathrooms);
     }
 
     if (max_bathrooms !== undefined) {
       paramCount++;
-      whereConditions.push(`p.bathrooms <= $${paramCount}`);
+      whereConditions.push(`p.bathrooms <= ${paramCount}`);
       queryParams.push(max_bathrooms);
     }
 
     if (min_sqft !== undefined) {
       paramCount++;
-      whereConditions.push(`p.square_feet >= $${paramCount}`);
+      whereConditions.push(`p.square_feet >= ${paramCount}`);
       queryParams.push(min_sqft);
     }
 
     if (max_sqft !== undefined) {
       paramCount++;
-      whereConditions.push(`p.square_feet <= $${paramCount}`);
+      whereConditions.push(`p.square_feet <= ${paramCount}`);
       queryParams.push(max_sqft);
     }
 
     if (landlord_verified !== undefined) {
       paramCount++;
-      whereConditions.push(`p.landlord_verified = $${paramCount}`);
+      whereConditions.push(`p.landlord_verified = ${paramCount}`);
       queryParams.push(landlord_verified);
+    }
+
+    if (verification_status) {
+      paramCount++;
+      whereConditions.push(`p.verification_status = ${paramCount}`);
+      queryParams.push(verification_status);
     }
 
     // Build WHERE clause
@@ -809,14 +870,14 @@ app.get('/properties', async (req, res) => {
 
     // Add pagination parameters
     paramCount++;
-    const limitParam = `$${paramCount}`;
+    const limitParam = `${paramCount}`;
     queryParams.push(limit);
     
     paramCount++;
-    const offsetParam = `$${paramCount}`;
+    const offsetParam = `${paramCount}`;
     queryParams.push(offset);
 
-    // Main search query with review stats
+    // Main search query with review stats and enhanced property tracking
     const searchQuery = `
       SELECT 
         p.id,
@@ -830,6 +891,10 @@ app.get('/properties', async (req, res) => {
         p.square_feet,
         p.description,
         p.landlord_verified,
+        p.data_source,
+        p.source_url,
+        p.verification_status,
+        p.last_verified_at,
         p.created_at,
         u.first_name as landlord_first_name,
         u.last_name as landlord_last_name,
@@ -863,7 +928,7 @@ app.get('/properties', async (req, res) => {
     const totalPages = Math.ceil(totalCount / limit);
     const currentPage = Math.floor(offset / limit) + 1;
 
-    // Format response
+    // Format response with enhanced property tracking
     const formattedProperties = properties.map(property => ({
       id: property.id,
       address: property.address,
@@ -876,6 +941,10 @@ app.get('/properties', async (req, res) => {
       square_feet: property.square_feet,
       description: property.description,
       landlord_verified: property.landlord_verified,
+      data_source: property.data_source,
+      source_url: property.source_url,
+      verification_status: property.verification_status,
+      last_verified_at: property.last_verified_at,
       created_at: property.created_at,
       landlord: {
         first_name: property.landlord_first_name,
@@ -904,7 +973,7 @@ app.get('/properties', async (req, res) => {
         bedrooms_range: min_bedrooms !== undefined || max_bedrooms !== undefined ? { min: min_bedrooms, max: max_bedrooms } : null,
         bathrooms_range: min_bathrooms || max_bathrooms ? { min: min_bathrooms, max: max_bathrooms } : null,
         sqft_range: min_sqft || max_sqft ? { min: min_sqft, max: max_sqft } : null,
-        landlord_verified, sort_by
+        landlord_verified, verification_status, sort_by
       }
     });
 
@@ -921,6 +990,9 @@ app.get('/properties/stats', async (req, res) => {
       SELECT 
         COUNT(*) as total_properties,
         COUNT(CASE WHEN landlord_verified = true THEN 1 END) as verified_properties,
+        COUNT(CASE WHEN verification_status = 'verified' THEN 1 END) as properties_verified,
+        COUNT(CASE WHEN verification_status = 'community_submitted' THEN 1 END) as community_properties,
+        COUNT(CASE WHEN verification_status = 'pending_verification' THEN 1 END) as pending_properties,
         AVG(rent_amount) as avg_rent,
         MIN(rent_amount) as min_rent,
         MAX(rent_amount) as max_rent,
@@ -944,6 +1016,11 @@ app.get('/properties/stats', async (req, res) => {
         verification_rate: stats.total_properties > 0 
           ? Math.round((stats.verified_properties / stats.total_properties) * 100) 
           : 0,
+        property_verification: {
+          verified: parseInt(stats.properties_verified),
+          community_submitted: parseInt(stats.community_properties),
+          pending_verification: parseInt(stats.pending_properties)
+        },
         rent_statistics: {
           average: stats.avg_rent ? Math.round(parseFloat(stats.avg_rent)) : null,
           minimum: stats.min_rent ? parseFloat(stats.min_rent) : null,
