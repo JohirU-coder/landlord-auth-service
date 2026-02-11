@@ -205,10 +205,10 @@
     <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 py-12">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
-                <h1 class="text-4xl font-bold text-white mb-4">
+                <h1 class="text-4xl font-bold text-white mb-4" data-i18n="addProperty:header.title">
                     Add New Property
                 </h1>
-                <p class="text-xl text-indigo-100">
+                <p class="text-xl text-indigo-100" data-i18n="addProperty:header.subtitle">
                     List your property in just 3 simple steps
                 </p>
             </div>
@@ -220,48 +220,48 @@
         <div class="flex items-center justify-center space-x-8 mb-8">
             <div class="flex items-center">
                 <div id="step1Indicator" class="step-indicator active w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold">1</div>
-                <span class="ml-3 text-sm font-medium text-gray-700">Property Details</span>
+                <span class="ml-3 text-sm font-medium text-gray-700" data-i18n="addProperty:progress.step1">Property Details</span>
             </div>
             <div class="w-16 h-1 bg-gray-200 rounded"></div>
             <div class="flex items-center">
                 <div id="step2Indicator" class="step-indicator w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-sm font-bold text-gray-500">2</div>
-                <span class="ml-3 text-sm font-medium text-gray-500">Photos & Features</span>
+                <span class="ml-3 text-sm font-medium text-gray-500" data-i18n="addProperty:progress.step2">Photos & Features</span>
             </div>
             <div class="w-16 h-1 bg-gray-200 rounded"></div>
             <div class="flex items-center">
                 <div id="step3Indicator" class="step-indicator w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-sm font-bold text-gray-500">3</div>
-                <span class="ml-3 text-sm font-medium text-gray-500">Review & Submit</span>
+                <span class="ml-3 text-sm font-medium text-gray-500" data-i18n="addProperty:progress.step3">Review & Submit</span>
             </div>
         </div>
 
         <!-- Step 1: Property Details -->
         <div id="step1" class="step-container active">
             <div class="form-section">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Property Information</h2>
-                
+                <h2 class="text-2xl font-bold text-gray-900 mb-6" data-i18n="addProperty:step1.title">Property Information</h2>
+
                 <!-- Property Type Selection -->
                 <div class="mb-8">
-                    <label class="block text-sm font-medium text-gray-700 mb-4">Property Type</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-4" data-i18n="addProperty:step1.propertyType">Property Type</label>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div class="property-type-card" data-type="apartment">
                             <div class="text-3xl mb-2">🏢</div>
-                            <div class="font-semibold">Apartment</div>
-                            <div class="text-xs text-gray-500 mt-1">Multi-unit building</div>
+                            <div class="font-semibold" data-i18n="addProperty:step1.apartment">Apartment</div>
+                            <div class="text-xs text-gray-500 mt-1" data-i18n="addProperty:step1.apartmentDesc">Multi-unit building</div>
                         </div>
                         <div class="property-type-card" data-type="house">
                             <div class="text-3xl mb-2">🏠</div>
-                            <div class="font-semibold">House</div>
-                            <div class="text-xs text-gray-500 mt-1">Single family home</div>
+                            <div class="font-semibold" data-i18n="addProperty:step1.house">House</div>
+                            <div class="text-xs text-gray-500 mt-1" data-i18n="addProperty:step1.houseDesc">Single family home</div>
                         </div>
                         <div class="property-type-card" data-type="condo">
                             <div class="text-3xl mb-2">🏘️</div>
-                            <div class="font-semibold">Condo</div>
-                            <div class="text-xs text-gray-500 mt-1">Condominium unit</div>
+                            <div class="font-semibold" data-i18n="addProperty:step1.condo">Condo</div>
+                            <div class="text-xs text-gray-500 mt-1" data-i18n="addProperty:step1.condoDesc">Condominium unit</div>
                         </div>
                         <div class="property-type-card" data-type="room">
                             <div class="text-3xl mb-2">🚪</div>
-                            <div class="font-semibold">Room</div>
-                            <div class="text-xs text-gray-500 mt-1">Shared living</div>
+                            <div class="font-semibold" data-i18n="addProperty:step1.room">Room</div>
+                            <div class="text-xs text-gray-500 mt-1" data-i18n="addProperty:step1.roomDesc">Shared living</div>
                         </div>
                     </div>
                     <input type="hidden" id="propertyType" name="propertyType">
@@ -270,25 +270,27 @@
                 <!-- Address Information -->
                 <div class="grid grid-cols-1 gap-6 mb-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Property Address *</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="addProperty:step1.addressLabel">Property Address *</label>
                         <input type="text" id="address" name="address" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                               data-i18n-placeholder="addProperty:step1.addressPlaceholder"
                                placeholder="123 Main Street, Apt 4B">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="addProperty:step1.cityLabel">City *</label>
                         <input type="text" id="city" name="city" required
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                               data-i18n-placeholder="addProperty:step1.cityPlaceholder"
                                placeholder="New York">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">State *</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="addProperty:step1.stateLabel">State *</label>
                         <select id="state" name="state" required
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="">Select State</option>
+                            <option value="" data-i18n="addProperty:step1.selectState">Select State</option>
                             <option value="NY">New York</option>
                             <option value="CA">California</option>
                             <option value="TX">Texas</option>
@@ -303,10 +305,11 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="addProperty:step1.zipLabel">Zip Code *</label>
                         <input type="text" id="zipCode" name="zipCode" required
                                pattern="^\d{5}(-\d{4})?$"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                               data-i18n-placeholder="addProperty:step1.zipPlaceholder"
                                placeholder="10001">
                     </div>
                 </div>
@@ -314,60 +317,63 @@
                 <!-- Property Details -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Rent</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="addProperty:step1.rentLabel">Monthly Rent</label>
                         <div class="relative">
                             <span class="absolute left-3 top-3 text-gray-500">$</span>
                             <input type="number" id="rentAmount" name="rentAmount" min="0" max="50000" step="50"
                                    class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                   data-i18n-placeholder="addProperty:step1.rentPlaceholder"
                                    placeholder="2500">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Bedrooms</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="addProperty:step1.bedroomsLabel">Bedrooms</label>
                         <select id="bedrooms" name="bedrooms"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="">Select</option>
-                            <option value="0">Studio</option>
-                            <option value="1">1 Bedroom</option>
-                            <option value="2">2 Bedrooms</option>
-                            <option value="3">3 Bedrooms</option>
-                            <option value="4">4 Bedrooms</option>
-                            <option value="5">5+ Bedrooms</option>
+                            <option value="" data-i18n="addProperty:step1.bedroomsSelect">Select</option>
+                            <option value="0" data-i18n="addProperty:step1.studio">Studio</option>
+                            <option value="1" data-i18n="addProperty:step1.oneBedroom">1 Bedroom</option>
+                            <option value="2" data-i18n="addProperty:step1.twoBedrooms">2 Bedrooms</option>
+                            <option value="3" data-i18n="addProperty:step1.threeBedrooms">3 Bedrooms</option>
+                            <option value="4" data-i18n="addProperty:step1.fourBedrooms">4 Bedrooms</option>
+                            <option value="5" data-i18n="addProperty:step1.fivePlusBedrooms">5+ Bedrooms</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Bathrooms</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="addProperty:step1.bathroomsLabel">Bathrooms</label>
                         <select id="bathrooms" name="bathrooms"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="">Select</option>
-                            <option value="1">1 Bathroom</option>
-                            <option value="1.5">1.5 Bathrooms</option>
-                            <option value="2">2 Bathrooms</option>
-                            <option value="2.5">2.5 Bathrooms</option>
-                            <option value="3">3 Bathrooms</option>
-                            <option value="3.5">3.5+ Bathrooms</option>
+                            <option value="" data-i18n="addProperty:step1.bedroomsSelect">Select</option>
+                            <option value="1" data-i18n="addProperty:step1.oneBathroom">1 Bathroom</option>
+                            <option value="1.5" data-i18n="addProperty:step1.onePointFiveBathrooms">1.5 Bathrooms</option>
+                            <option value="2" data-i18n="addProperty:step1.twoBathrooms">2 Bathrooms</option>
+                            <option value="2.5" data-i18n="addProperty:step1.twoPointFiveBathrooms">2.5 Bathrooms</option>
+                            <option value="3" data-i18n="addProperty:step1.threeBathrooms">3 Bathrooms</option>
+                            <option value="3.5" data-i18n="addProperty:step1.threePlusBathrooms">3.5+ Bathrooms</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Square Feet</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="addProperty:step1.sqFtLabel">Square Feet</label>
                         <input type="number" id="squareFeet" name="squareFeet" min="100" max="50000" step="50"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                               data-i18n-placeholder="addProperty:step1.sqFtPlaceholder"
                                placeholder="1200">
                     </div>
                 </div>
 
                 <!-- Property Description -->
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Property Description</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="addProperty:step1.descriptionLabel">Property Description</label>
                     <textarea id="description" name="description" rows="4" maxlength="2000"
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                              data-i18n-placeholder="addProperty:step1.descriptionPlaceholder"
                               placeholder="Describe your property... (optional)"></textarea>
-                    <p class="text-sm text-gray-500 mt-2">0/2000 characters</p>
+                    <p class="text-sm text-gray-500 mt-2" data-i18n="addProperty:step1.charCount" data-i18n-options='{"count": 0}'>0/2000 characters</p>
                 </div>
 
                 <!-- Step 1 Navigation -->
                 <div class="flex justify-end">
-                    <button id="step1Next" class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+                    <button id="step1Next" class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors" data-i18n="addProperty:step1.nextButton">
                         Next Step →
                     </button>
                 </div>
@@ -377,71 +383,71 @@
         <!-- Step 2: Photos & Features -->
         <div id="step2" class="step-container">
             <div class="form-section">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Photos & Features</h2>
-                
+                <h2 class="text-2xl font-bold text-gray-900 mb-6" data-i18n="addProperty:step2.title">Photos & Features</h2>
+
                 <!-- Photo Upload -->
                 <div class="mb-8">
-                    <label class="block text-sm font-medium text-gray-700 mb-4">Property Photos</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-4" data-i18n="addProperty:step2.photosLabel">Property Photos</label>
                     <div id="photoUploadZone" class="photo-upload-zone">
                         <div class="text-6xl text-gray-400 mb-4">📸</div>
-                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Add Photos</h3>
-                        <p class="text-gray-500 mb-4">Drag and drop photos here, or click to browse</p>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2" data-i18n="addProperty:step2.addPhotos">Add Photos</h3>
+                        <p class="text-gray-500 mb-4" data-i18n="addProperty:step2.dragDropText">Drag and drop photos here, or click to browse</p>
                         <input type="file" id="photoInput" accept="image/*" multiple class="hidden">
-                        <button type="button" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                        <button type="button" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors" data-i18n="addProperty:step2.choosePhotos">
                             Choose Photos
                         </button>
                     </div>
                     <div id="photoPreview" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-6 hidden">
                         <!-- Photo previews will be inserted here -->
                     </div>
-                    <p class="text-sm text-gray-500 mt-2">Optional: Add photos to help renters visualize your property</p>
+                    <p class="text-sm text-gray-500 mt-2" data-i18n="addProperty:step2.photosHint">Optional: Add photos to help renters visualize your property</p>
                 </div>
 
                 <!-- Property Features -->
                 <div class="mb-8">
-                    <label class="block text-sm font-medium text-gray-700 mb-4">Property Features</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-4" data-i18n="addProperty:step2.featuresLabel">Property Features</label>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <label class="flex items-center space-x-3 cursor-pointer">
                             <input type="checkbox" name="features" value="parking" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                            <span class="text-sm text-gray-700">🚗 Parking</span>
+                            <span class="text-sm text-gray-700" data-i18n="addProperty:step2.parking">🚗 Parking</span>
                         </label>
                         <label class="flex items-center space-x-3 cursor-pointer">
                             <input type="checkbox" name="features" value="laundry" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                            <span class="text-sm text-gray-700">🧺 Laundry</span>
+                            <span class="text-sm text-gray-700" data-i18n="addProperty:step2.laundry">🧺 Laundry</span>
                         </label>
                         <label class="flex items-center space-x-3 cursor-pointer">
                             <input type="checkbox" name="features" value="gym" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                            <span class="text-sm text-gray-700">💪 Gym</span>
+                            <span class="text-sm text-gray-700" data-i18n="addProperty:step2.gym">💪 Gym</span>
                         </label>
                         <label class="flex items-center space-x-3 cursor-pointer">
                             <input type="checkbox" name="features" value="pool" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                            <span class="text-sm text-gray-700">🏊 Pool</span>
+                            <span class="text-sm text-gray-700" data-i18n="addProperty:step2.pool">🏊 Pool</span>
                         </label>
                         <label class="flex items-center space-x-3 cursor-pointer">
                             <input type="checkbox" name="features" value="pets" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                            <span class="text-sm text-gray-700">🐕 Pet Friendly</span>
+                            <span class="text-sm text-gray-700" data-i18n="addProperty:step2.petFriendly">🐕 Pet Friendly</span>
                         </label>
                         <label class="flex items-center space-x-3 cursor-pointer">
                             <input type="checkbox" name="features" value="ac" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                            <span class="text-sm text-gray-700">❄️ A/C</span>
+                            <span class="text-sm text-gray-700" data-i18n="addProperty:step2.ac">❄️ A/C</span>
                         </label>
                         <label class="flex items-center space-x-3 cursor-pointer">
                             <input type="checkbox" name="features" value="dishwasher" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                            <span class="text-sm text-gray-700">🍽️ Dishwasher</span>
+                            <span class="text-sm text-gray-700" data-i18n="addProperty:step2.dishwasher">🍽️ Dishwasher</span>
                         </label>
                         <label class="flex items-center space-x-3 cursor-pointer">
                             <input type="checkbox" name="features" value="balcony" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                            <span class="text-sm text-gray-700">🏖️ Balcony</span>
+                            <span class="text-sm text-gray-700" data-i18n="addProperty:step2.balcony">🏖️ Balcony</span>
                         </label>
                     </div>
                 </div>
 
                 <!-- Step 2 Navigation -->
                 <div class="flex justify-between">
-                    <button id="step2Prev" class="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                    <button id="step2Prev" class="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors" data-i18n="addProperty:step2.previousButton">
                         ← Previous
                     </button>
-                    <button id="step2Next" class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+                    <button id="step2Next" class="bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors" data-i18n="addProperty:step2.nextButton">
                         Next Step →
                     </button>
                 </div>
@@ -451,11 +457,11 @@
         <!-- Step 3: Review & Submit -->
         <div id="step3" class="step-container">
             <div class="form-section">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">Review & Submit</h2>
-                
+                <h2 class="text-2xl font-bold text-gray-900 mb-6" data-i18n="addProperty:step3.title">Review & Submit</h2>
+
                 <!-- Property Summary -->
                 <div class="bg-gray-50 rounded-lg p-6 mb-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Property Summary</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4" data-i18n="addProperty:step3.summaryTitle">Property Summary</h3>
                     <div id="propertySummary">
                         <!-- Summary will be populated by JavaScript -->
                     </div>
@@ -466,19 +472,20 @@
                     <label class="flex items-start space-x-3 cursor-pointer">
                         <input type="checkbox" id="agreeTerms" required class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1">
                         <div class="text-sm text-gray-700">
-                            I confirm that I own or have permission to list this property and agree to the 
-                            <a href="#" class="text-indigo-600 hover:text-indigo-800">Terms of Service</a> and 
-                            <a href="#" class="text-indigo-600 hover:text-indigo-800">Property Listing Guidelines</a>.
+                            <span data-i18n="addProperty:step3.termsConfirm">I confirm that I own or have permission to list this property and agree to the</span>
+                            <a href="#" class="text-indigo-600 hover:text-indigo-800" data-i18n="addProperty:step3.termsLink">Terms of Service</a>
+                            <span data-i18n="addProperty:step3.and">and</span>
+                            <a href="#" class="text-indigo-600 hover:text-indigo-800" data-i18n="addProperty:step3.guidelinesLink">Property Listing Guidelines</a>.
                         </div>
                     </label>
                 </div>
 
                 <!-- Step 3 Navigation -->
                 <div class="flex justify-between">
-                    <button id="step3Prev" class="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                    <button id="step3Prev" class="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors" data-i18n="addProperty:step3.previousButton">
                         ← Previous
                     </button>
-                    <button id="submitProperty" class="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                    <button id="submitProperty" class="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors" data-i18n="addProperty:step3.submitButton">
                         🏠 List Property
                     </button>
                 </div>
@@ -533,16 +540,16 @@
         function checkAuthentication() {
             const token = localStorage.getItem('rentreviews_token');
             const user = JSON.parse(localStorage.getItem('rentreviews_user') || '{}');
-            
+
             if (!token) {
-                alert('Please log in to add a property.');
+                alert(t('addProperty:validation.authRequired'));
                 window.location.href = './auth.html';
                 return;
             }
 
             // Check if user is a landlord
             if (user.role !== 'landlord') {
-                alert('Only landlords can add properties. Please contact support to upgrade your account.');
+                alert(t('addProperty:validation.landlordOnly'));
                 window.location.href = './dashboard.html';
                 return;
             }
@@ -607,27 +614,27 @@
             const propertyType = document.getElementById('propertyType').value;
 
             if (!address || address.length < 5) {
-                alert('Please enter a valid property address (minimum 5 characters).');
+                alert(t('addProperty:validation.addressInvalid'));
                 return false;
             }
 
             if (!city || city.length < 2) {
-                alert('Please enter a valid city name.');
+                alert(t('addProperty:validation.cityInvalid'));
                 return false;
             }
 
             if (!state) {
-                alert('Please select a state.');
+                alert(t('addProperty:validation.stateRequired'));
                 return false;
             }
 
             if (!zipCode || !/^\d{5}(-\d{4})?$/.test(zipCode)) {
-                alert('Please enter a valid zip code (e.g., 12345 or 12345-6789).');
+                alert(t('addProperty:validation.zipInvalid'));
                 return false;
             }
 
             if (!propertyType) {
-                alert('Please select a property type.');
+                alert(t('addProperty:validation.propertyTypeRequired'));
                 return false;
             }
 
@@ -675,18 +682,18 @@
         function handleFiles(files) {
             const validFiles = Array.from(files).filter(file => {
                 if (!file.type.startsWith('image/')) {
-                    alert(`${file.name} is not an image file.`);
+                    alert(t('addProperty:validation.photoNotImage', { name: file.name }));
                     return false;
                 }
                 if (file.size > 10 * 1024 * 1024) { // 10MB limit
-                    alert(`${file.name} is too large. Maximum size is 10MB.`);
+                    alert(t('addProperty:validation.photoTooLarge', { name: file.name }));
                     return false;
                 }
                 return true;
             });
 
             if (uploadedPhotos.length + validFiles.length > 10) {
-                alert('Maximum 10 photos allowed.');
+                alert(t('addProperty:validation.photoLimit'));
                 return;
             }
 
@@ -736,7 +743,7 @@
         function updateCharacterCount() {
             const description = document.getElementById('description');
             const counter = description.parentElement.querySelector('p');
-            counter.textContent = `${description.value.length}/2000 characters`;
+            counter.textContent = t('addProperty:step1.charCount', { count: description.value.length });
         }
 
         function populateSummary() {
@@ -778,17 +785,17 @@
                                 <p class="text-sm text-gray-600">${data.city}, ${data.state} ${data.zipCode}</p>
                             </div>
                         </div>
-                        
-                        ${data.rentAmount ? `<p><strong>Monthly Rent:</strong> ${parseInt(data.rentAmount).toLocaleString()}</p>` : ''}
-                        ${data.bedrooms ? `<p><strong>Bedrooms:</strong> ${data.bedrooms === '0' ? 'Studio' : data.bedrooms}</p>` : ''}
-                        ${data.bathrooms ? `<p><strong>Bathrooms:</strong> ${data.bathrooms}</p>` : ''}
-                        ${data.squareFeet ? `<p><strong>Square Feet:</strong> ${parseInt(data.squareFeet).toLocaleString()}</p>` : ''}
+
+                        ${data.rentAmount ? `<p><strong>${t('addProperty:step3.monthlyRent')}</strong> $${parseInt(data.rentAmount).toLocaleString()}</p>` : ''}
+                        ${data.bedrooms ? `<p><strong>${t('addProperty:step3.bedrooms')}</strong> ${data.bedrooms === '0' ? t('addProperty:step1.studio') : data.bedrooms}</p>` : ''}
+                        ${data.bathrooms ? `<p><strong>${t('addProperty:step3.bathrooms')}</strong> ${data.bathrooms}</p>` : ''}
+                        ${data.squareFeet ? `<p><strong>${t('addProperty:step3.squareFeet')}</strong> ${parseInt(data.squareFeet).toLocaleString()}</p>` : ''}
                     </div>
-                    
+
                     <div>
-                        ${uploadedPhotos.length > 0 ? `<p><strong>Photos:</strong> ${uploadedPhotos.length} uploaded</p>` : '<p><strong>Photos:</strong> None uploaded</p>'}
-                        ${features.length > 0 ? `<p><strong>Features:</strong> ${features.join(', ')}</p>` : ''}
-                        ${data.description ? `<div class="mt-4"><strong>Description:</strong><br><p class="text-sm text-gray-600 mt-1">${data.description}</p></div>` : ''}
+                        ${uploadedPhotos.length > 0 ? `<p><strong>${t('addProperty:step3.photos')}</strong> ${t('addProperty:step3.photosUploaded', { count: uploadedPhotos.length })}</p>` : `<p><strong>${t('addProperty:step3.photos')}</strong> ${t('addProperty:step3.photosNone')}</p>`}
+                        ${features.length > 0 ? `<p><strong>${t('addProperty:step3.features')}</strong> ${features.join(', ')}</p>` : ''}
+                        ${data.description ? `<div class="mt-4"><strong>${t('addProperty:step3.description')}</strong><br><p class="text-sm text-gray-600 mt-1">${data.description}</p></div>` : ''}
                     </div>
                 </div>
             `;
@@ -799,7 +806,7 @@
             const agreeTerms = document.getElementById('agreeTerms');
 
             if (!agreeTerms.checked) {
-                alert('Please agree to the terms and conditions.');
+                alert(t('addProperty:validation.termsRequired'));
                 return;
             }
 
@@ -822,9 +829,9 @@
 
             try {
                 const token = localStorage.getItem('rentreviews_token');
-                
+
                 if (!token) {
-                    alert('Authentication required. Please log in again.');
+                    alert(t('addProperty:validation.authenticationFailed'));
                     window.location.href = './auth.html';
                     return;
                 }
@@ -863,23 +870,20 @@
                     });
 
                     if (response.status === 401) {
-                        errorMessage = 'Authentication failed. Please log in again.';
+                        errorMessage = t('addProperty:validation.authenticationFailed');
                         setTimeout(() => {
                             window.location.href = './auth.html';
                         }, 2000);
                     } else if (response.status === 403) {
-                        errorMessage = 'You need landlord permissions to add properties. Contact support to upgrade your account.';
-                        if (response.status === 403) {
-    const data = await response.json();
-    if (data.redirect_url) {
-        alert('Please verify your landlord account first.');
-        window.location.href = './verify-landlord.html';
-    } else {
-        errorMessage = 'You need landlord permissions to add properties.';
-    }
-}
+                        const data = await response.json();
+                        if (data.redirect_url) {
+                            alert(t('addProperty:validation.landlordVerificationRequired'));
+                            window.location.href = './verify-landlord.html';
+                        } else {
+                            errorMessage = t('addProperty:validation.landlordOnly');
+                        }
                     } else if (response.status === 409) {
-                        errorMessage = 'You have already listed a property with this address and zip code.';
+                        errorMessage = t('addProperty:validation.duplicateProperty');
                     } else if (response.status === 400) {
                         if (data.details && Array.isArray(data.details)) {
                             errorMessage = data.details.join(', ');
@@ -888,13 +892,13 @@
                         } else if (data.error) {
                             errorMessage = data.error;
                         }
-                        
+
                         // Special handling for landlord_id error
                         if (errorMessage.toLowerCase().includes('landlord') && errorMessage.toLowerCase().includes('required')) {
-                            errorMessage = 'Authentication issue: Your landlord account needs to be verified. Please log out and log back in.';
+                            errorMessage = t('addProperty:validation.landlordVerificationRequired');
                         }
                     } else if (response.status === 429) {
-                        errorMessage = 'You have reached the maximum number of properties you can add per hour (10). Please try again later.';
+                        errorMessage = t('addProperty:validation.rateLimitExceeded');
                     } else if (data.message) {
                         errorMessage = data.message;
                     } else if (data.error) {
@@ -903,11 +907,11 @@
 
                     // Show detailed error for debugging
                     console.error('Showing error to user:', errorMessage);
-                    alert(`Error: ${errorMessage}\n\nIf this persists, please try logging out and logging back in.`);
+                    alert(t('addProperty:validation.errorPrefix') + ' ' + errorMessage);
                 }
             } catch (error) {
                 console.error('Network/JavaScript error:', error);
-                alert('Network error. Please check your connection and try again.\n\nError details: ' + error.message);
+                alert(t('addProperty:validation.networkError'));
             }
 
             // Remove loading state
@@ -923,16 +927,16 @@
             modal.innerHTML = `
                 <div class="bg-white rounded-2xl max-w-md w-full p-8 text-center">
                     <div class="text-6xl mb-4">🎉</div>
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Property Listed Successfully!</h2>
-                    <p class="text-gray-600 mb-6">Your property at ${property.address} has been added to RentReviews.</p>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">${t('addProperty:success.title')}</h2>
+                    <p class="text-gray-600 mb-6">${t('addProperty:success.message', { address: property.address })}</p>
                     <div class="flex flex-col space-y-3">
-                        <button onclick="window.location.href='./dashboard.html'" 
+                        <button onclick="window.location.href='./dashboard.html'"
                                 class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
-                            Go to Dashboard
+                            ${t('addProperty:success.dashboardButton')}
                         </button>
-                        <button onclick="window.location.href='./search.html'" 
+                        <button onclick="window.location.href='./search.html'"
                                 class="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
-                            View in Search
+                            ${t('addProperty:success.searchButton')}
                         </button>
                     </div>
                 </div>
@@ -963,6 +967,31 @@
         console.warn(
             'This is a browser feature intended for developers. If someone told you to copy-paste something here to enable a feature or "hack" someone\'s account, it is a scam and will give them access to your account.'
         );
+    </script>
+
+    <!-- i18n Initialization -->
+    <script>
+        const CURRENT_PAGE = 'addProperty';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Initialize i18n first
+                await initI18n(CURRENT_PAGE);
+
+                // Update all translations on the page
+                updatePageTranslations();
+
+                // Setup language selector
+                setupLanguageSelector();
+
+                // Update HTML lang attribute
+                updateHtmlLangAttribute(i18next.language);
+
+                console.log('i18n initialized successfully for add-property page');
+            } catch (error) {
+                console.error('i18n initialization failed:', error);
+            }
+        });
     </script>
 </body>
 </html>
