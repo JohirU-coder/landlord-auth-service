@@ -1,48 +1,48 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
-    "signOut": "Sign Out"
+    "dashboard": "Panel de control",
+    "signOut": "Cerrar sesión"
   },
   "header": {
-    "title": "Find Your Perfect Rental",
-    "subtitle": "Search thousands of properties with honest reviews from real renters"
+    "title": "Encuentre su alquiler perfecto",
+    "subtitle": "Busca entre miles de propiedades con opiniones sinceras de inquilinos reales."
   },
   "searchForm": {
-    "locationLabel": "Location",
-    "locationPlaceholder": "City, neighborhood, or zip code",
-    "maxPriceLabel": "Max Price",
-    "anyPrice": "Any Price",
-    "under1000": "Under $1,000",
-    "under1500": "Under $1,500",
-    "under2000": "Under $2,000",
-    "under2500": "Under $2,500",
-    "under3000": "Under $3,000",
-    "under4000": "Under $4,000",
-    "bedroomsLabel": "Bedrooms",
-    "any": "Any",
-    "studio": "Studio",
+    "locationLabel": "Ubicación",
+    "locationPlaceholder": "Ciudad, barrio o código postal",
+    "maxPriceLabel": "Precio máximo",
+    "anyPrice": "Cualquier precio",
+    "under1000": "Menos de 1000 dólares",
+    "under1500": "Menos de 1500 dólares",
+    "under2000": "Menos de 2000 dólares",
+    "under2500": "Menos de 2500 dólares",
+    "under3000": "Menos de 3000 dólares",
+    "under4000": "Menos de 4000 dólares",
+    "bedroomsLabel": "Dormitorios",
+    "any": "Allí",
+    "studio": "Estudio",
     "oneBr": "1 BR",
     "twoBr": "2 BR",
     "threeBr": "3 BR",
     "fourPlusBr": "4+ BR",
-    "searchButton": "🔍 Search Properties"
+    "searchButton": "🔍 Buscar propiedades"
   },
   "filters": {
-    "activeFilters": "Active filters:",
-    "clearAll": "Clear all"
+    "activeFilters": "Filtros activos:",
+    "clearAll": "Borrar todo"
   },
   "results": {
-    "title": "Available Properties",
-    "loading": "Loading properties...",
-    "sortBy": "Sort by:",
-    "sortNewest": "Newest First",
-    "sortPriceLow": "Price: Low to High",
-    "sortPriceHigh": "Price: High to Low",
-    "sortRating": "Highest Rated",
-    "loadMore": "Load More Properties"
+    "title": "Propiedades disponibles",
+    "loading": "Cargando propiedades...",
+    "sortBy": "Ordenar por:",
+    "sortNewest": "Más reciente primero",
+    "sortPriceLow": "Precio: De menor a mayor",
+    "sortPriceHigh": "Precio: De mayor a menor",
+    "sortRating": "Más valorados",
+    "loadMore": "Cargar más propiedades"
   },
   "propertyCard": {
-    "verifiedLandlord": "Verified Landlord",
-    "viewDetails": "View Details"
+    "verifiedLandlord": "Propietario verificado",
+    "viewDetails": "Ver detalles"
   }
 }

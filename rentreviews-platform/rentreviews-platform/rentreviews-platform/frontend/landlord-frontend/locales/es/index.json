@@ -1,101 +1,101 @@
 {
   "hero": {
-    "title": "Smart Rental",
-    "titleHighlight": "Decisions",
-    "subtitle": "Read verified reviews from real tenants before you sign. Make informed decisions and avoid problem landlords.",
-    "searchProperties": "🔍 Search Properties",
-    "signUpFree": "📝 Sign Up Free"
+    "title": "Alquiler inteligente",
+    "titleHighlight": "Decisiones",
+    "subtitle": "Lee opiniones verificadas de inquilinos reales antes de firmar. Toma decisiones informadas y evita propietarios problemáticos.",
+    "searchProperties": "🔍 Buscar propiedades",
+    "signUpFree": "📝 Regístrate gratis"
   },
   "stats": {
-    "propertiesListed": "Properties Listed",
-    "activeUsers": "Active Users",
-    "verifiedReviews": "% Verified Reviews"
+    "propertiesListed": "Propiedades en venta",
+    "activeUsers": "Usuarios activos",
+    "verifiedReviews": "% de reseñas verificadas"
   },
   "problem": {
-    "heading": "The Problem with",
-    "headingHighlight": "Renting Today",
-    "subtitle": "Millions of renters sign leases without knowing what they're getting into. It's time for transparency in the rental market.",
+    "heading": "El problema con",
+    "headingHighlight": "Alquiler hoy",
+    "subtitle": "Millones de inquilinos firman contratos de alquiler sin saber en qué se están metiendo. Es hora de que haya transparencia en el mercado del alquiler.",
     "noInfo": {
-      "title": "No Information",
-      "description": "Renters have no way to research landlords or property management companies before signing."
+      "title": "Sin información",
+      "description": "Los inquilinos no tienen forma de investigar a los propietarios o a las empresas de gestión inmobiliaria antes de firmar."
     },
     "expensiveMistakes": {
-      "title": "Expensive Mistakes",
-      "description": "Bad landlords cost tenants thousands in deposits, repairs, and legal fees."
+      "title": "Errores costosos",
+      "description": "Los malos propietarios cuestan a los inquilinos miles de dólares en depósitos, reparaciones y gastos legales."
     },
     "noAccountability": {
-      "title": "No Accountability",
-      "description": "Landlords face no public consequences for poor service or unethical behavior."
+      "title": "Sin responsabilidad",
+      "description": "Los propietarios no enfrentan consecuencias públicas por un servicio deficiente o un comportamiento poco ético."
     }
   },
   "features": {
-    "heading": "Our",
-    "headingHighlight": "Solution",
-    "subtitle": "Get the inside scoop on landlords and properties from real tenants who've lived there.",
+    "heading": "Nuestro",
+    "headingHighlight": "Solución",
+    "subtitle": "Obtenga información privilegiada sobre los propietarios y las propiedades de inquilinos reales que han vivido allí.",
     "verifiedReviews": {
-      "title": "Verified Reviews",
-      "description": "Only real tenants can leave reviews. We verify authenticity to ensure trustworthy feedback."
+      "title": "Opiniones verificadas",
+      "description": "Solo los inquilinos reales pueden dejar opiniones. Verificamos la autenticidad para garantizar que los comentarios sean fiables."
     },
     "smartSearch": {
-      "title": "Smart Search",
-      "description": "Find properties by location, price, and ratings. Filter by specific landlord criteria."
+      "title": "Búsqueda inteligente",
+      "description": "Busca propiedades por ubicación, precio y valoraciones. Filtra por criterios específicos del propietario."
     },
     "detailedRatings": {
-      "title": "Detailed Ratings",
-      "description": "Communication, maintenance, property condition, and value - get the complete picture."
+      "title": "Calificaciones detalladas",
+      "description": "Comunicación, mantenimiento, estado de la propiedad y valor: obtenga una visión completa."
     },
     "anonymousReviews": {
-      "title": "Anonymous Reviews",
-      "description": "Leave honest feedback without fear of retaliation. Your identity stays protected."
+      "title": "Reseñas anónimas",
+      "description": "Deja comentarios sinceros sin miedo a represalias. Tu identidad estará protegida."
     },
     "landlordInsights": {
-      "title": "Landlord Insights",
-      "description": "See a landlord's complete track record across all their properties and tenants."
+      "title": "Perspectivas del propietario",
+      "description": "Consulte el historial completo de un propietario en todas sus propiedades e inquilinos."
     },
     "propertyHistory": {
-      "title": "Property History",
-      "description": "Access historical data and trends for any property or landlord."
+      "title": "Historia de la propiedad",
+      "description": "Acceda a datos históricos y tendencias de cualquier propiedad o propietario."
     }
   },
   "howItWorks": {
-    "heading": "How It",
-    "headingHighlight": "Works",
-    "subtitle": "Simple, transparent, and effective. Join renters making smarter decisions.",
+    "heading": "Cómo",
+    "headingHighlight": "Obras",
+    "subtitle": "Sencillo, transparente y eficaz. Únete a los inquilinos que toman decisiones más inteligentes.",
     "step1": {
-      "title": "Search Properties",
-      "description": "Enter your location, budget, and preferences. Our search reveals properties with their review history."
+      "title": "Buscar propiedades",
+      "description": "Introduce tu ubicación, presupuesto y preferencias. Nuestra búsqueda muestra propiedades con su historial de reseñas."
     },
     "step2": {
-      "title": "Read Reviews",
-      "description": "Get detailed insights from verified tenants about communication, maintenance, and overall experience."
+      "title": "Leer reseñas",
+      "description": "Obtenga información detallada de inquilinos verificados sobre la comunicación, el mantenimiento y la experiencia general."
     },
     "step3": {
-      "title": "Make Smart Decisions",
-      "description": "Armed with real data from real tenants, confidently choose your next home."
+      "title": "Tome decisiones inteligentes",
+      "description": "Con datos reales de inquilinos reales, elige con confianza tu próxima vivienda."
     }
   },
   "cta": {
-    "heading": "Ready to Rent",
-    "headingHighlight": "Smarter",
-    "subtitle": "Join our platform and make your next rental decision with confidence. Get instant access to verified reviews from real tenants.",
-    "getStartedFree": "🚀 Get Started Free",
-    "browseProperties": "🔍 Browse Properties"
+    "heading": "Listo para alquilar",
+    "headingHighlight": "Más inteligente",
+    "subtitle": "Únete a nuestra plataforma y toma tu próxima decisión de alquiler con confianza. Obtén acceso instantáneo a opiniones verificadas de inquilinos reales.",
+    "getStartedFree": "🚀 Empieza gratis",
+    "browseProperties": "🔍 Explorar propiedades"
   },
   "footer": {
-    "tagline": "Making renting transparent, one review at a time.",
-    "forRenters": "For Renters",
-    "searchProperties": "Search Properties",
-    "leaveReviews": "Leave Reviews",
-    "browseReviews": "Browse Reviews",
-    "forLandlords": "For Landlords",
-    "claimProperties": "Claim Properties",
-    "respondToReviews": "Respond to Reviews",
-    "dashboard": "Dashboard",
-    "support": "Support",
-    "helpCenter": "Help Center",
-    "contactUs": "Contact Us",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service",
-    "copyright": "© 2025 RentReviews. All rights reserved."
+    "tagline": "Haciendo que el alquiler sea transparente, una reseña a la vez.",
+    "forRenters": "Para inquilinos",
+    "searchProperties": "Buscar propiedades",
+    "leaveReviews": "Deja tus comentarios",
+    "browseReviews": "Explorar reseñas",
+    "forLandlords": "Para propietarios",
+    "claimProperties": "Propiedades de la reclamación",
+    "respondToReviews": "Responder a las reseñas",
+    "dashboard": "Panel de control",
+    "support": "Soporte",
+    "helpCenter": "Centro de ayuda",
+    "contactUs": "Contáctenos",
+    "privacyPolicy": "Política de privacidad",
+    "termsOfService": "Condiciones del servicio",
+    "copyright": "© 2025 RentReviews. Todos los derechos reservados."
   }
 }

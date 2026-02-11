@@ -1,75 +1,75 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
-    "search": "Search",
-    "signOut": "Sign Out"
+    "dashboard": "Panel de control",
+    "search": "Buscar",
+    "signOut": "Cerrar sesión"
   },
   "header": {
-    "title": "Market Insights",
-    "subtitle": "Stay informed with rental market trends and data-driven insights"
+    "title": "Perspectivas del mercado",
+    "subtitle": "Manténgase informado sobre las tendencias del mercado de alquiler y los datos analíticos."
   },
   "stats": {
-    "avgRent": "Average Rent",
-    "availableProperties": "Available Properties",
-    "avgRating": "Average Landlord Rating",
-    "daysOnMarket": "Avg. Days on Market",
+    "avgRent": "Alquiler medio",
+    "availableProperties": "Propiedades disponibles",
+    "avgRating": "Valoración media de los propietarios",
+    "daysOnMarket": "Promedio de días en el mercado",
     "increasePrefix": "↗ +",
     "decreasePrefix": "↘ -",
-    "fromLastMonth": " from last month"
+    "fromLastMonth": " del mes pasado"
   },
   "charts": {
-    "rentalTrends": "Rental Price Trends",
-    "trendsSubtitle": "Interactive chart showing 12-month rent trends",
-    "comingSoon": "Chart visualization coming soon",
-    "propertyTypes": "Property Types",
-    "oneBedroom": "1 Bedroom",
-    "twoBedrooms": "2 Bedroom",
-    "threePlusBedrooms": "3+ Bedroom",
-    "studio": "Studio"
+    "rentalTrends": "Tendencias en los precios de alquiler",
+    "trendsSubtitle": "Gráfico interactivo que muestra las tendencias de los alquileres en los últimos 12 meses.",
+    "comingSoon": "Visualización de gráficos próximamente",
+    "propertyTypes": "Tipos de propiedades",
+    "oneBedroom": "1 dormitorio",
+    "twoBedrooms": "2 dormitorios",
+    "threePlusBedrooms": "3+ dormitorios",
+    "studio": "Estudio"
   },
   "topRatedAreas": {
-    "title": "Top Rated Areas",
-    "manhattan": "Manhattan, NY",
-    "upperEastSide": "Upper East Side",
-    "brooklyn": "Brooklyn, NY",
+    "title": "Áreas mejor valoradas",
+    "manhattan": "Manhattan, Nueva York",
+    "upperEastSide": "Alto Este",
+    "brooklyn": "Brooklyn, Nueva York",
     "parkSlope": "Park Slope",
-    "queens": "Queens, NY",
+    "queens": "Queens, Nueva York",
     "astoria": "Astoria"
   },
   "priceAlerts": {
-    "title": "Price Alerts",
-    "highRent": "High Rent Area",
-    "manhattanUp": "Manhattan avg. rent up 15% this quarter",
-    "goodValue": "Good Value",
-    "queensSavings": "Queens offers 30% savings vs Manhattan",
-    "marketTrend": "Market Trend",
-    "inventoryIncreasing": "Inventory increasing in outer boroughs"
+    "title": "Alertas de precios",
+    "highRent": "Zona de alquiler elevado",
+    "manhattanUp": "El alquiler medio en Manhattan sube un 15 % este trimestre.",
+    "goodValue": "Buena relación calidad-precio",
+    "queensSavings": "Queens ofrece un ahorro del 30 % en comparación con Manhattan.",
+    "marketTrend": "Tendencia del mercado",
+    "inventoryIncreasing": "Aumento del inventario en los distritos periféricos"
   },
   "renterTips": {
-    "title": "Renter Tips",
-    "bestTime": "Best Time to Search",
-    "bestTimeDesc": "Late fall and winter typically offer better deals and more landlord flexibility.",
-    "negotiation": "Negotiation Strategy",
-    "negotiationDesc": "Properties on market 30+ days are more likely to accept lower offers.",
-    "redFlags": "Red Flags",
-    "redFlagsDesc": "Avoid landlords with ratings below 3.0 or multiple unresolved complaints."
+    "title": "Consejos sobre intereses",
+    "bestTime": "El mejor momento para buscar",
+    "bestTimeDesc": "El final del otoño y el invierno suelen ofrecer mejores ofertas y mayor flexibilidad por parte de los propietarios.",
+    "negotiation": "Estrategia de negociación",
+    "negotiationDesc": "Las propiedades que llevan más de 30 días en el mercado son más propensas a aceptar ofertas más bajas.",
+    "redFlags": "Señales de alerta",
+    "redFlagsDesc": "Evita los propietarios con valoraciones inferiores a 3,0 o con múltiples quejas sin resolver."
   },
   "neighborhood": {
-    "title": "Neighborhood Spotlight",
+    "title": "Foco de atención sobre el barrio",
     "williamsburg": "Williamsburg",
-    "lowerEastSide": "Lower East Side",
-    "trending": "Trending",
+    "lowerEastSide": "Lado este bajo",
+    "trending": "Tendencias",
     "popular": "Popular",
-    "value": "Value",
-    "avgRent": "Avg. Rent:",
-    "landlordRating": "Landlord Rating:",
-    "availableUnits": "Available Units:",
-    "viewProperties": "View Properties"
+    "value": "Valor",
+    "avgRent": "Promedio:",
+    "landlordRating": "Valoración del propietario:",
+    "availableUnits": "Unidades disponibles:",
+    "viewProperties": "Ver propiedades"
   },
   "cta": {
-    "title": "Ready to Find Your Perfect Rental?",
-    "subtitle": "Use these insights to make informed decisions about your next home.",
-    "searchButton": "🔍 Search Properties",
-    "reviewButton": "✏️ Write a Review"
+    "title": "¿Listo para encontrar tu alquiler perfecto?",
+    "subtitle": "Utiliza esta información para tomar decisiones informadas sobre tu próxima vivienda.",
+    "searchButton": "🔍 Buscar propiedades",
+    "reviewButton": "✏️ Escribir una reseña"
   }
 }
