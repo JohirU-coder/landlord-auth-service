@@ -6,8 +6,23 @@
     <title>Admin Property Seeder - RentReviews</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Multi-language font support -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- i18next Core & Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/i18next@23.7.6/i18next.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/i18next-http-backend@2.4.2/i18nextHttpBackend.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@7.2.0/i18nextBrowserLanguageDetector.min.js"></script>
+
+    <!-- i18n Configuration -->
+    <script src="./i18n/i18n-config.js"></script>
+
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif; }
         
         .btn-loading {
             position: relative;
@@ -43,9 +58,38 @@
                     <div class="bg-gradient-to-r from-indigo-600 to-purple-600 w-8 h-8 rounded-lg flex items-center justify-center">
                         <span class="text-white font-bold text-sm">⭐</span>
                     </div>
-                    <span class="ml-3 text-xl font-bold text-gray-900">RentReviews Admin</span>
+                    <span class="ml-3 text-xl font-bold text-gray-900" data-i18n="adminSeed:header.title">RentReviews Admin</span>
                 </div>
-                <div class="text-sm text-gray-500">Property Seeder Tool</div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-500" data-i18n="adminSeed:header.subtitle">Property Seeder Tool</div>
+
+                    <!-- Language Selector -->
+                    <div class="relative inline-block text-left" id="languageSelector">
+                        <button id="languageSelectorBtn"
+                                class="flex items-center space-x-2 text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                                aria-label="Select language">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+                            </svg>
+                            <span id="currentLanguageName">English</span>
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+
+                        <div id="languageDropdown"
+                             class="hidden absolute right-0 mt-2 w-48 rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50">
+                            <div class="py-1">
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="en">English</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="es">Español</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="zh">简体中文</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="bn">বাংলা</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="hi">हिन्दी</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -53,23 +97,23 @@
     <!-- Main Content -->
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <h1 class="text-2xl font-bold text-gray-900 mb-4">Seed Properties for Bootstrap</h1>
-            <p class="text-gray-600 mb-6">
-                Quickly add properties from public listings to give renters something to browse and review. 
+            <h1 class="text-2xl font-bold text-gray-900 mb-4" data-i18n="adminSeed:main.title">Seed Properties for Bootstrap</h1>
+            <p class="text-gray-600 mb-6" data-i18n="adminSeed:main.description">
+                Quickly add properties from public listings to give renters something to browse and review.
                 These will be marked as "Community-Submitted" until landlords claim them.
             </p>
-            
+
             <!-- Enhanced Status Display -->
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <div class="flex items-center">
                     <div class="text-blue-600 mr-3">ℹ️</div>
                     <div>
-                        <h4 class="font-semibold text-blue-800">Community Property Guidelines</h4>
+                        <h4 class="font-semibold text-blue-800" data-i18n="adminSeed:guidelines.title">Community Property Guidelines</h4>
                         <div class="text-sm text-blue-700 mt-1">
-                            <p>• Only add properties from legitimate public listings</p>
-                            <p>• Include accurate source attribution</p>
-                            <p>• Properties will be marked as claimable by verified landlords</p>
-                            <p>• All community properties include legal disclaimers</p>
+                            <p data-i18n="adminSeed:guidelines.rule1">• Only add properties from legitimate public listings</p>
+                            <p data-i18n="adminSeed:guidelines.rule2">• Include accurate source attribution</p>
+                            <p data-i18n="adminSeed:guidelines.rule3">• Properties will be marked as claimable by verified landlords</p>
+                            <p data-i18n="adminSeed:guidelines.rule4">• All community properties include legal disclaimers</p>
                         </div>
                     </div>
                 </div>
@@ -78,13 +122,13 @@
             <!-- Quick Add Form -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Property Address *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="adminSeed:form.addressLabel">Property Address *</label>
                     <input type="text" id="address" required
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                           placeholder="123 Main Street, Apt 4B">
+                           placeholder="123 Main Street, Apt 4B" data-i18n-placeholder="adminSeed:form.addressPlaceholder">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Rent Amount</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="adminSeed:form.rentLabel">Rent Amount</label>
                     <div class="relative">
                         <span class="absolute left-3 top-3 text-gray-500">$</span>
                         <input type="number" id="rentAmount" min="0" step="50"
@@ -93,59 +137,59 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="adminSeed:form.cityLabel">City *</label>
                     <input type="text" id="city" required
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                           placeholder="New York">
+                           placeholder="New York" data-i18n-placeholder="adminSeed:form.cityPlaceholder">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">State *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="adminSeed:form.stateLabel">State *</label>
                     <input type="text" id="state" required
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                           placeholder="NY">
+                           placeholder="NY" data-i18n-placeholder="adminSeed:form.statePlaceholder">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Zip Code *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="adminSeed:form.zipLabel">Zip Code *</label>
                     <input type="text" id="zipCode" required pattern="^\d{5}(-\d{4})?$"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                           placeholder="10001">
+                           placeholder="10001" data-i18n-placeholder="adminSeed:form.zipPlaceholder">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Bedrooms</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="adminSeed:form.bedroomsLabel">Bedrooms</label>
                     <select id="bedrooms" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Select</option>
-                        <option value="0">Studio</option>
-                        <option value="1">1 Bedroom</option>
-                        <option value="2">2 Bedrooms</option>
-                        <option value="3">3 Bedrooms</option>
-                        <option value="4">4+ Bedrooms</option>
+                        <option value="" data-i18n="adminSeed:form.bedroomsSelect">Select</option>
+                        <option value="0" data-i18n="adminSeed:form.studio">Studio</option>
+                        <option value="1" data-i18n="adminSeed:form.oneBedroom">1 Bedroom</option>
+                        <option value="2" data-i18n="adminSeed:form.twoBedrooms">2 Bedrooms</option>
+                        <option value="3" data-i18n="adminSeed:form.threeBedrooms">3 Bedrooms</option>
+                        <option value="4" data-i18n="adminSeed:form.fourPlusBedrooms">4+ Bedrooms</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Bathrooms</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="adminSeed:form.bathroomsLabel">Bathrooms</label>
                     <select id="bathrooms" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Select</option>
-                        <option value="1">1 Bathroom</option>
-                        <option value="1.5">1.5 Bathrooms</option>
-                        <option value="2">2 Bathrooms</option>
-                        <option value="2.5">2.5 Bathrooms</option>
-                        <option value="3">3+ Bathrooms</option>
+                        <option value="" data-i18n="adminSeed:form.bedroomsSelect">Select</option>
+                        <option value="1" data-i18n="adminSeed:form.oneBathroom">1 Bathroom</option>
+                        <option value="1.5" data-i18n="adminSeed:form.onePointFiveBathrooms">1.5 Bathrooms</option>
+                        <option value="2" data-i18n="adminSeed:form.twoBathrooms">2 Bathrooms</option>
+                        <option value="2.5" data-i18n="adminSeed:form.twoPointFiveBathrooms">2.5 Bathrooms</option>
+                        <option value="3" data-i18n="adminSeed:form.threePlusBathrooms">3+ Bathrooms</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Square Feet</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="adminSeed:form.sqFtLabel">Square Feet</label>
                     <input type="number" id="squareFeet" min="100" step="50"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                           placeholder="1200">
+                           placeholder="1200" data-i18n-placeholder="adminSeed:form.sqFtPlaceholder">
                 </div>
             </div>
             
             <!-- Description -->
             <div class="mt-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="adminSeed:form.descriptionLabel">Description</label>
                 <textarea id="description" rows="3" maxlength="500"
                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                          placeholder="Property description from listing..."></textarea>
+                          placeholder="Property description from listing..." data-i18n-placeholder="adminSeed:form.descriptionPlaceholder"></textarea>
                 <div class="text-sm text-gray-500 mt-1">
                     <span id="charCount">0</span>/500 characters
                 </div>
@@ -154,36 +198,36 @@
             <!-- Enhanced Source Tracking -->
             <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Source *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="adminSeed:form.sourceLabel">Source *</label>
                     <select id="source" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Select Source</option>
-                        <option value="craigslist">Craigslist</option>
-                        <option value="zillow">Zillow</option>
-                        <option value="apartments.com">Apartments.com</option>
-                        <option value="rentals.com">Rentals.com</option>
-                        <option value="streeteasy">StreetEasy</option>
-                        <option value="padmapper">PadMapper</option>
-                        <option value="other">Other Public Listing</option>
+                        <option value="" data-i18n="adminSeed:form.sourceSelect">Select Source</option>
+                        <option value="craigslist" data-i18n="adminSeed:form.craigslist">Craigslist</option>
+                        <option value="zillow" data-i18n="adminSeed:form.zillow">Zillow</option>
+                        <option value="apartments.com" data-i18n="adminSeed:form.apartmentsCom">Apartments.com</option>
+                        <option value="rentals.com" data-i18n="adminSeed:form.rentalsCom">Rentals.com</option>
+                        <option value="streeteasy" data-i18n="adminSeed:form.streetEasy">StreetEasy</option>
+                        <option value="padmapper" data-i18n="adminSeed:form.padMapper">PadMapper</option>
+                        <option value="other" data-i18n="adminSeed:form.other">Other Public Listing</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Source URL (Optional)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="adminSeed:form.sourceUrlLabel">Source URL (Optional)</label>
                     <input type="url" id="sourceUrl"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                           placeholder="https://...">
+                           placeholder="https://..." data-i18n-placeholder="adminSeed:form.sourceUrlPlaceholder">
                 </div>
             </div>
 
             <!-- Submit Button -->
             <div class="mt-8 flex justify-between items-center">
                 <div class="text-sm text-gray-500">
-                    Properties seeded: <span id="propertiesCount" class="font-medium text-indigo-600">0</span>
+                    <span data-i18n="adminSeed:buttons.propertiesSeeded">Properties seeded:</span> <span id="propertiesCount" class="font-medium text-indigo-600">0</span>
                 </div>
                 <div class="flex space-x-4">
-                    <button id="clearForm" class="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors">
+                    <button id="clearForm" class="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors" data-i18n="adminSeed:buttons.clearForm">
                         Clear Form
                     </button>
-                    <button id="addProperty" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
+                    <button id="addProperty" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors" data-i18n="adminSeed:buttons.addProperty">
                         Add Community Property
                     </button>
                 </div>
@@ -192,9 +236,9 @@
 
         <!-- Recent Additions -->
         <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Recent Additions</h2>
+            <h2 class="text-xl font-bold text-gray-900 mb-4" data-i18n="adminSeed:recent.title">Recent Additions</h2>
             <div id="recentProperties" class="space-y-3">
-                <p class="text-gray-500 text-center py-8">No properties seeded yet.</p>
+                <p class="text-gray-500 text-center py-8" data-i18n="adminSeed:recent.empty">No properties seeded yet.</p>
             </div>
         </div>
     </div>
@@ -219,7 +263,7 @@
         // Enhanced property seeding function
         document.getElementById('addProperty').addEventListener('click', async () => {
             const addBtn = document.getElementById('addProperty');
-            
+
             // Validate required fields
             const address = document.getElementById('address').value.trim();
             const city = document.getElementById('city').value.trim();
@@ -228,7 +272,7 @@
             const source = document.getElementById('source').value;
 
             if (!address || !city || !state || !zipCode || !source) {
-                alert('Please fill in all required fields (address, city, state, zip code, and source)');
+                alert(t('adminSeed:validation.fieldsRequired'));
                 return;
             }
 
@@ -264,8 +308,8 @@
 
             try {
                 // Use your admin token
-                const token = prompt('Enter admin token (your landlord account token):');
-                
+                const token = prompt(t('adminSeed:validation.tokenPrompt'));
+
                 if (!token) {
                     throw new Error('Admin token required for property seeding');
                 }
@@ -295,22 +339,22 @@
                     
                     // Clear form
                     document.getElementById('clearForm').click();
-                    
+
                     // Success message with guidance
-                    showMessage('Community property added successfully! Property can now be claimed by verified landlords.', 'success');
-                    
+                    showMessage(t('adminSeed:validation.success'), 'success');
+
                     // Log seeding activity for admin tracking
                     logSeedingActivity(data.property, propertyData.data_source);
-                    
+
                 } else {
                     const error = await response.json();
                     console.error('Seeding failed:', error);
                     throw new Error(error.message || 'Failed to seed property');
                 }
-                
+
             } catch (error) {
                 console.error('Error seeding property:', error);
-                showMessage('Error: ' + error.message + '. Ensure you have admin/landlord permissions.', 'error');
+                showMessage(t('adminSeed:validation.error', { message: error.message }), 'error');
             }
 
             // Remove loading state
@@ -333,18 +377,18 @@
                     <div class="flex-1">
                         <div class="flex items-center mb-2">
                             <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium mr-2">
-                                📍 Community-Submitted
+                                📍 ${t('adminSeed:recent.communitySubmitted')}
                             </span>
-                            <span class="text-xs text-gray-500">Claimable by landlords</span>
+                            <span class="text-xs text-gray-500">${t('adminSeed:recent.claimable')}</span>
                         </div>
                         <h3 class="font-medium text-gray-900">${property.address}</h3>
                         <p class="text-sm text-gray-600">${property.city}, ${property.state} ${property.zip_code}</p>
-                        ${property.rent_amount ? `<p class="text-sm text-green-600 font-medium">$${property.rent_amount.toLocaleString()}/month</p>` : ''}
-                        <p class="text-xs text-gray-500 mt-1">Source: ${property.data_source || 'Unknown'}</p>
+                        ${property.rent_amount ? `<p class="text-sm text-green-600 font-medium">$${property.rent_amount.toLocaleString()}${t('adminSeed:recent.perMonth')}</p>` : ''}
+                        <p class="text-xs text-gray-500 mt-1">${t('adminSeed:recent.source')} ${property.data_source || 'Unknown'}</p>
                     </div>
                     <div class="text-right text-sm text-gray-500">
-                        <p class="font-mono">ID: ${property.id}</p>
-                        <p>Just seeded</p>
+                        <p class="font-mono">${t('adminSeed:recent.id')} ${property.id}</p>
+                        <p>${t('adminSeed:recent.justSeeded')}</p>
                         <span class="inline-block w-2 h-2 bg-green-500 rounded-full"></span>
                     </div>
                 </div>
@@ -388,12 +432,27 @@
 
         // Load existing properties count on page load
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('Property seeder loaded. Ready to bootstrap your platform!');
-            
             // Load seeding log to display count
             const seedingLog = JSON.parse(localStorage.getItem('admin_seeding_log') || '[]');
             propertiesAdded = seedingLog.length;
             document.getElementById('propertiesCount').textContent = propertiesAdded;
+        });
+    </script>
+
+    <!-- i18n Initialization -->
+    <script>
+        const CURRENT_PAGE = 'adminSeed';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await initI18n(CURRENT_PAGE);
+                updatePageTranslations();
+                setupLanguageSelector();
+                updateHtmlLangAttribute(i18next.language);
+                console.log('i18n initialized successfully for admin-seed-properties page');
+            } catch (error) {
+                console.error('i18n initialization failed:', error);
+            }
         });
     </script>
 </body>
