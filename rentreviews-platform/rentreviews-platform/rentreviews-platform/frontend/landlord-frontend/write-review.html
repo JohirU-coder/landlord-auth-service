@@ -6,8 +6,23 @@
     <title>Write a Review - RentReviews</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Multi-language font support -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- i18next Core & Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/i18next@23.7.6/i18next.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/i18next-http-backend@2.4.2/i18nextHttpBackend.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@7.2.0/i18nextBrowserLanguageDetector.min.js"></script>
+
+    <!-- i18n Configuration -->
+    <script src="./i18n/i18n-config.js"></script>
+
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif; }
         
         .rating-stars {
             display: flex;
@@ -64,15 +79,42 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <button onclick="window.location.href='./dashboard.html'" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                    <button onclick="window.location.href='./dashboard.html'" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium" data-i18n="writeReview:nav.dashboard">
                         Dashboard
                     </button>
-                    <button onclick="window.location.href='./search.html'" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                    <button onclick="window.location.href='./search.html'" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium" data-i18n="writeReview:nav.search">
                         Search
                     </button>
-                    <button id="logoutBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    <button id="logoutBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors" data-i18n="writeReview:nav.signOut">
                         Sign Out
                     </button>
+
+                    <!-- Language Selector -->
+                    <div class="relative inline-block text-left" id="languageSelector">
+                        <button id="languageSelectorBtn"
+                                class="flex items-center space-x-2 text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                                aria-label="Select language">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+                            </svg>
+                            <span id="currentLanguageName">English</span>
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+
+                        <div id="languageDropdown"
+                             class="hidden absolute right-0 mt-2 w-48 rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50">
+                            <div class="py-1">
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="en">English</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="es">Español</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="zh">简体中文</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="bn">বাংলা</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="hi">हिन्दी</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -82,10 +124,10 @@
     <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 py-12">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
-                <h1 class="text-4xl font-bold text-white mb-4">
+                <h1 class="text-4xl font-bold text-white mb-4" data-i18n="writeReview:header.title" id="headerTitle">
                     Write a Review
                 </h1>
-                <p class="text-xl text-indigo-100">
+                <p class="text-xl text-indigo-100" data-i18n="writeReview:header.subtitle">
                     Share your rental experience to help other renters make informed decisions
                 </p>
             </div>
@@ -97,27 +139,27 @@
         
         <!-- Property Selection -->
         <div class="form-section">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Select Property</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6" data-i18n="writeReview:propertySelection.title">Select Property</h2>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Property Address</label>
-                    <input type="text" id="propertyAddress" placeholder="Enter the property address" 
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:propertySelection.addressLabel">Property Address</label>
+                    <input type="text" id="propertyAddress" data-i18n-placeholder="writeReview:propertySelection.addressPlaceholder" placeholder="Enter the property address"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
-                        <input type="text" id="propertyCity" placeholder="City" 
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:propertySelection.cityLabel">City</label>
+                        <input type="text" id="propertyCity" data-i18n-placeholder="writeReview:propertySelection.cityPlaceholder" placeholder="City"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">State</label>
-                        <input type="text" id="propertyState" placeholder="State" 
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:propertySelection.stateLabel">State</label>
+                        <input type="text" id="propertyState" data-i18n-placeholder="writeReview:propertySelection.statePlaceholder" placeholder="State"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Zip Code</label>
-                        <input type="text" id="propertyZip" placeholder="Zip Code" 
+                        <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:propertySelection.zipLabel">Zip Code</label>
+                        <input type="text" id="propertyZip" data-i18n-placeholder="writeReview:propertySelection.zipPlaceholder" placeholder="Zip Code"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                 </div>
@@ -126,22 +168,22 @@
 
         <!-- Landlord Information -->
         <div class="form-section">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Landlord Information</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6" data-i18n="writeReview:landlordInfo.title">Landlord Information</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Landlord/Property Manager Name</label>
-                    <input type="text" id="landlordName" placeholder="Full name or company name" 
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:landlordInfo.nameLabel">Landlord/Property Manager Name</label>
+                    <input type="text" id="landlordName" data-i18n-placeholder="writeReview:landlordInfo.namePlaceholder" placeholder="Full name or company name"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Contact Method</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:landlordInfo.contactMethodLabel">Contact Method</label>
                     <select id="contactMethod" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <option value="">Select contact method</option>
-                        <option value="phone">Phone</option>
-                        <option value="email">Email</option>
-                        <option value="text">Text/SMS</option>
-                        <option value="app">Property Management App</option>
-                        <option value="in-person">In Person</option>
+                        <option value="" data-i18n="writeReview:landlordInfo.selectContactMethod">Select contact method</option>
+                        <option value="phone" data-i18n="writeReview:landlordInfo.contactPhone">Phone</option>
+                        <option value="email" data-i18n="writeReview:landlordInfo.contactEmail">Email</option>
+                        <option value="text" data-i18n="writeReview:landlordInfo.contactText">Text/SMS</option>
+                        <option value="app" data-i18n="writeReview:landlordInfo.contactApp">Property Management App</option>
+                        <option value="in-person" data-i18n="writeReview:landlordInfo.contactInPerson">In Person</option>
                     </select>
                 </div>
             </div>
@@ -149,28 +191,28 @@
             <!-- Dynamic Contact Info Field -->
             <div class="mt-4">
                 <div id="phone-input" class="contact-info-input">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                    <input type="tel" id="phoneNumber" placeholder="(555) 123-4567" 
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:landlordInfo.phoneLabel">Phone Number</label>
+                    <input type="tel" id="phoneNumber" data-i18n-placeholder="writeReview:landlordInfo.phonePlaceholder" placeholder="(555) 123-4567"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div id="email-input" class="contact-info-input">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                    <input type="email" id="emailAddress" placeholder="landlord@example.com" 
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:landlordInfo.emailLabel">Email Address</label>
+                    <input type="email" id="emailAddress" data-i18n-placeholder="writeReview:landlordInfo.emailPlaceholder" placeholder="landlord@example.com"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div id="text-input" class="contact-info-input">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Text/SMS Number</label>
-                    <input type="tel" id="textNumber" placeholder="(555) 123-4567" 
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:landlordInfo.textLabel">Text/SMS Number</label>
+                    <input type="tel" id="textNumber" data-i18n-placeholder="writeReview:landlordInfo.textPlaceholder" placeholder="(555) 123-4567"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div id="app-input" class="contact-info-input">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">App Name</label>
-                    <input type="text" id="appName" placeholder="e.g., AppFolio, Buildium" 
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:landlordInfo.appLabel">App Name</label>
+                    <input type="text" id="appName" data-i18n-placeholder="writeReview:landlordInfo.appPlaceholder" placeholder="e.g., AppFolio, Buildium"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div id="in-person-input" class="contact-info-input">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Office Location</label>
-                    <input type="text" id="officeLocation" placeholder="Office address or location" 
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:landlordInfo.officeLabel">Office Location</label>
+                    <input type="text" id="officeLocation" data-i18n-placeholder="writeReview:landlordInfo.officePlaceholder" placeholder="Office address or location"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
             </div>
@@ -178,12 +220,12 @@
 
         <!-- Ratings -->
         <div class="form-section">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Rate Your Experience</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6" data-i18n="writeReview:ratings.title">Rate Your Experience</h2>
             <div class="space-y-6">
-                
+
                 <!-- Overall Rating -->
                 <div>
-                    <label class="block text-lg font-medium text-gray-900 mb-3">Overall Rating</label>
+                    <label class="block text-lg font-medium text-gray-900 mb-3" data-i18n="writeReview:ratings.overallLabel">Overall Rating</label>
                     <div class="rating-stars" data-rating="overall">
                         <span class="star" data-value="1">★</span>
                         <span class="star" data-value="2">★</span>
@@ -195,8 +237,8 @@
 
                 <!-- Communication -->
                 <div>
-                    <label class="block text-lg font-medium text-gray-900 mb-3">Communication</label>
-                    <p class="text-sm text-gray-600 mb-2">How responsive and clear was the landlord?</p>
+                    <label class="block text-lg font-medium text-gray-900 mb-3" data-i18n="writeReview:ratings.communicationLabel">Communication</label>
+                    <p class="text-sm text-gray-600 mb-2" data-i18n="writeReview:ratings.communicationHint">How responsive and clear was the landlord?</p>
                     <div class="rating-stars" data-rating="communication">
                         <span class="star" data-value="1">★</span>
                         <span class="star" data-value="2">★</span>
@@ -208,8 +250,8 @@
 
                 <!-- Maintenance -->
                 <div>
-                    <label class="block text-lg font-medium text-gray-900 mb-3">Maintenance & Repairs</label>
-                    <p class="text-sm text-gray-600 mb-2">How quickly were issues addressed?</p>
+                    <label class="block text-lg font-medium text-gray-900 mb-3" data-i18n="writeReview:ratings.maintenanceLabel">Maintenance & Repairs</label>
+                    <p class="text-sm text-gray-600 mb-2" data-i18n="writeReview:ratings.maintenanceHint">How quickly were issues addressed?</p>
                     <div class="rating-stars" data-rating="maintenance">
                         <span class="star" data-value="1">★</span>
                         <span class="star" data-value="2">★</span>
@@ -221,8 +263,8 @@
 
                 <!-- Property Condition -->
                 <div>
-                    <label class="block text-lg font-medium text-gray-900 mb-3">Property Condition</label>
-                    <p class="text-sm text-gray-600 mb-2">Overall state of the property and cleanliness</p>
+                    <label class="block text-lg font-medium text-gray-900 mb-3" data-i18n="writeReview:ratings.conditionLabel">Property Condition</label>
+                    <p class="text-sm text-gray-600 mb-2" data-i18n="writeReview:ratings.conditionHint">Overall state of the property and cleanliness</p>
                     <div class="rating-stars" data-rating="condition">
                         <span class="star" data-value="1">★</span>
                         <span class="star" data-value="2">★</span>
@@ -234,8 +276,8 @@
 
                 <!-- Value -->
                 <div>
-                    <label class="block text-lg font-medium text-gray-900 mb-3">Value for Money</label>
-                    <p class="text-sm text-gray-600 mb-2">Was the rent fair for what you got?</p>
+                    <label class="block text-lg font-medium text-gray-900 mb-3" data-i18n="writeReview:ratings.valueLabel">Value for Money</label>
+                    <p class="text-sm text-gray-600 mb-2" data-i18n="writeReview:ratings.valueHint">Was the rent fair for what you got?</p>
                     <div class="rating-stars" data-rating="value">
                         <span class="star" data-value="1">★</span>
                         <span class="star" data-value="2">★</span>
@@ -249,49 +291,49 @@
 
         <!-- Written Review -->
         <div class="form-section">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Tell Your Story</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6" data-i18n="writeReview:review.title">Tell Your Story</h2>
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Review Title</label>
-                    <input type="text" id="reviewTitle" placeholder="Summarize your experience in a few words" 
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:review.titleLabel">Review Title</label>
+                    <input type="text" id="reviewTitle" data-i18n-placeholder="writeReview:review.titlePlaceholder" placeholder="Summarize your experience in a few words"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Detailed Review</label>
-                    <textarea id="reviewText" rows="6" placeholder="Share your experience living at this property. What should other renters know?" 
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:review.textLabel">Detailed Review</label>
+                    <textarea id="reviewText" rows="6" data-i18n-placeholder="writeReview:review.textPlaceholder" placeholder="Share your experience living at this property. What should other renters know?"
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
-                    <p class="text-sm text-gray-500 mt-2">Minimum 50 characters. Be honest and helpful!</p>
+                    <p class="text-sm text-gray-500 mt-2" data-i18n="writeReview:review.textHint">Minimum 50 characters. Be honest and helpful!</p>
                 </div>
             </div>
         </div>
 
         <!-- Rental Details -->
         <div class="form-section">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Rental Details</h2>
+            <h2 class="text-2xl font-bold text-gray-900 mb-6" data-i18n="writeReview:rentalDetails.title">Rental Details</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Move-in Date</label>
-                    <input type="date" id="moveInDate" 
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:rentalDetails.moveInLabel">Move-in Date</label>
+                    <input type="date" id="moveInDate"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Move-out Date (if applicable)</label>
-                    <input type="date" id="moveOutDate" 
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:rentalDetails.moveOutLabel">Move-out Date (if applicable)</label>
+                    <input type="date" id="moveOutDate"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Monthly Rent</label>
-                    <input type="number" id="monthlyRent" placeholder="2500" 
+                    <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="writeReview:rentalDetails.monthlyRentLabel">Monthly Rent</label>
+                    <input type="number" id="monthlyRent" data-i18n-placeholder="writeReview:rentalDetails.monthlyRentPlaceholder" placeholder="2500"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div class="flex items-center space-x-6 pt-8">
                     <label class="flex items-center">
                         <input type="checkbox" id="wouldRecommend" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                        <span class="ml-2 text-sm text-gray-700">Would recommend to others</span>
+                        <span class="ml-2 text-sm text-gray-700" data-i18n="writeReview:rentalDetails.wouldRecommend">Would recommend to others</span>
                     </label>
                     <label class="flex items-center">
                         <input type="checkbox" id="anonymous" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                        <span class="ml-2 text-sm text-gray-700">Post anonymously</span>
+                        <span class="ml-2 text-sm text-gray-700" data-i18n="writeReview:rentalDetails.anonymous">Post anonymously</span>
                     </label>
                 </div>
             </div>
@@ -299,11 +341,11 @@
 
         <!-- Submit Button -->
         <div class="text-center">
-            <button id="submitReview" class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
+            <button id="submitReview" class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg" data-i18n="writeReview:submit.button">
                 📝 Submit Review
             </button>
             <p class="text-sm text-gray-500 mt-4">
-                By submitting this review, you agree to our <a href="#" class="text-indigo-600 hover:text-indigo-800">Terms of Service</a> and confirm that this review is based on your genuine experience.
+                <span data-i18n="writeReview:submit.terms">By submitting this review, you agree to our</span> <a href="#" class="text-indigo-600 hover:text-indigo-800" data-i18n="writeReview:submit.termsLink">Terms of Service</a> <span data-i18n="writeReview:submit.termsAnd">and confirm that this review is based on your genuine experience.</span>
             </p>
         </div>
     </div>
@@ -374,9 +416,9 @@
                 document.getElementById('landlordName').value = propertyData.landlord_name || '';
                 
                 // Show a helpful message
-                const header = document.querySelector('h1');
+                const header = document.getElementById('headerTitle');
                 if (header && propertyData.address) {
-                    header.innerHTML = `Write a Review<br><span class="text-lg font-normal text-indigo-200">for ${propertyData.address}</span>`;
+                    header.innerHTML = `${t('writeReview:header.title')}<br><span class="text-lg font-normal text-indigo-200">${t('writeReview:header.propertySubtitle', { address: propertyData.address })}</span>`;
                 }
             }
         }
@@ -465,18 +507,18 @@
 
             // Basic validation
             if (!formData.property.address || !formData.review.title || !formData.review.text) {
-                alert('Please fill in all required fields (property address, review title, and review text).');
+                alert(t('writeReview:validation.missingFields'));
                 return;
             }
 
             if (Object.keys(ratings).length === 0) {
-                alert('Please provide at least an overall rating.');
+                alert(t('writeReview:validation.missingRating'));
                 return;
             }
 
             // Enhanced success message
             const propertyAddress = formData.property.address;
-            alert(`Thank you for your review of ${propertyAddress}! Your review helps other renters make informed decisions. It will be published after verification.`);
+            alert(t('writeReview:validation.successMessage', { address: propertyAddress }));
             
             console.log('Complete review data:', formData); // For debugging
             
@@ -495,6 +537,37 @@
             localStorage.removeItem('rentreviews_token');
             localStorage.removeItem('rentreviews_user');
             window.location.href = './auth.html';
+        });
+    </script>
+
+    <!-- i18n Initialization -->
+    <script>
+        const CURRENT_PAGE = 'writeReview';
+
+        // Initialize i18n when DOM is ready
+        const originalDOMContentLoaded = document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Initialize i18n first
+                await initI18n(CURRENT_PAGE);
+
+                // Update all translations on the page
+                updatePageTranslations();
+
+                // Setup language selector
+                setupLanguageSelector();
+
+                // Update HTML lang attribute
+                updateHtmlLangAttribute(i18next.language);
+
+                // Now run the original prefillPropertyData after translations are loaded
+                prefillPropertyData();
+
+                console.log('i18n initialized successfully for write-review page');
+            } catch (error) {
+                console.error('i18n initialization failed:', error);
+                // Still run prefill even if i18n fails
+                prefillPropertyData();
+            }
         });
     </script>
 </body>
