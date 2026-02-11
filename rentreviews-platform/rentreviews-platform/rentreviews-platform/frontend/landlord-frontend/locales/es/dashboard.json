@@ -1,39 +1,39 @@
 {
   "loading": {
-    "message": "Loading your dashboard..."
+    "message": "Cargando tu panel de control..."
   },
   "nav": {
-    "signOut": "Sign Out"
+    "signOut": "Cerrar sesión"
   },
   "welcome": {
-    "greeting": "Welcome back, {{name}}!",
-    "subtitle": "Here's what's happening with your rental search"
+    "greeting": "¡Bienvenido de nuevo, {{name}}!",
+    "subtitle": "Esto es lo que está sucediendo con tu búsqueda de alquiler"
   },
   "stats": {
-    "reviewsWritten": "Reviews Written",
-    "reviewsHint": "Help other renters by sharing your experience",
-    "propertiesSaved": "Properties Saved",
-    "propertiesHint": "Keep track of places you're interested in",
-    "accountStatus": "Account Status",
-    "statusActive": "ACTIVE",
-    "roleRenter": "Renter Account",
-    "roleLandlord": "Landlord Account"
+    "reviewsWritten": "Reseñas escritas",
+    "reviewsHint": "Ayuda a otros inquilinos compartiendo tu experiencia.",
+    "propertiesSaved": "Propiedades guardadas",
+    "propertiesHint": "Mantén un registro de los lugares que te interesan.",
+    "accountStatus": "Estado de la cuenta",
+    "statusActive": "ACTIVO",
+    "roleRenter": "Cuenta de inquilino",
+    "roleLandlord": "Cuenta del propietario"
   },
   "quickActions": {
-    "title": "Quick Actions",
-    "searchProperties": "Search Properties",
-    "searchPropertiesHint": "Find your next home",
-    "writeReview": "Write Review",
-    "writeReviewHint": "Share your experience",
-    "marketInsights": "Market Insights",
-    "marketInsightsHint": "Rental market trends",
-    "addProperty": "Add Property",
-    "addPropertyHint": "List your rental"
+    "title": "Acciones rápidas",
+    "searchProperties": "Buscar propiedades",
+    "searchPropertiesHint": "Encuentre su próximo hogar",
+    "writeReview": "Escribir reseña",
+    "writeReviewHint": "Comparte tu experiencia",
+    "marketInsights": "Perspectivas del mercado",
+    "marketInsightsHint": "Tendencias del mercado de alquiler",
+    "addProperty": "Añadir propiedad",
+    "addPropertyHint": "Anuncia tu alquiler"
   },
   "recentActivity": {
-    "title": "Recent Activity",
-    "noActivity": "No activity yet",
-    "noActivityHint": "Start by searching for properties or writing your first review!",
-    "getStarted": "Get Started"
+    "title": "Actividad reciente",
+    "noActivity": "Aún no hay actividad.",
+    "noActivityHint": "¡Empieza por buscar propiedades o escribir tu primera reseña!",
+    "getStarted": "Empezar"
   }
 }

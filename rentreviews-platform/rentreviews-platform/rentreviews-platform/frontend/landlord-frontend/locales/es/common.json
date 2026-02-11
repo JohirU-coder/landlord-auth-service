@@ -1,36 +1,36 @@
 {
   "brand": {
     "name": "RentReviews",
-    "tagline": "Smart Rental Decisions"
+    "tagline": "Decisiones inteligentes sobre alquileres"
   },
   "nav": {
-    "features": "Features",
-    "howItWorks": "How It Works",
-    "about": "About",
-    "dashboard": "Dashboard",
-    "search": "Search",
-    "signUp": "Sign Up",
-    "signIn": "Sign In",
-    "signOut": "Sign Out"
+    "features": "Características",
+    "howItWorks": "Cómo funciona",
+    "about": "Acerca de",
+    "dashboard": "Panel de control",
+    "search": "Buscar",
+    "signUp": "Registrarse",
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión"
   },
   "actions": {
-    "getStarted": "Get Started",
-    "learnMore": "Learn More",
-    "backToHome": "Back to Home",
-    "cancel": "Cancel",
+    "getStarted": "Empezar",
+    "learnMore": "Más información",
+    "backToHome": "Volver a la página de inicio",
+    "cancel": "Cancelar",
     "save": "Save",
-    "submit": "Submit",
-    "delete": "Delete",
-    "edit": "Edit",
-    "close": "Close",
-    "confirm": "Confirm",
-    "loadMore": "Load More"
+    "submit": "Enviar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "loadMore": "Cargar más"
   },
   "common": {
-    "loading": "Loading...",
+    "loading": "Cargando...",
     "error": "Error",
-    "success": "Success",
-    "warning": "Warning",
-    "info": "Information"
+    "success": "Éxito",
+    "warning": "Advertencia",
+    "info": "Información"
   }
 }

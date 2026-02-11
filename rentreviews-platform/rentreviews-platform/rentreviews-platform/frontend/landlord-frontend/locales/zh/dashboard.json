@@ -1,39 +1,39 @@
 {
   "loading": {
-    "message": "Loading your dashboard..."
+    "message": "正在加载您的仪表盘..."
   },
   "nav": {
-    "signOut": "Sign Out"
+    "signOut": "注销"
   },
   "welcome": {
-    "greeting": "Welcome back, {{name}}!",
-    "subtitle": "Here's what's happening with your rental search"
+    "greeting": "欢迎回来，{{name}}！",
+    "subtitle": "关于您的租房搜索，目前进展如下："
   },
   "stats": {
-    "reviewsWritten": "Reviews Written",
-    "reviewsHint": "Help other renters by sharing your experience",
-    "propertiesSaved": "Properties Saved",
-    "propertiesHint": "Keep track of places you're interested in",
-    "accountStatus": "Account Status",
+    "reviewsWritten": "撰写的评论",
+    "reviewsHint": "通过分享您的经验来帮助其他租客",
+    "propertiesSaved": "已保存的属性",
+    "propertiesHint": "记录你感兴趣的地方",
+    "accountStatus": "账户状态",
     "statusActive": "ACTIVE",
-    "roleRenter": "Renter Account",
-    "roleLandlord": "Landlord Account"
+    "roleRenter": "租户账户",
+    "roleLandlord": "房东账户"
   },
   "quickActions": {
-    "title": "Quick Actions",
-    "searchProperties": "Search Properties",
-    "searchPropertiesHint": "Find your next home",
-    "writeReview": "Write Review",
-    "writeReviewHint": "Share your experience",
-    "marketInsights": "Market Insights",
-    "marketInsightsHint": "Rental market trends",
-    "addProperty": "Add Property",
-    "addPropertyHint": "List your rental"
+    "title": "快速操作",
+    "searchProperties": "搜索房产",
+    "searchPropertiesHint": "寻找您的下一处家园",
+    "writeReview": "撰写评论",
+    "writeReviewHint": "分享您的体验",
+    "marketInsights": "市场洞察",
+    "marketInsightsHint": "租赁市场趋势",
+    "addProperty": "添加房产",
+    "addPropertyHint": "发布您的租赁信息"
   },
   "recentActivity": {
-    "title": "Recent Activity",
-    "noActivity": "No activity yet",
-    "noActivityHint": "Start by searching for properties or writing your first review!",
-    "getStarted": "Get Started"
+    "title": "最近活动",
+    "noActivity": "目前尚无活动",
+    "noActivityHint": "从搜索房产或撰写第一篇评论开始吧！",
+    "getStarted": "开始使用"
   }
 }
