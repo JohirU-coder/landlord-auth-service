@@ -9,7 +9,7 @@ const https = require('https');
 
 // Configuration
 const CONFIG = {
-    DEEPL_API_KEY: process.env.DEEPL_API_KEY || 'YOUR_DEEPL_API_KEY_HERE',
+    DEEPL_API_KEY: process.env.DEEPL_API_KEY || 'f5224605-d4a2-40b3-b49f-681aa25ab1e3:fx',
     BASE_LOCALES_PATH: path.join(__dirname, 'locales'),
     SOURCE_LANGUAGE: 'en',
     TARGET_LANGUAGES: ['es', 'zh', 'bn', 'hi'],
@@ -34,7 +34,6 @@ async function translateText(text, targetLang) {
         }
 
         const postData = new URLSearchParams({
-            auth_key: CONFIG.DEEPL_API_KEY,
             text: text,
             target_lang: deeplLangCode,
             preserve_formatting: '1',
@@ -47,6 +46,7 @@ async function translateText(text, targetLang) {
             path: '/v2/translate',
             method: 'POST',
             headers: {
+                'Authorization': `DeepL-Auth-Key ${CONFIG.DEEPL_API_KEY}`,
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'Content-Length': Buffer.byteLength(postData)
             }
@@ -61,14 +61,26 @@ async function translateText(text, targetLang) {
             
             res.on('end', () => {
                 try {
+                    if (!data || data.trim() === '') {
+                        reject(new Error(`Empty response from DeepL API (Status: ${res.statusCode})`));
+                        return;
+                    }
+
                     const response = JSON.parse(data);
+
+                    // Check for API errors
+                    if (response.message) {
+                        reject(new Error(`DeepL API Error: ${response.message}`));
+                        return;
+                    }
+
                     if (response.translations && response.translations[0]) {
                         resolve(response.translations[0].text);
                     } else {
-                        reject(new Error('Invalid DeepL response'));
+                        reject(new Error(`Invalid DeepL response: ${JSON.stringify(response).substring(0, 200)}`));
                     }
                 } catch (error) {
-                    reject(error);
+                    reject(new Error(`Failed to parse DeepL response: ${error.message}. Data: ${data.substring(0, 200)}`));
                 }
             });
         });
@@ -95,8 +107,8 @@ async function translateJSON(obj, targetLang, path = '') {
                 console.log(`  Translating: ${currentPath}`);
                 translated[key] = await translateText(value, targetLang);
                 
-                // Rate limiting: wait 100ms between requests (DeepL free tier limit)
-                await new Promise(resolve => setTimeout(resolve, 100));
+                // Rate limiting: wait 500ms between requests to avoid hitting limits
+                await new Promise(resolve => setTimeout(resolve, 500));
             } catch (error) {
                 console.error(`  ❌ Error translating ${currentPath}:`, error.message);
                 translated[key] = value; // Keep original on error
