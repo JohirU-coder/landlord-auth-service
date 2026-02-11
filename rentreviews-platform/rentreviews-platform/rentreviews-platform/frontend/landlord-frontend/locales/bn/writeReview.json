@@ -1,0 +1,85 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "search": "Search",
+    "signOut": "Sign Out"
+  },
+  "header": {
+    "title": "Write a Review",
+    "subtitle": "Share your rental experience to help other renters make informed decisions",
+    "propertySubtitle": "for {{address}}"
+  },
+  "propertySelection": {
+    "title": "Select Property",
+    "addressLabel": "Property Address",
+    "addressPlaceholder": "Enter the property address",
+    "cityLabel": "City",
+    "cityPlaceholder": "City",
+    "stateLabel": "State",
+    "statePlaceholder": "State",
+    "zipLabel": "Zip Code",
+    "zipPlaceholder": "Zip Code"
+  },
+  "landlordInfo": {
+    "title": "Landlord Information",
+    "nameLabel": "Landlord/Property Manager Name",
+    "namePlaceholder": "Full name or company name",
+    "contactMethodLabel": "Contact Method",
+    "selectContactMethod": "Select contact method",
+    "contactPhone": "Phone",
+    "contactEmail": "Email",
+    "contactText": "Text/SMS",
+    "contactApp": "Property Management App",
+    "contactInPerson": "In Person",
+    "phoneLabel": "Phone Number",
+    "phonePlaceholder": "(555) 123-4567",
+    "emailLabel": "Email Address",
+    "emailPlaceholder": "landlord@example.com",
+    "textLabel": "Text/SMS Number",
+    "textPlaceholder": "(555) 123-4567",
+    "appLabel": "App Name",
+    "appPlaceholder": "e.g., AppFolio, Buildium",
+    "officeLabel": "Office Location",
+    "officePlaceholder": "Office address or location"
+  },
+  "ratings": {
+    "title": "Rate Your Experience",
+    "overallLabel": "Overall Rating",
+    "communicationLabel": "Communication",
+    "communicationHint": "How responsive and clear was the landlord?",
+    "maintenanceLabel": "Maintenance & Repairs",
+    "maintenanceHint": "How quickly were issues addressed?",
+    "conditionLabel": "Property Condition",
+    "conditionHint": "Overall state of the property and cleanliness",
+    "valueLabel": "Value for Money",
+    "valueHint": "Was the rent fair for what you got?"
+  },
+  "review": {
+    "title": "Tell Your Story",
+    "titleLabel": "Review Title",
+    "titlePlaceholder": "Summarize your experience in a few words",
+    "textLabel": "Detailed Review",
+    "textPlaceholder": "Share your experience living at this property. What should other renters know?",
+    "textHint": "Minimum 50 characters. Be honest and helpful!"
+  },
+  "rentalDetails": {
+    "title": "Rental Details",
+    "moveInLabel": "Move-in Date",
+    "moveOutLabel": "Move-out Date (if applicable)",
+    "monthlyRentLabel": "Monthly Rent",
+    "monthlyRentPlaceholder": "2500",
+    "wouldRecommend": "Would recommend to others",
+    "anonymous": "Post anonymously"
+  },
+  "submit": {
+    "button": "📝 Submit Review",
+    "terms": "By submitting this review, you agree to our",
+    "termsLink": "Terms of Service",
+    "termsAnd": "and confirm that this review is based on your genuine experience."
+  },
+  "validation": {
+    "missingFields": "Please fill in all required fields (property address, review title, and review text).",
+    "missingRating": "Please provide at least an overall rating.",
+    "successMessage": "Thank you for your review of {{address}}! Your review helps other renters make informed decisions. It will be published after verification."
+  }
+}

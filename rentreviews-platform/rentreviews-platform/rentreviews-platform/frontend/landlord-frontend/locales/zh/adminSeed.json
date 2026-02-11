@@ -1,0 +1,78 @@
+{
+  "header": {
+    "title": "RentReviews Admin",
+    "subtitle": "Property Seeder Tool"
+  },
+  "main": {
+    "title": "Seed Properties for Bootstrap",
+    "description": "Quickly add properties from public listings to give renters something to browse and review. These will be marked as \"Community-Submitted\" until landlords claim them."
+  },
+  "guidelines": {
+    "title": "Community Property Guidelines",
+    "rule1": "Only add properties from legitimate public listings",
+    "rule2": "Include accurate source attribution",
+    "rule3": "Properties will be marked as claimable by verified landlords",
+    "rule4": "All community properties include legal disclaimers"
+  },
+  "form": {
+    "addressLabel": "Property Address *",
+    "addressPlaceholder": "123 Main Street, Apt 4B",
+    "rentLabel": "Rent Amount",
+    "cityLabel": "City *",
+    "cityPlaceholder": "New York",
+    "stateLabel": "State *",
+    "statePlaceholder": "NY",
+    "zipLabel": "Zip Code *",
+    "zipPlaceholder": "10001",
+    "bedroomsLabel": "Bedrooms",
+    "bedroomsSelect": "Select",
+    "studio": "Studio",
+    "oneBedroom": "1 Bedroom",
+    "twoBedrooms": "2 Bedrooms",
+    "threeBedrooms": "3 Bedrooms",
+    "fourPlusBedrooms": "4+ Bedrooms",
+    "bathroomsLabel": "Bathrooms",
+    "oneBathroom": "1 Bathroom",
+    "onePointFiveBathrooms": "1.5 Bathrooms",
+    "twoBathrooms": "2 Bathrooms",
+    "twoPointFiveBathrooms": "2.5 Bathrooms",
+    "threePlusBathrooms": "3+ Bathrooms",
+    "sqFtLabel": "Square Feet",
+    "sqFtPlaceholder": "1200",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Property description from listing...",
+    "sourceLabel": "Source *",
+    "sourceSelect": "Select Source",
+    "craigslist": "Craigslist",
+    "zillow": "Zillow",
+    "apartmentsCom": "Apartments.com",
+    "rentalsCom": "Rentals.com",
+    "streetEasy": "StreetEasy",
+    "padMapper": "PadMapper",
+    "other": "Other Public Listing",
+    "sourceUrlLabel": "Source URL (Optional)",
+    "sourceUrlPlaceholder": "https://..."
+  },
+  "buttons": {
+    "propertiesSeeded": "Properties seeded:",
+    "clearForm": "Clear Form",
+    "addProperty": "Add Community Property"
+  },
+  "recent": {
+    "title": "Recent Additions",
+    "empty": "No properties seeded yet.",
+    "communitySubmitted": "Community-Submitted",
+    "claimable": "Claimable by landlords",
+    "perMonth": "/month",
+    "source": "Source:",
+    "id": "ID:",
+    "justSeeded": "Just seeded"
+  },
+  "validation": {
+    "fieldsRequired": "Please fill in all required fields (address, city, state, zip code, and source)",
+    "success": "Community property added successfully! Property can now be claimed by verified landlords.",
+    "error": "Error: {{message}}. Ensure you have admin/landlord permissions.",
+    "tokenPrompt": "Enter admin token (your landlord account token):",
+    "loaded": "Property seeder loaded. Ready to bootstrap your platform!"
+  }
+}
