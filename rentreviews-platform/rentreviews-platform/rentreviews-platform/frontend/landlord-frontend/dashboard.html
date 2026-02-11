@@ -5,9 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RentReviews - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- i18next Core & Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/i18next@23.7.6/i18next.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/i18next-http-backend@2.4.2/i18nextHttpBackend.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@7.2.0/i18nextBrowserLanguageDetector.min.js"></script>
+
+    <!-- i18n Configuration -->
+    <script src="./i18n/i18n-config.js"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Multi-language font support -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body {
+            font-family: 'Inter', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali',
+                         'Noto Sans Devanagari', sans-serif;
+        }
         
         .loading-skeleton {
             background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
@@ -35,7 +54,7 @@
     <div id="loadingOverlay" class="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50">
         <div class="text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-            <p class="text-gray-600 font-medium">Loading your dashboard...</p>
+            <p class="text-gray-600 font-medium" data-i18n="dashboard:loading.message">Loading your dashboard...</p>
         </div>
     </div>
 
@@ -48,7 +67,7 @@
                         <div class="bg-gradient-to-r from-indigo-600 to-purple-600 w-8 h-8 rounded-lg flex items-center justify-center">
                             <span class="text-white font-bold text-sm">⭐</span>
                         </div>
-                        <span class="ml-3 text-xl font-bold text-gray-900">RentReviews</span>
+                        <span class="ml-3 text-xl font-bold text-gray-900" data-i18n="common:brand.name">RentReviews</span>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -60,7 +79,7 @@
                             <span id="userNameNav" class="ml-3 text-gray-700 font-medium loading-skeleton w-20 h-4 rounded"></span>
                         </button>
                     </div>
-                    <button id="logoutBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                    <button id="logoutBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors" data-i18n="dashboard:nav.signOut">
                         Sign Out
                     </button>
                 </div>
@@ -82,7 +101,7 @@
                             <h1 id="welcomeMessage" class="text-3xl font-bold text-white">
                                 <span class="loading-skeleton w-64 h-8 rounded inline-block"></span>
                             </h1>
-                            <p class="text-indigo-100 mt-2 text-lg">
+                            <p class="text-indigo-100 mt-2 text-lg" data-i18n="dashboard:welcome.subtitle">
                                 Here's what's happening with your rental search
                             </p>
                         </div>
@@ -103,8 +122,8 @@
                             </div>
                             <div class="ml-4">
                                 <div class="text-3xl font-bold text-gray-900">0</div>
-                                <div class="text-sm font-medium text-gray-500">Reviews Written</div>
-                                <div class="text-xs text-gray-400 mt-1">Help other renters by sharing your experience</div>
+                                <div class="text-sm font-medium text-gray-500" data-i18n="dashboard:stats.reviewsWritten">Reviews Written</div>
+                                <div class="text-xs text-gray-400 mt-1" data-i18n="dashboard:stats.reviewsHint">Help other renters by sharing your experience</div>
                             </div>
                         </div>
                     </div>
@@ -121,8 +140,8 @@
                             </div>
                             <div class="ml-4">
                                 <div class="text-3xl font-bold text-gray-900">0</div>
-                                <div class="text-sm font-medium text-gray-500">Properties Saved</div>
-                                <div class="text-xs text-gray-400 mt-1">Keep track of places you're interested in</div>
+                                <div class="text-sm font-medium text-gray-500" data-i18n="dashboard:stats.propertiesSaved">Properties Saved</div>
+                                <div class="text-xs text-gray-400 mt-1" data-i18n="dashboard:stats.propertiesHint">Keep track of places you're interested in</div>
                             </div>
                         </div>
                     </div>
@@ -138,8 +157,8 @@
                                 </div>
                             </div>
                             <div class="ml-4">
-                                <div class="text-sm font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">ACTIVE</div>
-                                <div class="text-sm font-medium text-gray-500 mt-1">Account Status</div>
+                                <div class="text-sm font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full" data-i18n="dashboard:stats.statusActive">ACTIVE</div>
+                                <div class="text-sm font-medium text-gray-500 mt-1" data-i18n="dashboard:stats.accountStatus">Account Status</div>
                                 <div id="userRole" class="text-xs text-gray-400 mt-1">
                                     <span class="loading-skeleton w-20 h-3 rounded inline-block"></span>
                                 </div>
@@ -152,36 +171,36 @@
             <!-- Quick Actions -->
             <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+                    <h3 class="text-lg font-medium text-gray-900" data-i18n="dashboard:quickActions.title">Quick Actions</h3>
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <!-- Search Properties -->
                         <button id="searchPropertiesBtn" class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all transform hover:scale-105">
                             <div class="text-2xl mb-2">🔍</div>
-                            <div class="font-medium">Search Properties</div>
-                            <div class="text-xs opacity-90 mt-1">Find your next home</div>
+                            <div class="font-medium" data-i18n="dashboard:quickActions.searchProperties">Search Properties</div>
+                            <div class="text-xs opacity-90 mt-1" data-i18n="dashboard:quickActions.searchPropertiesHint">Find your next home</div>
                         </button>
 
                         <!-- Write Review -->
                         <button id="writeReviewBtn" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105">
                             <div class="text-2xl mb-2">✏️</div>
-                            <div class="font-medium">Write Review</div>
-                            <div class="text-xs opacity-90 mt-1">Share your experience</div>
+                            <div class="font-medium" data-i18n="dashboard:quickActions.writeReview">Write Review</div>
+                            <div class="text-xs opacity-90 mt-1" data-i18n="dashboard:quickActions.writeReviewHint">Share your experience</div>
                         </button>
 
                         <!-- Market Insights -->
                         <button id="marketInsightsBtn" class="bg-gradient-to-r from-blue-500 to-cyan-600 text-white p-4 rounded-lg hover:from-blue-600 hover:to-cyan-700 transition-all transform hover:scale-105">
                             <div class="text-2xl mb-2">📊</div>
-                            <div class="font-medium">Market Insights</div>
-                            <div class="text-xs opacity-90 mt-1">Rental market trends</div>
+                            <div class="font-medium" data-i18n="dashboard:quickActions.marketInsights">Market Insights</div>
+                            <div class="text-xs opacity-90 mt-1" data-i18n="dashboard:quickActions.marketInsightsHint">Rental market trends</div>
                         </button>
 
                         <!-- Add Property -->
                         <button id="addPropertyBtn" class="bg-gradient-to-r from-emerald-500 to-green-600 text-white p-4 rounded-lg hover:from-emerald-600 hover:to-green-700 transition-all transform hover:scale-105" style="display: none;">
                             <div class="text-2xl mb-2">🏠</div>
-                            <div class="font-medium">Add Property</div>
-                            <div class="text-xs opacity-90 mt-1">List your rental</div>
+                            <div class="font-medium" data-i18n="dashboard:quickActions.addProperty">Add Property</div>
+                            <div class="text-xs opacity-90 mt-1" data-i18n="dashboard:quickActions.addPropertyHint">List your rental</div>
                         </button>
                     </div>
                 </div>
@@ -190,13 +209,13 @@
             <!-- Recent Activity (Empty State) -->
             <div class="bg-white shadow-lg rounded-lg overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-medium text-gray-900">Recent Activity</h3>
+                    <h3 class="text-lg font-medium text-gray-900" data-i18n="dashboard:recentActivity.title">Recent Activity</h3>
                 </div>
                 <div class="p-12 text-center">
                     <div class="text-gray-400 text-6xl mb-4">📋</div>
-                    <h4 class="text-lg font-medium text-gray-900 mb-2">No activity yet</h4>
-                    <p class="text-gray-500 mb-6">Start by searching for properties or writing your first review!</p>
-                    <button id="getStartedBtn" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium">
+                    <h4 class="text-lg font-medium text-gray-900 mb-2" data-i18n="dashboard:recentActivity.noActivity">No activity yet</h4>
+                    <p class="text-gray-500 mb-6" data-i18n="dashboard:recentActivity.noActivityHint">Start by searching for properties or writing your first review!</p>
+                    <button id="getStartedBtn" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium" data-i18n="dashboard:recentActivity.getStarted">
                         Get Started
                     </button>
                 </div>
@@ -600,6 +619,32 @@
         console.warn(
             'This is a browser feature intended for developers. If someone told you to copy-paste something here to enable a feature or "hack" someone\'s account, it is a scam and will give them access to your account.'
         );
+    </script>
+
+    <!-- i18n Initialization -->
+    <script>
+        const CURRENT_PAGE = 'dashboard.html';
+
+        // Initialize i18n before DOM content is loaded
+        (async function() {
+            try {
+                await initI18n(CURRENT_PAGE);
+                console.log('✅ i18n initialized:', i18next.language);
+            } catch (error) {
+                console.error('❌ i18n initialization failed:', error);
+            }
+        })();
+
+        // Update translations after page load
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                updatePageTranslations();
+                setupLanguageSelector();
+                updateHtmlLangAttribute(i18next.language);
+            } catch (error) {
+                console.error('❌ i18n update failed:', error);
+            }
+        });
     </script>
 </body>
 </html>

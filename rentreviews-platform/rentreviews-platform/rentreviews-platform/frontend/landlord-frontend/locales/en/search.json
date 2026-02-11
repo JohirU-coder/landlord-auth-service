@@ -1,0 +1,147 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "signOut": "Sign Out"
+  },
+  "header": {
+    "title": "Find Your Perfect Rental",
+    "subtitle": "Search thousands of properties with honest reviews from real renters"
+  },
+  "searchForm": {
+    "locationLabel": "Location",
+    "locationPlaceholder": "City, neighborhood, or zip code",
+    "maxPriceLabel": "Max Price",
+    "anyPrice": "Any Price",
+    "under1000": "Under $1,000",
+    "under1500": "Under $1,500",
+    "under2000": "Under $2,000",
+    "under2500": "Under $2,500",
+    "under3000": "Under $3,000",
+    "under4000": "Under $4,000",
+    "bedroomsLabel": "Bedrooms",
+    "any": "Any",
+    "studio": "Studio",
+    "oneBr": "1 BR",
+    "twoBr": "2 BR",
+    "threeBr": "3 BR",
+    "fourPlusBr": "4+ BR",
+    "searchButton": "🔍 Search Properties"
+  },
+  "filters": {
+    "activeFilters": "Active filters:",
+    "clearAll": "Clear all"
+  },
+  "results": {
+    "title": "Available Properties",
+    "loading": "Loading properties...",
+    "foundProperties": "Found {{count}} properties",
+    "sortBy": "Sort by:",
+    "sortNewest": "Newest First",
+    "sortPriceLow": "Price: Low to High",
+    "sortPriceHigh": "Price: High to Low",
+    "sortRating": "Highest Rated",
+    "loadMore": "Load More Properties"
+  },
+  "propertyCard": {
+    "bed": "{{count}} bed",
+    "bath": "{{count}} bath",
+    "sqft": "{{sqft}} sqft",
+    "verifiedLandlord": "Verified Landlord",
+    "pendingVerification": "Pending Verification",
+    "viewDetails": "View Details",
+    "writeReview": "Write Review",
+    "reviewUnverified": "⚠️ Review (Unverified)",
+    "claimProperty": "Claim Property",
+    "highlyRated": "Highly Rated",
+    "communitySubmitted": "📍 Community-Submitted",
+    "verifiedBadge": "✅ Verified Landlord",
+    "pendingBadge": "⏳ Pending Verification",
+    "reviews": "{{count}} review",
+    "reviews_plural": "{{count}} reviews",
+    "noReviews": "No reviews yet"
+  },
+  "disclaimer": {
+    "title": "Community-Submitted Property:",
+    "message": "This property information was submitted by the community and has not been verified by the landlord. Data accuracy cannot be guaranteed. Please verify all details independently before making rental decisions."
+  },
+  "propertyDetails": {
+    "unverifiedBadge": "📍 Community-Submitted - Unverified",
+    "noReviews": "No reviews yet",
+    "unverifiedWarningTitle": "Unverified Property Information",
+    "unverifiedWarning1": "• This property was submitted by community members, not the landlord",
+    "unverifiedWarning2": "• Property details may be inaccurate or outdated",
+    "unverifiedWarning3": "• Always verify information independently before making decisions",
+    "unverifiedWarning4": "• Contact the property directly to confirm availability and details",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "sqFt": "Sq Ft",
+    "description": "Description",
+    "noDescription": "No description available",
+    "landlord": "Landlord",
+    "verifiedLandlord": "Verified Landlord",
+    "pendingVerification": "Pending Verification",
+    "dataSourceLabel": "Data Source:",
+    "dataSourceValue": "Community-submitted from public rental listings",
+    "lastUpdatedLabel": "Last Updated:",
+    "accuracyLabel": "Accuracy:",
+    "accuracyValue": "Not verified by property owner/manager",
+    "recentReviews": "Recent Reviews",
+    "noReviewsMessage": "No reviews yet. Be the first to share your experience!",
+    "verifyBeforeReviewing": "⚠️ Verify Before Reviewing",
+    "writeReview": "Write a Review",
+    "close": "Close"
+  },
+  "reviewWarning": {
+    "title": "Review Unverified Property",
+    "subtitle": "This property information hasn't been verified by the landlord",
+    "beforeReviewingTitle": "Before writing a review:",
+    "warning1": "• Verify the property address and details independently",
+    "warning2": "• Confirm you actually lived at this exact property",
+    "warning3": "• Ensure the landlord information is accurate",
+    "warning4": "• Be aware that property details may be outdated",
+    "confirmationText": "By proceeding, you confirm that you have independently verified this property information and that your review is based on your actual rental experience.",
+    "cancel": "Cancel",
+    "continue": "I Understand - Continue"
+  },
+  "claimModal": {
+    "title": "Claim This Property",
+    "subtitle": "Are you the owner or manager of this property?",
+    "verificationLabel": "Verification Details",
+    "verificationPlaceholder": "Please provide any details that prove you manage this property (lease agreements, utility bills, property management license, etc.)",
+    "legalConfirmation": "I confirm under penalty of perjury that I am the legal owner or authorized manager of this property. I understand that false claims may result in account suspension.",
+    "cancel": "Cancel",
+    "submit": "Submit Claim",
+    "submitting": "Submitting...",
+    "missingDetails": "Please provide documentation details.",
+    "missingConfirmation": "You must confirm the legal statement to proceed."
+  },
+  "claimSuccess": {
+    "title": "Claim Submitted!",
+    "message": "Your property claim has been submitted for review. We'll verify your ownership and notify you within 1-3 business days.",
+    "nextStepsTitle": "Next Steps:",
+    "nextStepsMessage": "Complete your landlord verification in your dashboard to speed up the claim process.",
+    "close": "Close",
+    "verifyAccount": "Verify Account"
+  },
+  "messages": {
+    "noResults": "No properties found",
+    "noResultsHint": "Try adjusting your search criteria",
+    "errorTitle": "Error loading properties",
+    "errorHint": "Please try again later",
+    "retry": "Retry"
+  },
+  "mockReviews": {
+    "sarah": {
+      "text": "Amazing property! The landlord is very responsive and the apartment is exactly as described. Highly recommend!",
+      "date": "2 weeks ago"
+    },
+    "mike": {
+      "text": "Great location and fair rent. Had a small maintenance issue that was fixed quickly.",
+      "date": "1 month ago"
+    },
+    "jessica": {
+      "text": "Beautiful apartment in a quiet neighborhood. Landlord is professional and respectful.",
+      "date": "2 months ago"
+    }
+  }
+}

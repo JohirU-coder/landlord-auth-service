@@ -5,11 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In - RentReviews</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- i18next Core & Plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/i18next@23.7.6/i18next.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/i18next-http-backend@2.4.2/i18nextHttpBackend.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/i18next-browser-languagedetector@7.2.0/i18nextBrowserLanguageDetector.min.js"></script>
+
+    <!-- i18n Configuration -->
+    <script src="./i18n/i18n-config.js"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-        
+
+        /* Multi-language font support */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap');
+
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali',
+                         'Noto Sans Devanagari', sans-serif;
         }
         
         .gradient-bg {
@@ -125,8 +141,8 @@
                     </svg>
                 </div>
             </div>
-            <h1 class="text-2xl font-bold text-white mb-2">Welcome to RentReviews</h1>
-            <p class="text-purple-100">Sign in to your account</p>
+            <h1 class="text-2xl font-bold text-white mb-2" data-i18n="auth:welcome.title">Welcome to RentReviews</h1>
+            <p class="text-purple-100" data-i18n="auth:welcome.subtitle">Sign in to your account</p>
         </div>
 
         <!-- Auth Forms Container -->
@@ -134,34 +150,36 @@
             <!-- Login Form -->
             <form id="loginForm" class="space-y-6">
                 <div>
-                    <label for="loginEmail" class="block text-sm font-medium text-white mb-2">
+                    <label for="loginEmail" class="block text-sm font-medium text-white mb-2" data-i18n="auth:login.emailLabel">
                         Email Address
                     </label>
-                    <input 
-                        type="email" 
-                        id="loginEmail" 
+                    <input
+                        type="email"
+                        id="loginEmail"
                         required
                         class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 input-focus"
+                        data-i18n-placeholder="auth:login.emailPlaceholder"
                         placeholder="Enter your email"
                         autocomplete="email"
                     >
                 </div>
 
                 <div>
-                    <label for="loginPassword" class="block text-sm font-medium text-white mb-2">
+                    <label for="loginPassword" class="block text-sm font-medium text-white mb-2" data-i18n="auth:login.passwordLabel">
                         Password
                     </label>
                     <div class="relative">
-                        <input 
-                            type="password" 
-                            id="loginPassword" 
+                        <input
+                            type="password"
+                            id="loginPassword"
                             required
                             class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 input-focus pr-12"
+                            data-i18n-placeholder="auth:login.passwordPlaceholder"
                             placeholder="Enter your password"
                             autocomplete="current-password"
                         >
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             id="toggleLoginPassword"
                             class="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white"
                         >
@@ -176,27 +194,29 @@
                 <div class="flex items-center justify-between">
                     <label class="flex items-center">
                         <input type="checkbox" id="rememberMe" class="rounded border-white/20 bg-white/10 text-purple-600">
-                        <span class="ml-2 text-sm text-white/80">Remember me</span>
+                        <span class="ml-2 text-sm text-white/80" data-i18n="auth:login.rememberMe">Remember me</span>
                     </label>
-                    <a href="#" class="text-sm text-purple-200 hover:text-white transition-colors">
+                    <a href="#" class="text-sm text-purple-200 hover:text-white transition-colors" data-i18n="auth:login.forgotPassword">
                         Forgot password?
                     </a>
                 </div>
 
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     id="loginBtn"
                     class="w-full bg-white text-purple-600 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
+                    data-i18n="auth:login.submitButton"
                 >
                     Sign In
                 </button>
 
                 <div class="text-center">
-                    <span class="text-white/80 text-sm">Don't have an account? </span>
-                    <button 
-                        type="button" 
+                    <span class="text-white/80 text-sm" data-i18n="auth:login.noAccount">Don't have an account? </span>
+                    <button
+                        type="button"
                         id="showSignup"
                         class="text-purple-200 hover:text-white font-medium text-sm transition-colors"
+                        data-i18n="auth:login.signUpLink"
                     >
                         Sign up
                     </button>
@@ -206,39 +226,41 @@
             <!-- Signup Form (Hidden by default) -->
             <form id="signupForm" class="space-y-6 hidden">
                 <div class="text-center mb-6">
-                    <h2 class="text-xl font-bold text-white mb-2">Create Account</h2>
-                    <p class="text-purple-100 text-sm">Join thousands of smart renters</p>
+                    <h2 class="text-xl font-bold text-white mb-2" data-i18n="auth:signup.title">Create Account</h2>
+                    <p class="text-purple-100 text-sm" data-i18n="auth:signup.subtitle">Join thousands of smart renters</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="firstName" class="block text-sm font-medium text-white mb-2">
+                        <label for="firstName" class="block text-sm font-medium text-white mb-2" data-i18n="auth:signup.firstNameLabel">
                             First Name
                         </label>
-                        <input 
-                            type="text" 
-                            id="firstName" 
+                        <input
+                            type="text"
+                            id="firstName"
                             required
                             minlength="1"
                             maxlength="50"
                             pattern="[A-Za-z\s]+"
                             class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 input-focus"
+                            data-i18n-placeholder="auth:signup.firstNamePlaceholder"
                             placeholder="John"
                             autocomplete="given-name"
                         >
                     </div>
                     <div>
-                        <label for="lastName" class="block text-sm font-medium text-white mb-2">
+                        <label for="lastName" class="block text-sm font-medium text-white mb-2" data-i18n="auth:signup.lastNameLabel">
                             Last Name
                         </label>
-                        <input 
-                            type="text" 
-                            id="lastName" 
+                        <input
+                            type="text"
+                            id="lastName"
                             required
                             minlength="1"
                             maxlength="50"
                             pattern="[A-Za-z\s]+"
                             class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 input-focus"
+                            data-i18n-placeholder="auth:signup.lastNamePlaceholder"
                             placeholder="Doe"
                             autocomplete="family-name"
                         >
@@ -246,37 +268,39 @@
                 </div>
 
                 <div>
-                    <label for="signupEmail" class="block text-sm font-medium text-white mb-2">
+                    <label for="signupEmail" class="block text-sm font-medium text-white mb-2" data-i18n="auth:signup.emailLabel">
                         Email Address
                     </label>
-                    <input 
-                        type="email" 
-                        id="signupEmail" 
+                    <input
+                        type="email"
+                        id="signupEmail"
                         required
                         maxlength="255"
                         class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 input-focus"
+                        data-i18n-placeholder="auth:signup.emailPlaceholder"
                         placeholder="john@example.com"
                         autocomplete="email"
                     >
                 </div>
 
                 <div>
-                    <label for="signupPassword" class="block text-sm font-medium text-white mb-2">
+                    <label for="signupPassword" class="block text-sm font-medium text-white mb-2" data-i18n="auth:signup.passwordLabel">
                         Password
                     </label>
                     <div class="relative">
-                        <input 
-                            type="password" 
-                            id="signupPassword" 
+                        <input
+                            type="password"
+                            id="signupPassword"
                             required
                             minlength="8"
                             maxlength="128"
                             class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 input-focus pr-12"
+                            data-i18n-placeholder="auth:signup.passwordPlaceholder"
                             placeholder="Create a strong password"
                             autocomplete="new-password"
                         >
-                        <button 
-                            type="button" 
+                        <button
+                            type="button"
                             id="toggleSignupPassword"
                             class="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white"
                         >
@@ -286,53 +310,55 @@
                             </svg>
                         </button>
                     </div>
-                    <div id="passwordStrength" class="password-strength text-white/60">
+                    <div id="passwordStrength" class="password-strength text-white/60" data-i18n="auth:passwordStrength.requirements">
                         Password must contain: uppercase, lowercase, and number (min 8 characters)
                     </div>
                 </div>
 
                 <div>
-                    <label for="userRole" class="block text-sm font-medium text-white mb-2">
+                    <label for="userRole" class="block text-sm font-medium text-white mb-2" data-i18n="auth:signup.roleLabel">
                         I am a...
                     </label>
-                    <select 
-                        id="userRole" 
+                    <select
+                        id="userRole"
                         required
                         class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white input-focus"
                     >
-                        <option value="">Choose your role</option>
-                        <option value="renter">Renter (Looking for places to rent)</option>
-                        <option value="landlord">Landlord (I own rental properties)</option>
+                        <option value="" data-i18n="auth:signup.rolePlaceholder">Choose your role</option>
+                        <option value="renter" data-i18n="auth:signup.roleRenter">Renter (Looking for places to rent)</option>
+                        <option value="landlord" data-i18n="auth:signup.roleLandlord">Landlord (I own rental properties)</option>
                     </select>
                 </div>
 
                 <div class="flex items-start">
-                    <input 
-                        type="checkbox" 
-                        id="agreeTerms" 
+                    <input
+                        type="checkbox"
+                        id="agreeTerms"
                         required
                         class="rounded border-white/20 bg-white/10 text-purple-600 mt-1"
                     >
                     <label for="agreeTerms" class="ml-2 text-sm text-white/80">
-                        I agree to the <a href="#" class="text-purple-200 hover:text-white">Terms of Service</a> 
-                        and <a href="#" class="text-purple-200 hover:text-white">Privacy Policy</a>
+                        <span data-i18n="auth:signup.agreeTerms">I agree to the</span> <a href="#" class="text-purple-200 hover:text-white" data-i18n="auth:signup.termsOfService">Terms of Service</a>
+                        <span data-i18n="auth:signup.and">and</span> <a href="#" class="text-purple-200 hover:text-white" data-i18n="auth:signup.privacyPolicy">Privacy Policy</a>
                     </label>
                 </div>
 
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     id="signupBtn"
                     class="w-full bg-white text-purple-600 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
+                    data-i18n="auth:signup.submitButton"
                 >
                     Create Account
                 </button>
 
                 <div class="text-center">
-                    <span class="text-white/80 text-sm">Already have an account? </span>
-                    <button 
-                        type="button" 
+                    <span class="text-white/80 text-sm" data-i18n="auth:signup.haveAccount">Already have an account? </span>
+                    <button
+                        type="button"
                         id="showLogin"
                         class="text-purple-200 hover:text-white font-medium text-sm transition-colors"
+                        data-i18n="auth:signup.signInLink"
                     >
                         Sign in
                     </button>
@@ -346,7 +372,7 @@
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
-                Back to Home
+                <span data-i18n="common:actions.backToHome">Back to Home</span>
             </a>
         </div>
     </div>
@@ -564,7 +590,7 @@
             const password = document.getElementById('loginPassword').value;
             
             if (!email || !password) {
-                showNotification('Missing Information', 'Please enter both email and password', 'error');
+                showNotification(t('auth:notifications.missingInfo'), t('auth:notifications.missingEmailPassword'), 'error');
                 return;
             }
             
@@ -593,8 +619,12 @@
                     
                     if (profileData) {
                         console.log('✅ Profile data fetched and stored');
-                        showNotification('Welcome back!', `Hello ${profileData.first_name}! Redirecting to dashboard...`, 'success');
-                        
+                        showNotification(
+                            t('auth:notifications.loginSuccess'),
+                            t('auth:notifications.loginSuccessMessage', { name: profileData.first_name }),
+                            'success'
+                        );
+
                         setTimeout(() => {
                             window.location.href = './dashboard.html';
                         }, 1500);
@@ -602,8 +632,12 @@
                         // Fallback: use basic user data from login response if profile fetch fails
                         console.log('⚠️  Profile fetch failed, using basic login data');
                         AuthManager.setUser(data.user);
-                        
-                        showNotification('Welcome back!', 'Successfully signed in! Redirecting...', 'success');
+
+                        showNotification(
+                            t('auth:notifications.loginSuccess'),
+                            t('auth:notifications.loginSuccessGeneric'),
+                            'success'
+                        );
                         setTimeout(() => {
                             window.location.href = './dashboard.html';
                         }, 1500);
@@ -622,7 +656,7 @@
                     }
                     
                     console.log('❌ Login failed:', errorMessage);
-                    showNotification('Sign In Failed', errorMessage, 'error');
+                    showNotification(t('auth:notifications.loginFailed'), errorMessage, 'error');
                 }
             } catch (error) {
                 console.error('Login error:', error);
@@ -643,13 +677,13 @@
             const role = document.getElementById('userRole').value;
             
             if (!firstName || !lastName || !email || !password || !role) {
-                showNotification('Missing Information', 'Please fill in all required fields', 'error');
+                showNotification(t('auth:notifications.missingInfo'), t('auth:notifications.missingInfoMessage'), 'error');
                 return;
             }
-            
+
             const passwordCheck = checkPasswordStrength(password);
             if (passwordCheck.strength === 'weak') {
-                showNotification('Weak Password', 'Password must contain uppercase, lowercase, and number (min 8 characters)', 'error');
+                showNotification(t('auth:notifications.weakPassword'), t('auth:notifications.weakPasswordMessage'), 'error');
                 return;
             }
             
@@ -701,19 +735,27 @@
                     
                     if (profileData) {
                         console.log('✅ Profile data fetched and stored');
-                        showNotification('Account Created!', `Welcome ${profileData.first_name}! Redirecting to dashboard...`, 'success');
+                        showNotification(
+                            t('auth:notifications.signupSuccess'),
+                            t('auth:notifications.signupSuccessMessage', { name: profileData.first_name }),
+                            'success'
+                        );
                     } else {
                         // Fallback: use basic user data from registration response
                         AuthManager.setUser(data.user);
-                        showNotification('Account Created!', 'Welcome to RentReviews! Redirecting...', 'success');
+                        showNotification(
+                            t('auth:notifications.signupSuccess'),
+                            t('auth:notifications.signupSuccessGeneric'),
+                            'success'
+                        );
                     }
-                    
+
                     setTimeout(() => {
                         window.location.href = './dashboard.html';
                     }, 1500);
                 } else {
                     let errorMessage = 'Registration failed';
-                    
+
                     if (response.status === 409) {
                         errorMessage = data.message || 'An account with this email address already exists';
                     } else if (response.status === 400) {
@@ -723,8 +765,8 @@
                     } else if (data.message || data.error) {
                         errorMessage = data.message || data.error;
                     }
-                    
-                    showNotification('Registration Failed', errorMessage, 'error');
+
+                    showNotification(t('auth:notifications.signupFailed'), errorMessage, 'error');
                 }
             } catch (error) {
                 console.error('Signup error:', error);
@@ -820,6 +862,44 @@
         // Console security warning
         console.log('%cStop!', 'color: red; font-size: 50px; font-weight: bold;');
         console.log('%cThis is a browser feature intended for developers. If someone told you to copy-paste something here to enable a feature or "hack" someone\'s account, it is a scam and will give them access to your account.', 'color: red; font-size: 16px;');
+    </script>
+
+    <!-- i18n Initialization -->
+    <script>
+        const CURRENT_PAGE = 'auth.html';
+
+        // Initialize i18n before DOMContentLoaded to ensure translations are ready
+        (async function() {
+            try {
+                await initI18n(CURRENT_PAGE);
+                console.log('✅ i18n initialized:', i18next.language);
+            } catch (error) {
+                console.error('❌ i18n initialization failed:', error);
+            }
+        })();
+
+        // Update translations after page load
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                updatePageTranslations();
+                setupLanguageSelector();
+                updateHtmlLangAttribute(i18next.language);
+            } catch (error) {
+                console.error('❌ i18n update failed:', error);
+            }
+        });
+
+        // Override showNotification to use translations
+        const originalShowNotification = showNotification;
+        function showNotificationI18n(titleKey, messageKey, type = 'success', options = {}) {
+            const title = typeof titleKey === 'string' && titleKey.includes(':')
+                ? t(titleKey, options)
+                : titleKey;
+            const message = typeof messageKey === 'string' && messageKey.includes(':')
+                ? t(messageKey, options)
+                : messageKey;
+            return originalShowNotification(title, message, type);
+        }
     </script>
 </body>
 </html>

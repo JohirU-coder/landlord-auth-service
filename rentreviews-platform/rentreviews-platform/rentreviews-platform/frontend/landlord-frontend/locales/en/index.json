@@ -1,0 +1,101 @@
+{
+  "hero": {
+    "title": "Smart Rental",
+    "titleHighlight": "Decisions",
+    "subtitle": "Read verified reviews from real tenants before you sign. Make informed decisions and avoid problem landlords.",
+    "searchProperties": "🔍 Search Properties",
+    "signUpFree": "📝 Sign Up Free"
+  },
+  "stats": {
+    "propertiesListed": "Properties Listed",
+    "activeUsers": "Active Users",
+    "verifiedReviews": "% Verified Reviews"
+  },
+  "problem": {
+    "heading": "The Problem with",
+    "headingHighlight": "Renting Today",
+    "subtitle": "Millions of renters sign leases without knowing what they're getting into. It's time for transparency in the rental market.",
+    "noInfo": {
+      "title": "No Information",
+      "description": "Renters have no way to research landlords or property management companies before signing."
+    },
+    "expensiveMistakes": {
+      "title": "Expensive Mistakes",
+      "description": "Bad landlords cost tenants thousands in deposits, repairs, and legal fees."
+    },
+    "noAccountability": {
+      "title": "No Accountability",
+      "description": "Landlords face no public consequences for poor service or unethical behavior."
+    }
+  },
+  "features": {
+    "heading": "Our",
+    "headingHighlight": "Solution",
+    "subtitle": "Get the inside scoop on landlords and properties from real tenants who've lived there.",
+    "verifiedReviews": {
+      "title": "Verified Reviews",
+      "description": "Only real tenants can leave reviews. We verify authenticity to ensure trustworthy feedback."
+    },
+    "smartSearch": {
+      "title": "Smart Search",
+      "description": "Find properties by location, price, and ratings. Filter by specific landlord criteria."
+    },
+    "detailedRatings": {
+      "title": "Detailed Ratings",
+      "description": "Communication, maintenance, property condition, and value - get the complete picture."
+    },
+    "anonymousReviews": {
+      "title": "Anonymous Reviews",
+      "description": "Leave honest feedback without fear of retaliation. Your identity stays protected."
+    },
+    "landlordInsights": {
+      "title": "Landlord Insights",
+      "description": "See a landlord's complete track record across all their properties and tenants."
+    },
+    "propertyHistory": {
+      "title": "Property History",
+      "description": "Access historical data and trends for any property or landlord."
+    }
+  },
+  "howItWorks": {
+    "heading": "How It",
+    "headingHighlight": "Works",
+    "subtitle": "Simple, transparent, and effective. Join renters making smarter decisions.",
+    "step1": {
+      "title": "Search Properties",
+      "description": "Enter your location, budget, and preferences. Our search reveals properties with their review history."
+    },
+    "step2": {
+      "title": "Read Reviews",
+      "description": "Get detailed insights from verified tenants about communication, maintenance, and overall experience."
+    },
+    "step3": {
+      "title": "Make Smart Decisions",
+      "description": "Armed with real data from real tenants, confidently choose your next home."
+    }
+  },
+  "cta": {
+    "heading": "Ready to Rent",
+    "headingHighlight": "Smarter",
+    "subtitle": "Join our platform and make your next rental decision with confidence. Get instant access to verified reviews from real tenants.",
+    "getStartedFree": "🚀 Get Started Free",
+    "browseProperties": "🔍 Browse Properties"
+  },
+  "footer": {
+    "tagline": "Making renting transparent, one review at a time.",
+    "forRenters": "For Renters",
+    "searchProperties": "Search Properties",
+    "leaveReviews": "Leave Reviews",
+    "browseReviews": "Browse Reviews",
+    "forLandlords": "For Landlords",
+    "claimProperties": "Claim Properties",
+    "respondToReviews": "Respond to Reviews",
+    "dashboard": "Dashboard",
+    "support": "Support",
+    "helpCenter": "Help Center",
+    "contactUs": "Contact Us",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "copyright": "© 2025 RentReviews. All rights reserved."
+  }
+}
