@@ -1,0 +1,75 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "search": "Search",
+    "signOut": "Sign Out"
+  },
+  "header": {
+    "title": "Market Insights",
+    "subtitle": "Stay informed with rental market trends and data-driven insights"
+  },
+  "stats": {
+    "avgRent": "Average Rent",
+    "availableProperties": "Available Properties",
+    "avgRating": "Average Landlord Rating",
+    "daysOnMarket": "Avg. Days on Market",
+    "increasePrefix": "↗ +",
+    "decreasePrefix": "↘ -",
+    "fromLastMonth": " from last month"
+  },
+  "charts": {
+    "rentalTrends": "Rental Price Trends",
+    "trendsSubtitle": "Interactive chart showing 12-month rent trends",
+    "comingSoon": "Chart visualization coming soon",
+    "propertyTypes": "Property Types",
+    "oneBedroom": "1 Bedroom",
+    "twoBedrooms": "2 Bedroom",
+    "threePlusBedrooms": "3+ Bedroom",
+    "studio": "Studio"
+  },
+  "topRatedAreas": {
+    "title": "Top Rated Areas",
+    "manhattan": "Manhattan, NY",
+    "upperEastSide": "Upper East Side",
+    "brooklyn": "Brooklyn, NY",
+    "parkSlope": "Park Slope",
+    "queens": "Queens, NY",
+    "astoria": "Astoria"
+  },
+  "priceAlerts": {
+    "title": "Price Alerts",
+    "highRent": "High Rent Area",
+    "manhattanUp": "Manhattan avg. rent up 15% this quarter",
+    "goodValue": "Good Value",
+    "queensSavings": "Queens offers 30% savings vs Manhattan",
+    "marketTrend": "Market Trend",
+    "inventoryIncreasing": "Inventory increasing in outer boroughs"
+  },
+  "renterTips": {
+    "title": "Renter Tips",
+    "bestTime": "Best Time to Search",
+    "bestTimeDesc": "Late fall and winter typically offer better deals and more landlord flexibility.",
+    "negotiation": "Negotiation Strategy",
+    "negotiationDesc": "Properties on market 30+ days are more likely to accept lower offers.",
+    "redFlags": "Red Flags",
+    "redFlagsDesc": "Avoid landlords with ratings below 3.0 or multiple unresolved complaints."
+  },
+  "neighborhood": {
+    "title": "Neighborhood Spotlight",
+    "williamsburg": "Williamsburg",
+    "lowerEastSide": "Lower East Side",
+    "trending": "Trending",
+    "popular": "Popular",
+    "value": "Value",
+    "avgRent": "Avg. Rent:",
+    "landlordRating": "Landlord Rating:",
+    "availableUnits": "Available Units:",
+    "viewProperties": "View Properties"
+  },
+  "cta": {
+    "title": "Ready to Find Your Perfect Rental?",
+    "subtitle": "Use these insights to make informed decisions about your next home.",
+    "searchButton": "🔍 Search Properties",
+    "reviewButton": "✏️ Write a Review"
+  }
+}

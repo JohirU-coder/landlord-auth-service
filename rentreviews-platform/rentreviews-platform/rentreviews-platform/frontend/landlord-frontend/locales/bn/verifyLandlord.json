@@ -1,0 +1,92 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "signOut": "Sign Out"
+  },
+  "header": {
+    "title": "Verify Your Landlord Account",
+    "subtitle": "Upload documents to verify your property ownership and unlock landlord features"
+  },
+  "status": {
+    "title": "Verification Status",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "underReview": "Under Review",
+    "pendingMessage": "Your landlord verification is pending. Complete the steps below to verify your account.",
+    "approvedMessage": "Congratulations! Your landlord account has been verified. You can now list properties and access all landlord features.",
+    "rejectedMessage": "Your verification was rejected. Please review the feedback and submit additional documentation.",
+    "underReviewMessage": "Your documents are currently being reviewed by our team. We will notify you within 1-3 business days.",
+    "verifiedInfo": "Verified landlords can list properties and respond to reviews. Verification typically takes 1-3 business days."
+  },
+  "step1": {
+    "title": "Basic Information",
+    "nameLabel": "Full Legal Name *",
+    "namePlaceholder": "John Smith",
+    "nameHint": "Must match name on property documents",
+    "phoneLabel": "Phone Number *",
+    "phonePlaceholder": "(555) 123-4567",
+    "addressLabel": "Business Address",
+    "addressPlaceholder": "123 Main St, City, State, ZIP (optional)",
+    "addressHint": "If you operate as a business, include your business address"
+  },
+  "step2": {
+    "title": "Upload Verification Documents",
+    "subtitle": "Please upload at least two of the following documents to verify your property ownership:",
+    "propertyDeed": "Property deed or title",
+    "mortgageStatement": "Current mortgage statement",
+    "taxRecords": "Property tax records",
+    "license": "Rental/business license",
+    "governmentId": "Government-issued ID",
+    "insurance": "Property insurance documents",
+    "uploadTitle": "Upload Documents",
+    "dragDrop": "Drag and drop files here, or click to browse",
+    "chooseFiles": "Choose Files",
+    "fileFormats": "Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB per file)",
+    "uploadedDocs": "Uploaded Documents"
+  },
+  "step3": {
+    "title": "Additional Information",
+    "propertiesLabel": "How many properties do you currently manage?",
+    "propertiesSelect": "Select...",
+    "oneProperty": "1 property",
+    "twoToFive": "2-5 properties",
+    "sixToTen": "6-10 properties",
+    "elevenToTwentyFive": "11-25 properties",
+    "twentyFivePlus": "25+ properties",
+    "experienceLabel": "Years of experience as a landlord",
+    "newLandlord": "New landlord (less than 1 year)",
+    "oneToTwo": "1-2 years",
+    "threeToFive": "3-5 years",
+    "sixToTen": "6-10 years",
+    "tenPlus": "10+ years",
+    "notesLabel": "Additional Notes (Optional)",
+    "notesPlaceholder": "Any additional information you'd like to provide..."
+  },
+  "terms": {
+    "certification": "I certify that all information provided is accurate and that I am the legal owner or authorized representative of the properties I manage. I understand that providing false information may result in account suspension or termination. I agree to the",
+    "termsLink": "Landlord Terms of Service",
+    "and": "and",
+    "policyLink": "Verification Policy",
+    "submitButton": "Submit for Verification",
+    "reviewNote": "Our team will review your documents within 1-3 business days and notify you via email."
+  },
+  "validation": {
+    "loginRequired": "Please log in to access verification.",
+    "landlordOnly": "Only landlord accounts can be verified. Please contact support to upgrade your account.",
+    "termsRequired": "Please agree to the terms and conditions.",
+    "fieldsRequired": "Please fill in all required fields (Full Name and Phone Number).",
+    "documentsRequired": "Please upload at least 2 verification documents.",
+    "fileTypeInvalid": "{{name}} is not a supported file type.",
+    "fileTooLarge": "{{name}} is too large. Maximum size is 10MB.",
+    "fileLimit": "Maximum 10 documents allowed.",
+    "submissionError": "Error submitting verification. Please try again."
+  },
+  "success": {
+    "title": "Verification Submitted!",
+    "message": "Your landlord verification has been submitted successfully.",
+    "submissionId": "Submission ID: {{id}}",
+    "reviewMessage": "Our team will review your documents within 1-3 business days. You'll receive an email notification once the review is complete.",
+    "dashboardButton": "Return to Dashboard"
+  }
+}
