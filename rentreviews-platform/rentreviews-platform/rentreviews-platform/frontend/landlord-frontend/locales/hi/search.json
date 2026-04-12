@@ -1,48 +1,48 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
-    "signOut": "Sign Out"
+    "dashboard": "डैशबोर्ड",
+    "signOut": "साइन आउट"
   },
   "header": {
-    "title": "Find Your Perfect Rental",
-    "subtitle": "Search thousands of properties with honest reviews from real renters"
+    "title": "अपना आदर्श किराया खोजें",
+    "subtitle": "हजारों संपत्तियों में खोजें और असली किरायेदारों की ईमानदार समीक्षाएं देखें"
   },
   "searchForm": {
-    "locationLabel": "Location",
-    "locationPlaceholder": "City, neighborhood, or zip code",
-    "maxPriceLabel": "Max Price",
-    "anyPrice": "Any Price",
-    "under1000": "Under $1,000",
-    "under1500": "Under $1,500",
-    "under2000": "Under $2,000",
-    "under2500": "Under $2,500",
-    "under3000": "Under $3,000",
-    "under4000": "Under $4,000",
-    "bedroomsLabel": "Bedrooms",
-    "any": "Any",
-    "studio": "Studio",
-    "oneBr": "1 BR",
-    "twoBr": "2 BR",
-    "threeBr": "3 BR",
-    "fourPlusBr": "4+ BR",
-    "searchButton": "🔍 Search Properties"
+    "locationLabel": "स्थान",
+    "locationPlaceholder": "शहर, मोहल्ला या पिन कोड",
+    "maxPriceLabel": "अधिकतम किराया",
+    "anyPrice": "कोई भी किराया",
+    "under1000": "$1,000 से कम",
+    "under1500": "$1,500 से कम",
+    "under2000": "$2,000 से कम",
+    "under2500": "$2,500 से कम",
+    "under3000": "$3,000 से कम",
+    "under4000": "$4,000 से कम",
+    "bedroomsLabel": "शयनकक्ष",
+    "any": "कोई भी",
+    "studio": "स्टूडियो",
+    "oneBr": "1 बीआर",
+    "twoBr": "2 बीआर",
+    "threeBr": "3 बीआर",
+    "fourPlusBr": "4+ बीआर",
+    "searchButton": "🔍 संपत्ति खोजें"
   },
   "filters": {
-    "activeFilters": "Active filters:",
-    "clearAll": "Clear all"
+    "activeFilters": "सक्रिय फिल्टर:",
+    "clearAll": "सभी हटाएं"
   },
   "results": {
-    "title": "Available Properties",
-    "loading": "Loading properties...",
-    "sortBy": "Sort by:",
-    "sortNewest": "Newest First",
-    "sortPriceLow": "Price: Low to High",
-    "sortPriceHigh": "Price: High to Low",
-    "sortRating": "Highest Rated",
-    "loadMore": "Load More Properties"
+    "title": "उपलब्ध संपत्तियां",
+    "loading": "संपत्तियां लोड हो रही हैं...",
+    "sortBy": "क्रमबद्ध करें:",
+    "sortNewest": "नवीनतम पहले",
+    "sortPriceLow": "किराया: कम से अधिक",
+    "sortPriceHigh": "किराया: अधिक से कम",
+    "sortRating": "सर्वाधिक रेटेड",
+    "loadMore": "और संपत्तियां लोड करें"
   },
   "propertyCard": {
-    "verifiedLandlord": "Verified Landlord",
-    "viewDetails": "View Details"
+    "verifiedLandlord": "सत्यापित मकान मालिक",
+    "viewDetails": "विवरण देखें"
   }
 }
