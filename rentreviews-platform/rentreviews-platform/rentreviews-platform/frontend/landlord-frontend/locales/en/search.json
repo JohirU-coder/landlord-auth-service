@@ -34,6 +34,7 @@
   "results": {
     "title": "Available Properties",
     "loading": "Loading properties...",
+    "foundProperties": "{{count}} properties found",
     "sortBy": "Sort by:",
     "sortNewest": "Newest First",
     "sortPriceLow": "Price: Low to High",
@@ -43,6 +44,89 @@
   },
   "propertyCard": {
     "verifiedLandlord": "Verified Landlord",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "bed": "{{count}} Bed",
+    "bath": "{{count}} Bath",
+    "sqft": "{{sqft}} sq ft",
+    "noReviews": "No reviews yet",
+    "highlyRated": "⭐ Highly Rated",
+    "reviewUnverified": "Review (Unverified)",
+    "writeReview": "Write Review",
+    "claimProperty": "Claim Property",
+    "communitySubmitted": "Community Submitted",
+    "verifiedBadge": "✓ Verified",
+    "pendingBadge": "Pending Verification",
+    "reviews": "{{count}} review",
+    "reviews_plural": "{{count}} reviews"
+  },
+  "disclaimer": {
+    "title": "Unverified Property:",
+    "message": "This property was submitted by a community member and has not been verified by the landlord. Information may be inaccurate."
+  },
+  "messages": {
+    "noResults": "No properties found",
+    "noResultsHint": "Try adjusting your search criteria or browse all properties",
+    "errorTitle": "Failed to load properties",
+    "errorHint": "Please check your connection and try again",
+    "retry": "Try Again"
+  },
+  "propertyDetails": {
+    "unverifiedBadge": "⚠️ Community Submitted — Unverified",
+    "unverifiedWarningTitle": "Important Notice",
+    "unverifiedWarning1": "This property listing was submitted by a community member, not by the landlord.",
+    "unverifiedWarning2": "Details such as rent, bedrooms, and amenities may be inaccurate.",
+    "unverifiedWarning3": "We do not guarantee the accuracy of this listing.",
+    "unverifiedWarning4": "Contact the landlord directly to verify all information.",
+    "noReviews": "No reviews yet",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "sqFt": "Sq Ft",
+    "description": "Description",
+    "noDescription": "No description available.",
+    "landlord": "Landlord",
+    "verifiedLandlord": "Verified Landlord",
+    "pendingVerification": "Pending Verification",
+    "dataSourceLabel": "Data Source:",
+    "dataSourceValue": "Community submitted",
+    "lastUpdatedLabel": "Last Updated:",
+    "accuracyLabel": "Accuracy:",
+    "accuracyValue": "Not guaranteed",
+    "recentReviews": "Recent Reviews",
+    "noReviewsMessage": "No reviews yet. Be the first to review this property!",
+    "verifyBeforeReviewing": "Review This Property",
+    "writeReview": "Write a Review",
+    "close": "Close"
+  },
+  "reviewWarning": {
+    "title": "Reviewing an Unverified Property",
+    "subtitle": "This property has not been verified by its landlord.",
+    "beforeReviewingTitle": "Before you continue:",
+    "warning1": "Property details may be inaccurate or outdated.",
+    "warning2": "The landlord may not be aware this listing exists.",
+    "warning3": "Your review will be marked as being for an unverified property.",
+    "warning4": "You can still leave an honest review based on your experience.",
+    "confirmationText": "By continuing, you acknowledge that this is an unverified property listing and that your review will reflect your personal experience.",
+    "cancel": "Cancel",
+    "continue": "Continue Anyway"
+  },
+  "claimModal": {
+    "title": "Claim This Property",
+    "subtitle": "Verify that you are the landlord for this property",
+    "verificationLabel": "Provide verification details",
+    "verificationPlaceholder": "Explain how you can verify ownership (deed, tax records, property management agreement, etc.)",
+    "legalConfirmation": "I confirm that I am the legal owner or authorized representative of this property and that the information I provide is accurate and truthful.",
+    "cancel": "Cancel",
+    "submit": "Submit Claim",
+    "submitting": "Submitting...",
+    "missingDetails": "Please provide verification details.",
+    "missingConfirmation": "Please confirm the legal statement."
+  },
+  "claimSuccess": {
+    "title": "Claim Submitted!",
+    "message": "Your property claim has been submitted for review. Our team will verify your documentation and contact you within 2–3 business days.",
+    "nextStepsTitle": "Next Steps:",
+    "nextStepsMessage": "Complete your landlord verification to expedite the claim process.",
+    "close": "Close",
+    "verifyAccount": "Verify Account"
   }
 }

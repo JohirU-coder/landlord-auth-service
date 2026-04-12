@@ -34,6 +34,7 @@
   "results": {
     "title": "可用房源",
     "loading": "正在加载房源...",
+    "foundProperties": "找到 {{count}} 套房源",
     "sortBy": "排序方式：",
     "sortNewest": "最新优先",
     "sortPriceLow": "价格：从低到高",
@@ -43,6 +44,89 @@
   },
   "propertyCard": {
     "verifiedLandlord": "认证房东",
-    "viewDetails": "查看详情"
+    "viewDetails": "查看详情",
+    "bed": "{{count}} 间卧室",
+    "bath": "{{count}} 间浴室",
+    "sqft": "{{sqft}} 平方英尺",
+    "noReviews": "暂无评价",
+    "highlyRated": "⭐ 高分房源",
+    "reviewUnverified": "评价（未验证）",
+    "writeReview": "写评价",
+    "claimProperty": "认领房源",
+    "communitySubmitted": "社区提交",
+    "verifiedBadge": "✓ 已认证",
+    "pendingBadge": "待认证",
+    "reviews": "{{count}} 条评价",
+    "reviews_plural": "{{count}} 条评价"
+  },
+  "disclaimer": {
+    "title": "未验证房源：",
+    "message": "此房源由社区成员提交，尚未经过房东验证。信息可能不准确。"
+  },
+  "messages": {
+    "noResults": "未找到房源",
+    "noResultsHint": "尝试调整搜索条件或浏览全部房源",
+    "errorTitle": "加载房源失败",
+    "errorHint": "请检查网络连接后重试",
+    "retry": "重试"
+  },
+  "propertyDetails": {
+    "unverifiedBadge": "⚠️ 社区提交 — 未验证",
+    "unverifiedWarningTitle": "重要提示",
+    "unverifiedWarning1": "此房源由社区成员提交，并非由房东发布。",
+    "unverifiedWarning2": "租金、卧室数量和配套设施等详情可能不准确。",
+    "unverifiedWarning3": "我们不保证此房源信息的准确性。",
+    "unverifiedWarning4": "请直接联系房东核实所有信息。",
+    "noReviews": "暂无评价",
+    "bedrooms": "卧室",
+    "bathrooms": "浴室",
+    "sqFt": "平方英尺",
+    "description": "描述",
+    "noDescription": "暂无描述。",
+    "landlord": "房东",
+    "verifiedLandlord": "认证房东",
+    "pendingVerification": "待认证",
+    "dataSourceLabel": "数据来源：",
+    "dataSourceValue": "社区提交",
+    "lastUpdatedLabel": "最后更新：",
+    "accuracyLabel": "准确性：",
+    "accuracyValue": "不作保证",
+    "recentReviews": "最近评价",
+    "noReviewsMessage": "暂无评价，成为第一个评价此房源的人！",
+    "verifyBeforeReviewing": "评价此房源",
+    "writeReview": "写评价",
+    "close": "关闭"
+  },
+  "reviewWarning": {
+    "title": "评价未验证房源",
+    "subtitle": "此房源尚未经过房东验证。",
+    "beforeReviewingTitle": "继续前请注意：",
+    "warning1": "房源详情可能不准确或已过时。",
+    "warning2": "房东可能不知道此房源列表的存在。",
+    "warning3": "您的评价将被标记为针对未验证房源。",
+    "warning4": "您仍可根据自身经历留下真实评价。",
+    "confirmationText": "继续即表示您承认这是未验证的房源，且您的评价将反映您的个人体验。",
+    "cancel": "取消",
+    "continue": "继续"
+  },
+  "claimModal": {
+    "title": "认领此房源",
+    "subtitle": "验证您是此房源的房东",
+    "verificationLabel": "提供验证信息",
+    "verificationPlaceholder": "说明您如何证明所有权（房产证、税务记录、物业管理协议等）",
+    "legalConfirmation": "我确认我是此房源的合法所有人或授权代表，所提供的信息准确真实。",
+    "cancel": "取消",
+    "submit": "提交认领",
+    "submitting": "提交中...",
+    "missingDetails": "请提供验证信息。",
+    "missingConfirmation": "请确认法律声明。"
+  },
+  "claimSuccess": {
+    "title": "认领申请已提交！",
+    "message": "您的房源认领申请已提交审核。我们的团队将验证您的文件，并在2–3个工作日内与您联系。",
+    "nextStepsTitle": "下一步：",
+    "nextStepsMessage": "完成房东账户验证以加快认领流程。",
+    "close": "关闭",
+    "verifyAccount": "验证账户"
   }
 }
