@@ -4,7 +4,8 @@
     "titleHighlight": "Decisiones",
     "subtitle": "Lee opiniones verificadas de inquilinos reales antes de firmar. Toma decisiones informadas y evita propietarios problemáticos.",
     "searchProperties": "🔍 Buscar propiedades",
-    "signUpFree": "📝 Regístrate gratis"
+    "signUpFree": "📝 Regístrate gratis",
+    "addProperty": "🏠 Añadir propiedad"
   },
   "stats": {
     "propertiesListed": "Propiedades en venta",
@@ -88,7 +89,8 @@
     "leaveReviews": "Deja tus comentarios",
     "browseReviews": "Explorar reseñas",
     "forLandlords": "Para propietarios",
-    "claimProperties": "Propiedades de la reclamación",
+    "addProperty": "Añadir propiedad",
+    "claimProperties": "Reclamar propiedades",
     "respondToReviews": "Responder a las reseñas",
     "dashboard": "Panel de control",
     "support": "Soporte",

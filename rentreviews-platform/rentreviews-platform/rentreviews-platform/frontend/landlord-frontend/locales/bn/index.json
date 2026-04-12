@@ -3,8 +3,9 @@
     "title": "Smart Rental",
     "titleHighlight": "Decisions",
     "subtitle": "Read verified reviews from real tenants before you sign. Make informed decisions and avoid problem landlords.",
-    "searchProperties": "🔍 Search Properties",
-    "signUpFree": "📝 Sign Up Free"
+    "searchProperties": "🔍 সম্পত্তি খুঁজুন",
+    "signUpFree": "📝 বিনামূল্যে সাইন আপ করুন",
+    "addProperty": "🏠 সম্পত্তি যোগ করুন"
   },
   "stats": {
     "propertiesListed": "Properties Listed",
@@ -88,9 +89,10 @@
     "leaveReviews": "Leave Reviews",
     "browseReviews": "Browse Reviews",
     "forLandlords": "For Landlords",
-    "claimProperties": "Claim Properties",
-    "respondToReviews": "Respond to Reviews",
-    "dashboard": "Dashboard",
+    "addProperty": "সম্পত্তি যোগ করুন",
+    "claimProperties": "সম্পত্তি দাবি করুন",
+    "respondToReviews": "রিভিউতে সাড়া দিন",
+    "dashboard": "ড্যাশবোর্ড",
     "support": "Support",
     "helpCenter": "Help Center",
     "contactUs": "Contact Us",
