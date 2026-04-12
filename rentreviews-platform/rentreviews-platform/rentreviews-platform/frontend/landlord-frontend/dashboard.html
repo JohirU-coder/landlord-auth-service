@@ -225,7 +225,7 @@
                         </button>
 
                         <!-- Add Property -->
-                        <button id="addPropertyBtn" class="bg-gradient-to-r from-emerald-500 to-green-600 text-white p-4 rounded-lg hover:from-emerald-600 hover:to-green-700 transition-all transform hover:scale-105" style="display: none;">
+                        <button id="addPropertyBtn" class="bg-gradient-to-r from-emerald-500 to-green-600 text-white p-4 rounded-lg hover:from-emerald-600 hover:to-green-700 transition-all transform hover:scale-105">
                             <div class="text-2xl mb-2">🏠</div>
                             <div class="font-medium" data-i18n="dashboard:quickActions.addProperty">Add Property</div>
                             <div class="text-xs opacity-90 mt-1" data-i18n="dashboard:quickActions.addPropertyHint">List your rental</div>
@@ -403,16 +403,6 @@
                         userNameNav.textContent = `${firstName} ${lastName}`.trim() || 'User';
                     }
 
-                    // Show/hide Add Property button based on user role
-                    const addPropertyBtn = document.getElementById('addPropertyBtn');
-                    if (addPropertyBtn && this.user) {
-                        if (this.user.role === 'landlord') {
-                            addPropertyBtn.style.display = 'block';
-                            addPropertyBtn.style.opacity = '1';
-                        } else {
-                            addPropertyBtn.style.display = 'none';
-                        }
-                    }
                 } catch (error) {
                     console.error('⚠️ Error in updateBasicUI:', error);
                 }
@@ -443,18 +433,6 @@
                         const role = this.user.role || 'user';
                         const roleKey = role === 'landlord' ? 'dashboard:stats.roleLandlord' : 'dashboard:stats.roleRenter';
                         userRole.textContent = t(roleKey);
-                    }
-
-                    // Show/hide Add Property button based on user role
-                    const addPropertyBtn = document.getElementById('addPropertyBtn');
-                    if (addPropertyBtn) {
-                        if (this.user && this.user.role === 'landlord') {
-                            addPropertyBtn.style.display = 'block';
-                            addPropertyBtn.style.opacity = '1';
-                        } else {
-                            addPropertyBtn.style.display = 'none';
-                            addPropertyBtn.style.opacity = '0.5';
-                        }
                     }
 
                     console.log('✅ UI updated successfully');
