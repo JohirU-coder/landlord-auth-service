@@ -1,48 +1,48 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
-    "signOut": "Sign Out"
+    "dashboard": "仪表盘",
+    "signOut": "注销"
   },
   "header": {
-    "title": "Find Your Perfect Rental",
-    "subtitle": "Search thousands of properties with honest reviews from real renters"
+    "title": "找到您的理想租房",
+    "subtitle": "搜索数千套房源，查看真实租客的诚实评价"
   },
   "searchForm": {
-    "locationLabel": "Location",
-    "locationPlaceholder": "City, neighborhood, or zip code",
-    "maxPriceLabel": "Max Price",
-    "anyPrice": "Any Price",
-    "under1000": "Under $1,000",
-    "under1500": "Under $1,500",
-    "under2000": "Under $2,000",
-    "under2500": "Under $2,500",
-    "under3000": "Under $3,000",
-    "under4000": "Under $4,000",
-    "bedroomsLabel": "Bedrooms",
-    "any": "Any",
-    "studio": "Studio",
-    "oneBr": "1 BR",
-    "twoBr": "2 BR",
-    "threeBr": "3 BR",
-    "fourPlusBr": "4+ BR",
-    "searchButton": "🔍 Search Properties"
+    "locationLabel": "位置",
+    "locationPlaceholder": "城市、社区或邮政编码",
+    "maxPriceLabel": "最高价格",
+    "anyPrice": "不限价格",
+    "under1000": "$1,000以下",
+    "under1500": "$1,500以下",
+    "under2000": "$2,000以下",
+    "under2500": "$2,500以下",
+    "under3000": "$3,000以下",
+    "under4000": "$4,000以下",
+    "bedroomsLabel": "卧室数量",
+    "any": "不限",
+    "studio": "开放式",
+    "oneBr": "1卧",
+    "twoBr": "2卧",
+    "threeBr": "3卧",
+    "fourPlusBr": "4卧以上",
+    "searchButton": "🔍 搜索房源"
   },
   "filters": {
-    "activeFilters": "Active filters:",
-    "clearAll": "Clear all"
+    "activeFilters": "已选筛选条件：",
+    "clearAll": "清除全部"
   },
   "results": {
-    "title": "Available Properties",
-    "loading": "Loading properties...",
-    "sortBy": "Sort by:",
-    "sortNewest": "Newest First",
-    "sortPriceLow": "Price: Low to High",
-    "sortPriceHigh": "Price: High to Low",
-    "sortRating": "Highest Rated",
-    "loadMore": "Load More Properties"
+    "title": "可用房源",
+    "loading": "正在加载房源...",
+    "sortBy": "排序方式：",
+    "sortNewest": "最新优先",
+    "sortPriceLow": "价格：从低到高",
+    "sortPriceHigh": "价格：从高到低",
+    "sortRating": "评分最高",
+    "loadMore": "加载更多房源"
   },
   "propertyCard": {
-    "verifiedLandlord": "Verified Landlord",
-    "viewDetails": "View Details"
+    "verifiedLandlord": "认证房东",
+    "viewDetails": "查看详情"
   }
 }

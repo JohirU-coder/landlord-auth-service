@@ -1,39 +1,39 @@
 {
   "loading": {
-    "message": "Loading your dashboard..."
+    "message": "আপনার ড্যাশবোর্ড লোড হচ্ছে..."
   },
   "nav": {
-    "signOut": "Sign Out"
+    "signOut": "সাইন আউট"
   },
   "welcome": {
-    "greeting": "Welcome back, {{name}}!",
-    "subtitle": "Here's what's happening with your rental search"
+    "greeting": "আবার স্বাগতম, {{name}}!",
+    "subtitle": "আপনার ভাড়া অনুসন্ধানের আপডেট"
   },
   "stats": {
-    "reviewsWritten": "Reviews Written",
-    "reviewsHint": "Help other renters by sharing your experience",
-    "propertiesSaved": "Properties Saved",
-    "propertiesHint": "Keep track of places you're interested in",
-    "accountStatus": "Account Status",
-    "statusActive": "ACTIVE",
-    "roleRenter": "Renter Account",
-    "roleLandlord": "Landlord Account"
+    "reviewsWritten": "লেখা রিভিউ",
+    "reviewsHint": "আপনার অভিজ্ঞতা শেয়ার করে অন্য ভাড়াটেদের সাহায্য করুন",
+    "propertiesSaved": "সংরক্ষিত সম্পত্তি",
+    "propertiesHint": "আপনার আগ্রহের জায়গাগুলো ট্র্যাক করুন",
+    "accountStatus": "অ্যাকাউন্টের অবস্থা",
+    "statusActive": "সক্রিয়",
+    "roleRenter": "ভাড়াটে অ্যাকাউন্ট",
+    "roleLandlord": "বাড়িওয়ালা অ্যাকাউন্ট"
   },
   "quickActions": {
-    "title": "Quick Actions",
-    "searchProperties": "Search Properties",
-    "searchPropertiesHint": "Find your next home",
-    "writeReview": "Write Review",
-    "writeReviewHint": "Share your experience",
-    "marketInsights": "Market Insights",
-    "marketInsightsHint": "Rental market trends",
-    "addProperty": "Add Property",
-    "addPropertyHint": "List your rental"
+    "title": "দ্রুত অ্যাকশন",
+    "searchProperties": "সম্পত্তি খুঁজুন",
+    "searchPropertiesHint": "আপনার পরবর্তী বাড়ি খুঁজুন",
+    "writeReview": "রিভিউ লিখুন",
+    "writeReviewHint": "আপনার অভিজ্ঞতা শেয়ার করুন",
+    "marketInsights": "বাজার বিশ্লেষণ",
+    "marketInsightsHint": "ভাড়া বাজারের প্রবণতা",
+    "addProperty": "সম্পত্তি যোগ করুন",
+    "addPropertyHint": "আপনার ভাড়া তালিকাভুক্ত করুন"
   },
   "recentActivity": {
-    "title": "Recent Activity",
-    "noActivity": "No activity yet",
-    "noActivityHint": "Start by searching for properties or writing your first review!",
-    "getStarted": "Get Started"
+    "title": "সাম্প্রতিক কার্যক্রম",
+    "noActivity": "এখনো কোনো কার্যক্রম নেই",
+    "noActivityHint": "সম্পত্তি অনুসন্ধান করে বা আপনার প্রথম রিভিউ লিখে শুরু করুন!",
+    "getStarted": "শুরু করুন"
   }
 }

@@ -1,48 +1,48 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
-    "signOut": "Sign Out"
+    "dashboard": "ড্যাশবোর্ড",
+    "signOut": "সাইন আউট"
   },
   "header": {
-    "title": "Find Your Perfect Rental",
-    "subtitle": "Search thousands of properties with honest reviews from real renters"
+    "title": "আপনার আদর্শ ভাড়া খুঁজুন",
+    "subtitle": "হাজার হাজার সম্পত্তি অনুসন্ধান করুন এবং বাস্তব ভাড়াটেদের সৎ রিভিউ দেখুন"
   },
   "searchForm": {
-    "locationLabel": "Location",
-    "locationPlaceholder": "City, neighborhood, or zip code",
-    "maxPriceLabel": "Max Price",
-    "anyPrice": "Any Price",
-    "under1000": "Under $1,000",
-    "under1500": "Under $1,500",
-    "under2000": "Under $2,000",
-    "under2500": "Under $2,500",
-    "under3000": "Under $3,000",
-    "under4000": "Under $4,000",
-    "bedroomsLabel": "Bedrooms",
-    "any": "Any",
-    "studio": "Studio",
-    "oneBr": "1 BR",
-    "twoBr": "2 BR",
-    "threeBr": "3 BR",
-    "fourPlusBr": "4+ BR",
-    "searchButton": "🔍 Search Properties"
+    "locationLabel": "অবস্থান",
+    "locationPlaceholder": "শহর, এলাকা বা পোস্টাল কোড",
+    "maxPriceLabel": "সর্বোচ্চ মূল্য",
+    "anyPrice": "যেকোনো মূল্য",
+    "under1000": "$১,০০০ এর নিচে",
+    "under1500": "$১,৫০০ এর নিচে",
+    "under2000": "$২,০০০ এর নিচে",
+    "under2500": "$২,৫০০ এর নিচে",
+    "under3000": "$৩,০০০ এর নিচে",
+    "under4000": "$৪,০০০ এর নিচে",
+    "bedroomsLabel": "শয়নকক্ষ",
+    "any": "যেকোনো",
+    "studio": "স্টুডিও",
+    "oneBr": "১ বিআর",
+    "twoBr": "২ বিআর",
+    "threeBr": "৩ বিআর",
+    "fourPlusBr": "৪+ বিআর",
+    "searchButton": "🔍 সম্পত্তি খুঁজুন"
   },
   "filters": {
-    "activeFilters": "Active filters:",
-    "clearAll": "Clear all"
+    "activeFilters": "সক্রিয় ফিল্টার:",
+    "clearAll": "সব মুছুন"
   },
   "results": {
-    "title": "Available Properties",
-    "loading": "Loading properties...",
-    "sortBy": "Sort by:",
-    "sortNewest": "Newest First",
-    "sortPriceLow": "Price: Low to High",
-    "sortPriceHigh": "Price: High to Low",
-    "sortRating": "Highest Rated",
-    "loadMore": "Load More Properties"
+    "title": "উপলব্ধ সম্পত্তি",
+    "loading": "সম্পত্তি লোড হচ্ছে...",
+    "sortBy": "সাজান:",
+    "sortNewest": "সর্বশেষ প্রথমে",
+    "sortPriceLow": "মূল্য: কম থেকে বেশি",
+    "sortPriceHigh": "মূল্য: বেশি থেকে কম",
+    "sortRating": "সর্বোচ্চ রেটেড",
+    "loadMore": "আরও সম্পত্তি লোড করুন"
   },
   "propertyCard": {
-    "verifiedLandlord": "Verified Landlord",
-    "viewDetails": "View Details"
+    "verifiedLandlord": "যাচাইকৃত বাড়িওয়ালা",
+    "viewDetails": "বিস্তারিত দেখুন"
   }
 }
