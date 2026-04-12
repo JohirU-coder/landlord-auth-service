@@ -896,24 +896,15 @@
     <script>
         const CURRENT_PAGE = 'auth.html';
 
-        // Initialize i18n before DOMContentLoaded to ensure translations are ready
-        (async function() {
+        document.addEventListener('DOMContentLoaded', async () => {
             try {
                 await initI18n(CURRENT_PAGE);
-                console.log('✅ i18n initialized:', i18next.language);
-            } catch (error) {
-                console.error('❌ i18n initialization failed:', error);
-            }
-        })();
-
-        // Update translations after page load
-        document.addEventListener('DOMContentLoaded', () => {
-            try {
                 updatePageTranslations();
                 setupLanguageSelector();
                 updateHtmlLangAttribute(i18next.language);
+                console.log('✅ i18n initialized:', i18next.language);
             } catch (error) {
-                console.error('❌ i18n update failed:', error);
+                console.error('❌ i18n initialization failed:', error);
             }
         });
 

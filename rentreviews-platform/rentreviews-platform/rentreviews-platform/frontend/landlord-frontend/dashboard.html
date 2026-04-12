@@ -654,24 +654,15 @@
     <script>
         const CURRENT_PAGE = 'dashboard.html';
 
-        // Initialize i18n before DOM content is loaded
-        (async function() {
+        document.addEventListener('DOMContentLoaded', async () => {
             try {
                 await initI18n(CURRENT_PAGE);
-                console.log('✅ i18n initialized:', i18next.language);
-            } catch (error) {
-                console.error('❌ i18n initialization failed:', error);
-            }
-        })();
-
-        // Update translations after page load
-        window.addEventListener('DOMContentLoaded', () => {
-            try {
                 updatePageTranslations();
                 setupLanguageSelector();
                 updateHtmlLangAttribute(i18next.language);
+                console.log('✅ i18n initialized:', i18next.language);
             } catch (error) {
-                console.error('❌ i18n update failed:', error);
+                console.error('❌ i18n initialization failed:', error);
             }
         });
     </script>
