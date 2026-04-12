@@ -19,16 +19,24 @@ const I18N_CONFIG = {
     storageKey: 'rentreviews_language',
 
     // Namespace mapping for each page
+    // Keys match both the filename (index.html, auth.html, dashboard.html)
+    // and the namespace name used by pages that pass a short identifier
     namespaces: {
         'index.html': ['common', 'index'],
         'auth.html': ['common', 'auth'],
         'dashboard.html': ['common', 'dashboard'],
         'search.html': ['common', 'search'],
+        'search': ['common', 'search'],
         'write-review.html': ['common', 'writeReview'],
+        'writeReview': ['common', 'writeReview'],
         'add-property.html': ['common', 'addProperty'],
+        'addProperty': ['common', 'addProperty'],
         'market-insights.html': ['common', 'marketInsights'],
+        'marketInsights': ['common', 'marketInsights'],
         'verify-landlord.html': ['common', 'verifyLandlord'],
-        'admin-seed-properties.html': ['common', 'adminSeed']
+        'verifyLandlord': ['common', 'verifyLandlord'],
+        'admin-seed-properties.html': ['common', 'adminSeed'],
+        'adminSeed': ['common', 'adminSeed']
     }
 };
 

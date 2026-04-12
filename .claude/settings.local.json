@@ -24,7 +24,10 @@
       "Bash(for ns:*)",
       "Bash(en_file=\"$BASE/en/$ns.json\")",
       "Bash(lang_file=\"$BASE/$lang/$ns.json\")",
-      "Bash(if cmp:*)"
+      "Bash(if cmp:*)",
+      "Bash(BASE=\"c:/Users/johir/OneDrive/Documents/GitHub/landlord-auth-service/rentreviews-platform/rentreviews-platform/rentreviews-platform/frontend/landlord-frontend\" for f in dashboard.html auth.html search.html write-review.html add-property.html market-insights.html verify-landlord.html admin-seed-properties.html index.html)",
+      "Bash(do echo:*)",
+      "Bash(grep -v \"^--$\")"
     ]
   }
 }
