@@ -77,6 +77,16 @@
     "termsLink": "Terms of Service",
     "termsAnd": "and confirm that this review is based on your genuine experience."
   },
+  "photos": {
+    "title": "Property Photos",
+    "subtitle": "Optionally upload 1–2 photos of the property (max 10 MB each).",
+    "clickToSelect": "Click to select photos",
+    "hint": "Up to 2 images • JPG, PNG, WEBP • 10 MB max each",
+    "maxReached": "Maximum photos uploaded",
+    "errorTooMany": "You can only upload up to {{max}} photos.",
+    "errorInvalidType": "Only JPG, PNG, and WEBP images are allowed.",
+    "errorTooLarge": "\"{{name}}\" exceeds the 10 MB limit."
+  },
   "validation": {
     "missingFields": "Please fill in all required fields (property address, review title, and review text).",
     "missingRating": "Please provide at least an overall rating.",

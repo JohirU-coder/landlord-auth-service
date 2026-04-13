@@ -1,85 +1,95 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
-    "search": "Search",
-    "signOut": "Sign Out"
+    "dashboard": "ড্যাশবোর্ড",
+    "search": "অনুসন্ধান",
+    "signOut": "সাইন আউট"
   },
   "header": {
-    "title": "Write a Review",
-    "subtitle": "Share your rental experience to help other renters make informed decisions",
-    "propertySubtitle": "for {{address}}"
+    "title": "রিভিউ লিখুন",
+    "subtitle": "অন্যান্য ভাড়াটেদের সঠিক সিদ্ধান্ত নিতে সাহায্য করতে আপনার ভাড়ার অভিজ্ঞতা শেয়ার করুন",
+    "propertySubtitle": "{{address}} এর জন্য"
   },
   "propertySelection": {
-    "title": "Select Property",
-    "addressLabel": "Property Address",
-    "addressPlaceholder": "Enter the property address",
-    "cityLabel": "City",
-    "cityPlaceholder": "City",
-    "stateLabel": "State",
-    "statePlaceholder": "State",
-    "zipLabel": "Zip Code",
-    "zipPlaceholder": "Zip Code"
+    "title": "সম্পত্তি নির্বাচন করুন",
+    "addressLabel": "সম্পত্তির ঠিকানা",
+    "addressPlaceholder": "সম্পত্তির ঠিকানা লিখুন",
+    "cityLabel": "শহর",
+    "cityPlaceholder": "শহর",
+    "stateLabel": "রাজ্য",
+    "statePlaceholder": "রাজ্য",
+    "zipLabel": "পোস্টাল কোড",
+    "zipPlaceholder": "পোস্টাল কোড"
   },
   "landlordInfo": {
-    "title": "Landlord Information",
-    "nameLabel": "Landlord/Property Manager Name",
-    "namePlaceholder": "Full name or company name",
-    "contactMethodLabel": "Contact Method",
-    "selectContactMethod": "Select contact method",
-    "contactPhone": "Phone",
-    "contactEmail": "Email",
-    "contactText": "Text/SMS",
-    "contactApp": "Property Management App",
-    "contactInPerson": "In Person",
-    "phoneLabel": "Phone Number",
+    "title": "বাড়িওয়ালার তথ্য",
+    "nameLabel": "বাড়িওয়ালা/সম্পত্তি ব্যবস্থাপকের নাম",
+    "namePlaceholder": "পুরো নাম বা কোম্পানির নাম",
+    "contactMethodLabel": "যোগাযোগের পদ্ধতি",
+    "selectContactMethod": "যোগাযোগের পদ্ধতি নির্বাচন করুন",
+    "contactPhone": "ফোন",
+    "contactEmail": "ইমেইল",
+    "contactText": "টেক্সট/এসএমএস",
+    "contactApp": "সম্পত্তি ব্যবস্থাপনা অ্যাপ",
+    "contactInPerson": "সরাসরি",
+    "phoneLabel": "ফোন নম্বর",
     "phonePlaceholder": "(555) 123-4567",
-    "emailLabel": "Email Address",
+    "emailLabel": "ইমেইল ঠিকানা",
     "emailPlaceholder": "landlord@example.com",
-    "textLabel": "Text/SMS Number",
+    "textLabel": "টেক্সট/এসএমএস নম্বর",
     "textPlaceholder": "(555) 123-4567",
-    "appLabel": "App Name",
-    "appPlaceholder": "e.g., AppFolio, Buildium",
-    "officeLabel": "Office Location",
-    "officePlaceholder": "Office address or location"
+    "appLabel": "অ্যাপের নাম",
+    "appPlaceholder": "যেমন, AppFolio, Buildium",
+    "officeLabel": "অফিসের অবস্থান",
+    "officePlaceholder": "অফিসের ঠিকানা বা অবস্থান"
   },
   "ratings": {
-    "title": "Rate Your Experience",
-    "overallLabel": "Overall Rating",
-    "communicationLabel": "Communication",
-    "communicationHint": "How responsive and clear was the landlord?",
-    "maintenanceLabel": "Maintenance & Repairs",
-    "maintenanceHint": "How quickly were issues addressed?",
-    "conditionLabel": "Property Condition",
-    "conditionHint": "Overall state of the property and cleanliness",
-    "valueLabel": "Value for Money",
-    "valueHint": "Was the rent fair for what you got?"
+    "title": "আপনার অভিজ্ঞতা রেট করুন",
+    "overallLabel": "সামগ্রিক রেটিং",
+    "communicationLabel": "যোগাযোগ",
+    "communicationHint": "বাড়িওয়ালা কতটা দ্রুত এবং স্পষ্টভাবে সাড়া দিতেন?",
+    "maintenanceLabel": "রক্ষণাবেক্ষণ ও মেরামত",
+    "maintenanceHint": "সমস্যাগুলো কত দ্রুত সমাধান করা হয়েছিল?",
+    "conditionLabel": "সম্পত্তির অবস্থা",
+    "conditionHint": "সম্পত্তির সামগ্রিক অবস্থা ও পরিষ্কার-পরিচ্ছন্নতা",
+    "valueLabel": "অর্থের বিনিময়ে মূল্য",
+    "valueHint": "আপনি যা পেয়েছেন তার জন্য ভাড়া কি ন্যায্য ছিল?"
   },
   "review": {
-    "title": "Tell Your Story",
-    "titleLabel": "Review Title",
-    "titlePlaceholder": "Summarize your experience in a few words",
-    "textLabel": "Detailed Review",
-    "textPlaceholder": "Share your experience living at this property. What should other renters know?",
-    "textHint": "Minimum 50 characters. Be honest and helpful!"
+    "title": "আপনার গল্প বলুন",
+    "titleLabel": "রিভিউ শিরোনাম",
+    "titlePlaceholder": "কয়েকটি শব্দে আপনার অভিজ্ঞতা সংক্ষেপ করুন",
+    "textLabel": "বিস্তারিত রিভিউ",
+    "textPlaceholder": "এই সম্পত্তিতে বসবাসের আপনার অভিজ্ঞতা শেয়ার করুন। অন্যান্য ভাড়াটেদের কী জানা উচিত?",
+    "textHint": "সর্বনিম্ন ৫০টি অক্ষর। সৎ ও সহায়ক হোন!"
   },
   "rentalDetails": {
-    "title": "Rental Details",
-    "moveInLabel": "Move-in Date",
-    "moveOutLabel": "Move-out Date (if applicable)",
-    "monthlyRentLabel": "Monthly Rent",
+    "title": "ভাড়ার বিবরণ",
+    "moveInLabel": "প্রবেশের তারিখ",
+    "moveOutLabel": "প্রস্থানের তারিখ (যদি প্রযোজ্য হয়)",
+    "monthlyRentLabel": "মাসিক ভাড়া",
     "monthlyRentPlaceholder": "2500",
-    "wouldRecommend": "Would recommend to others",
-    "anonymous": "Post anonymously"
+    "wouldRecommend": "অন্যদের কাছে সুপারিশ করব",
+    "anonymous": "বেনামে পোস্ট করুন"
+  },
+  "photos": {
+    "title": "সম্পত্তির ছবি",
+    "subtitle": "ঐচ্ছিকভাবে সম্পত্তির ১–২টি ছবি আপলোড করুন (প্রতিটি সর্বোচ্চ ১০ এমবি)।",
+    "clickToSelect": "ছবি নির্বাচন করতে ক্লিক করুন",
+    "hint": "সর্বোচ্চ ২টি ছবি • JPG, PNG, WEBP • প্রতিটি সর্বোচ্চ ১০ এমবি",
+    "maxReached": "সর্বোচ্চ ছবি আপলোড হয়েছে",
+    "errorTooMany": "আপনি সর্বোচ্চ {{max}}টি ছবি আপলোড করতে পারবেন।",
+    "errorInvalidType": "শুধুমাত্র JPG, PNG এবং WEBP ছবি অনুমোদিত।",
+    "errorTooLarge": "\"{{name}}\" ১০ এমবি সীমা অতিক্রম করেছে।"
   },
   "submit": {
-    "button": "📝 Submit Review",
-    "terms": "By submitting this review, you agree to our",
-    "termsLink": "Terms of Service",
-    "termsAnd": "and confirm that this review is based on your genuine experience."
+    "button": "📝 রিভিউ জমা দিন",
+    "terms": "এই রিভিউ জমা দেওয়ার মাধ্যমে আপনি আমাদের",
+    "termsLink": "পরিষেবার শর্তাবলী",
+    "termsAnd": "সম্মত হচ্ছেন এবং নিশ্চিত করছেন যে এই রিভিউ আপনার সত্যিকারের অভিজ্ঞতার উপর ভিত্তি করে।"
   },
   "validation": {
-    "missingFields": "Please fill in all required fields (property address, review title, and review text).",
-    "missingRating": "Please provide at least an overall rating.",
-    "successMessage": "Thank you for your review of {{address}}! Your review helps other renters make informed decisions. It will be published after verification."
+    "missingFields": "অনুগ্রহ করে সমস্ত প্রয়োজনীয় ক্ষেত্র পূরণ করুন (সম্পত্তির ঠিকানা, রিভিউ শিরোনাম এবং রিভিউ টেক্সট)।",
+    "missingRating": "অনুগ্রহ করে কমপক্ষে একটি সামগ্রিক রেটিং দিন।",
+    "successMessage": "{{address}} এর রিভিউর জন্য ধন্যবাদ! আপনার রিভিউ অন্যান্য ভাড়াটেদের সঠিক সিদ্ধান্ত নিতে সাহায্য করবে। যাচাইয়ের পরে এটি প্রকাশিত হবে।"
   }
 }
