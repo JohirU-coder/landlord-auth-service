@@ -546,7 +546,8 @@
                                 this.showVerificationRequiredModal();
                             }
                         } else {
-                            alert('Only landlords can add properties. Contact support to upgrade your account.');
+                            // Renters go to the review form where they can upload photos + leave a review
+                            window.location.href = './write-review.html';
                         }
                     });
                 }
