@@ -342,15 +342,15 @@
 
         <!-- Photo Upload -->
         <div class="form-section">
-            <h2 class="text-2xl font-bold text-gray-900 mb-2">Property Photos</h2>
-            <p class="text-sm text-gray-500 mb-6">Optionally upload 1–2 photos of the property (max 10 MB each).</p>
+            <h2 class="text-2xl font-bold text-gray-900 mb-2" data-i18n="writeReview:photos.title">Property Photos</h2>
+            <p class="text-sm text-gray-500 mb-6" data-i18n="writeReview:photos.subtitle">Optionally upload 1–2 photos of the property (max 10 MB each).</p>
 
             <div id="photoDropZone"
                  class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition-colors"
                  onclick="document.getElementById('photoInput').click()">
                 <div class="text-4xl mb-3">📷</div>
-                <p class="text-gray-600 font-medium">Click to select photos</p>
-                <p class="text-sm text-gray-400 mt-1">Up to 2 images &bull; JPG, PNG, WEBP &bull; 10 MB max each</p>
+                <p class="text-gray-600 font-medium" data-i18n="writeReview:photos.clickToSelect">Click to select photos</p>
+                <p class="text-sm text-gray-400 mt-1" data-i18n="writeReview:photos.hint">Up to 2 images &bull; JPG, PNG, WEBP &bull; 10 MB max each</p>
                 <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" multiple class="hidden">
             </div>
 
@@ -530,7 +530,7 @@
 
             const allowed = MAX_PHOTOS - selectedPhotos.length;
             if (allowed <= 0) {
-                showPhotoError(`You can only upload up to ${MAX_PHOTOS} photos.`);
+                showPhotoError(t('writeReview:photos.errorTooMany', { max: MAX_PHOTOS }));
                 return;
             }
 
@@ -539,11 +539,11 @@
                 if (selectedPhotos.length >= MAX_PHOTOS) break;
 
                 if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
-                    showPhotoError('Only JPG, PNG, and WEBP images are allowed.');
+                    showPhotoError(t('writeReview:photos.errorInvalidType'));
                     continue;
                 }
                 if (file.size > MAX_BYTES) {
-                    showPhotoError(`"${file.name}" exceeds the 10 MB limit.`);
+                    showPhotoError(t('writeReview:photos.errorTooLarge', { name: file.name }));
                     continue;
                 }
 
@@ -558,7 +558,7 @@
             }
 
             if (added === 0 && !photoError.textContent) {
-                showPhotoError(`You can only upload up to ${MAX_PHOTOS} photos.`);
+                showPhotoError(t('writeReview:photos.errorTooMany', { max: MAX_PHOTOS }));
             }
         }
 
@@ -595,8 +595,8 @@
             const hint = dropZone.querySelector('p.text-gray-600');
             if (hint) {
                 hint.textContent = selectedPhotos.length >= MAX_PHOTOS
-                    ? 'Maximum photos uploaded'
-                    : 'Click to select photos';
+                    ? t('writeReview:photos.maxReached')
+                    : t('writeReview:photos.clickToSelect');
             }
             dropZone.style.opacity = selectedPhotos.length >= MAX_PHOTOS ? '0.5' : '1';
             dropZone.style.pointerEvents = selectedPhotos.length >= MAX_PHOTOS ? 'none' : 'auto';

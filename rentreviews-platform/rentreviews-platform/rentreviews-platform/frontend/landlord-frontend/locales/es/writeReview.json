@@ -77,6 +77,16 @@
     "termsLink": "Condiciones del servicio",
     "termsAnd": "y confirme que esta reseña se basa en su experiencia real."
   },
+  "photos": {
+    "title": "Fotos de la propiedad",
+    "subtitle": "Sube opcionalmente 1–2 fotos de la propiedad (máx. 10 MB cada una).",
+    "clickToSelect": "Haz clic para seleccionar fotos",
+    "hint": "Hasta 2 imágenes • JPG, PNG, WEBP • máx. 10 MB cada una",
+    "maxReached": "Máximo de fotos subidas",
+    "errorTooMany": "Solo puedes subir hasta {{max}} fotos.",
+    "errorInvalidType": "Solo se permiten imágenes JPG, PNG y WEBP.",
+    "errorTooLarge": "\"{{name}}\" supera el límite de 10 MB."
+  },
   "validation": {
     "missingFields": "Rellene todos los campos obligatorios (dirección de la propiedad, título de la reseña y texto de la reseña).",
     "missingRating": "Por favor, proporcione al menos una valoración general.",

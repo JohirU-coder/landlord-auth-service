@@ -1,85 +1,95 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
-    "search": "Search",
-    "signOut": "Sign Out"
+    "dashboard": "仪表盘",
+    "search": "搜索",
+    "signOut": "注销"
   },
   "header": {
-    "title": "Write a Review",
-    "subtitle": "Share your rental experience to help other renters make informed decisions",
-    "propertySubtitle": "for {{address}}"
+    "title": "撰写评价",
+    "subtitle": "分享您的租房经历，帮助其他租客做出明智的决定",
+    "propertySubtitle": "关于 {{address}}"
   },
   "propertySelection": {
-    "title": "Select Property",
-    "addressLabel": "Property Address",
-    "addressPlaceholder": "Enter the property address",
-    "cityLabel": "City",
-    "cityPlaceholder": "City",
-    "stateLabel": "State",
-    "statePlaceholder": "State",
-    "zipLabel": "Zip Code",
-    "zipPlaceholder": "Zip Code"
+    "title": "选择房源",
+    "addressLabel": "房源地址",
+    "addressPlaceholder": "输入房源地址",
+    "cityLabel": "城市",
+    "cityPlaceholder": "城市",
+    "stateLabel": "州/省",
+    "statePlaceholder": "州/省",
+    "zipLabel": "邮政编码",
+    "zipPlaceholder": "邮政编码"
   },
   "landlordInfo": {
-    "title": "Landlord Information",
-    "nameLabel": "Landlord/Property Manager Name",
-    "namePlaceholder": "Full name or company name",
-    "contactMethodLabel": "Contact Method",
-    "selectContactMethod": "Select contact method",
-    "contactPhone": "Phone",
-    "contactEmail": "Email",
-    "contactText": "Text/SMS",
-    "contactApp": "Property Management App",
-    "contactInPerson": "In Person",
-    "phoneLabel": "Phone Number",
+    "title": "房东信息",
+    "nameLabel": "房东/物业经理姓名",
+    "namePlaceholder": "全名或公司名称",
+    "contactMethodLabel": "联系方式",
+    "selectContactMethod": "选择联系方式",
+    "contactPhone": "电话",
+    "contactEmail": "电子邮件",
+    "contactText": "短信/SMS",
+    "contactApp": "物业管理应用",
+    "contactInPerson": "面对面",
+    "phoneLabel": "电话号码",
     "phonePlaceholder": "(555) 123-4567",
-    "emailLabel": "Email Address",
+    "emailLabel": "电子邮件地址",
     "emailPlaceholder": "landlord@example.com",
-    "textLabel": "Text/SMS Number",
+    "textLabel": "短信/SMS 号码",
     "textPlaceholder": "(555) 123-4567",
-    "appLabel": "App Name",
-    "appPlaceholder": "e.g., AppFolio, Buildium",
-    "officeLabel": "Office Location",
-    "officePlaceholder": "Office address or location"
+    "appLabel": "应用名称",
+    "appPlaceholder": "例如：AppFolio、Buildium",
+    "officeLabel": "办公地点",
+    "officePlaceholder": "办公地址或位置"
   },
   "ratings": {
-    "title": "Rate Your Experience",
-    "overallLabel": "Overall Rating",
-    "communicationLabel": "Communication",
-    "communicationHint": "How responsive and clear was the landlord?",
-    "maintenanceLabel": "Maintenance & Repairs",
-    "maintenanceHint": "How quickly were issues addressed?",
-    "conditionLabel": "Property Condition",
-    "conditionHint": "Overall state of the property and cleanliness",
-    "valueLabel": "Value for Money",
-    "valueHint": "Was the rent fair for what you got?"
+    "title": "评价您的体验",
+    "overallLabel": "综合评分",
+    "communicationLabel": "沟通",
+    "communicationHint": "房东的回应速度和沟通清晰度如何？",
+    "maintenanceLabel": "维修与保养",
+    "maintenanceHint": "问题处理速度如何？",
+    "conditionLabel": "房屋状况",
+    "conditionHint": "房屋整体状态与清洁度",
+    "valueLabel": "性价比",
+    "valueHint": "租金与所获服务是否匹配？"
   },
   "review": {
-    "title": "Tell Your Story",
-    "titleLabel": "Review Title",
-    "titlePlaceholder": "Summarize your experience in a few words",
-    "textLabel": "Detailed Review",
-    "textPlaceholder": "Share your experience living at this property. What should other renters know?",
-    "textHint": "Minimum 50 characters. Be honest and helpful!"
+    "title": "讲述您的故事",
+    "titleLabel": "评价标题",
+    "titlePlaceholder": "用几个字概括您的体验",
+    "textLabel": "详细评价",
+    "textPlaceholder": "分享您在该房源的居住体验。其他租客应该了解什么？",
+    "textHint": "最少 50 个字符。请诚实、有参考价值！"
   },
   "rentalDetails": {
-    "title": "Rental Details",
-    "moveInLabel": "Move-in Date",
-    "moveOutLabel": "Move-out Date (if applicable)",
-    "monthlyRentLabel": "Monthly Rent",
+    "title": "租房详情",
+    "moveInLabel": "入住日期",
+    "moveOutLabel": "退租日期（如适用）",
+    "monthlyRentLabel": "月租金",
     "monthlyRentPlaceholder": "2500",
-    "wouldRecommend": "Would recommend to others",
-    "anonymous": "Post anonymously"
+    "wouldRecommend": "愿意推荐给他人",
+    "anonymous": "匿名发布"
+  },
+  "photos": {
+    "title": "房源照片",
+    "subtitle": "可选择上传 1–2 张房源照片（每张最大 10 MB）。",
+    "clickToSelect": "点击选择照片",
+    "hint": "最多 2 张 • JPG、PNG、WEBP • 每张最大 10 MB",
+    "maxReached": "已达到最大上传数量",
+    "errorTooMany": "最多只能上传 {{max}} 张照片。",
+    "errorInvalidType": "仅支持 JPG、PNG 和 WEBP 格式的图片。",
+    "errorTooLarge": "\"{{name}}\" 超过 10 MB 限制。"
   },
   "submit": {
-    "button": "📝 Submit Review",
-    "terms": "By submitting this review, you agree to our",
-    "termsLink": "Terms of Service",
-    "termsAnd": "and confirm that this review is based on your genuine experience."
+    "button": "📝 提交评价",
+    "terms": "提交此评价即表示您同意我们的",
+    "termsLink": "服务条款",
+    "termsAnd": "并确认此评价基于您的真实体验。"
   },
   "validation": {
-    "missingFields": "Please fill in all required fields (property address, review title, and review text).",
-    "missingRating": "Please provide at least an overall rating.",
-    "successMessage": "Thank you for your review of {{address}}! Your review helps other renters make informed decisions. It will be published after verification."
+    "missingFields": "请填写所有必填项（房源地址、评价标题和评价内容）。",
+    "missingRating": "请至少提供一个综合评分。",
+    "successMessage": "感谢您对 {{address}} 的评价！您的评价将帮助其他租客做出明智的决定。评价经核实后将发布。"
   }
 }
