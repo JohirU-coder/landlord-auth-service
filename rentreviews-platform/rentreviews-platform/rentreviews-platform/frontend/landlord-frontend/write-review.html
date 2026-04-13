@@ -340,6 +340,27 @@
             </div>
         </div>
 
+        <!-- Photo Upload -->
+        <div class="form-section">
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">Property Photos</h2>
+            <p class="text-sm text-gray-500 mb-6">Optionally upload 1–2 photos of the property (max 10 MB each).</p>
+
+            <div id="photoDropZone"
+                 class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition-colors"
+                 onclick="document.getElementById('photoInput').click()">
+                <div class="text-4xl mb-3">📷</div>
+                <p class="text-gray-600 font-medium">Click to select photos</p>
+                <p class="text-sm text-gray-400 mt-1">Up to 2 images &bull; JPG, PNG, WEBP &bull; 10 MB max each</p>
+                <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" multiple class="hidden">
+            </div>
+
+            <!-- Error message -->
+            <p id="photoError" class="text-red-600 text-sm mt-2 hidden"></p>
+
+            <!-- Preview grid -->
+            <div id="photoPreviews" class="grid grid-cols-2 gap-4 mt-4"></div>
+        </div>
+
         <!-- Submit Button -->
         <div class="text-center">
             <button id="submitReview" class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg" data-i18n="writeReview:submit.button">
@@ -474,6 +495,114 @@
             });
         });
 
+        // ── Photo Upload ──────────────────────────────────────────────────────
+        const MAX_PHOTOS = 2;
+        const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+        const selectedPhotos = []; // Array of { file, dataURL }
+
+        const photoInput    = document.getElementById('photoInput');
+        const photoError    = document.getElementById('photoError');
+        const photoPreviews = document.getElementById('photoPreviews');
+        const dropZone      = document.getElementById('photoDropZone');
+
+        // Drag-and-drop support
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-indigo-400', 'bg-indigo-50');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-indigo-400', 'bg-indigo-50');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-indigo-400', 'bg-indigo-50');
+            handlePhotoFiles(Array.from(e.dataTransfer.files));
+        });
+
+        photoInput.addEventListener('change', () => {
+            handlePhotoFiles(Array.from(photoInput.files));
+            photoInput.value = ''; // reset so the same file can be re-added after removal
+        });
+
+        function handlePhotoFiles(files) {
+            photoError.classList.add('hidden');
+            photoError.textContent = '';
+
+            const allowed = MAX_PHOTOS - selectedPhotos.length;
+            if (allowed <= 0) {
+                showPhotoError(`You can only upload up to ${MAX_PHOTOS} photos.`);
+                return;
+            }
+
+            let added = 0;
+            for (const file of files) {
+                if (selectedPhotos.length >= MAX_PHOTOS) break;
+
+                if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
+                    showPhotoError('Only JPG, PNG, and WEBP images are allowed.');
+                    continue;
+                }
+                if (file.size > MAX_BYTES) {
+                    showPhotoError(`"${file.name}" exceeds the 10 MB limit.`);
+                    continue;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const entry = { file, dataURL: e.target.result };
+                    selectedPhotos.push(entry);
+                    renderPreviews();
+                };
+                reader.readAsDataURL(file);
+                added++;
+            }
+
+            if (added === 0 && !photoError.textContent) {
+                showPhotoError(`You can only upload up to ${MAX_PHOTOS} photos.`);
+            }
+        }
+
+        function showPhotoError(msg) {
+            photoError.textContent = msg;
+            photoError.classList.remove('hidden');
+        }
+
+        function renderPreviews() {
+            photoPreviews.innerHTML = '';
+            selectedPhotos.forEach((entry, idx) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative rounded-xl overflow-hidden border border-gray-200 shadow-sm';
+                wrapper.innerHTML = `
+                    <img src="${entry.dataURL}" alt="Property photo ${idx + 1}"
+                         class="w-full h-40 object-cover">
+                    <button type="button"
+                            class="absolute top-2 right-2 bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm hover:bg-red-700 shadow"
+                            data-idx="${idx}"
+                            aria-label="Remove photo">✕</button>
+                    <div class="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-xs px-2 py-1 truncate">
+                        ${entry.file.name}
+                    </div>
+                `;
+                wrapper.querySelector('button').addEventListener('click', () => {
+                    selectedPhotos.splice(idx, 1);
+                    renderPreviews();
+                    photoError.classList.add('hidden');
+                });
+                photoPreviews.appendChild(wrapper);
+            });
+
+            // Show/hide drop zone hint
+            const hint = dropZone.querySelector('p.text-gray-600');
+            if (hint) {
+                hint.textContent = selectedPhotos.length >= MAX_PHOTOS
+                    ? 'Maximum photos uploaded'
+                    : 'Click to select photos';
+            }
+            dropZone.style.opacity = selectedPhotos.length >= MAX_PHOTOS ? '0.5' : '1';
+            dropZone.style.pointerEvents = selectedPhotos.length >= MAX_PHOTOS ? 'none' : 'auto';
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
         // Enhanced form submission with property connection
         document.getElementById('submitReview').addEventListener('click', async () => {
             const propertyData = getPropertyFromURL();
@@ -503,7 +632,8 @@
                     monthlyRent: document.getElementById('monthlyRent').value,
                     wouldRecommend: document.getElementById('wouldRecommend').checked,
                     anonymous: document.getElementById('anonymous').checked
-                }
+                },
+                photos: selectedPhotos.map(p => p.dataURL)
             };
 
             // Basic validation
