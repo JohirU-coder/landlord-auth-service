@@ -97,8 +97,8 @@ app.use(express.json({ limit: '10mb' }));
 const registerSchema = Joi.object({
   email: Joi.string().email().required().max(255),
   password: Joi.string().min(8).max(128).required()
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .message('Password must contain at least one lowercase letter, one uppercase letter, and one number'),
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
+    .message('Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character (@$!%*?&)'),
   firstName: Joi.string().required().min(1).max(50).pattern(/^[a-zA-Z\s]+$/),
   lastName: Joi.string().required().min(1).max(50).pattern(/^[a-zA-Z\s]+$/),
   role: Joi.string().valid('renter', 'landlord').required()

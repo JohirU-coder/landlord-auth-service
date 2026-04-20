@@ -53,7 +53,7 @@ app.use(helmet({
 // Rate Limiting
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // Limit each IP to 50 auth requests per windowMs
+  max: 10, // 10 attempts per 15 min — tight enough to block brute-force, generous enough for real users
   message: {
     error: 'Too many authentication attempts',
     message: 'Please try again in 15 minutes'
@@ -617,7 +617,7 @@ app.put('/profile', authenticateToken, async (req, res) => {
 });
 
 // Change Password (Protected Route) - ✅ NEW ENDPOINT
-app.post('/change-password', authenticateToken, async (req, res) => {
+app.post('/change-password', authenticateToken, authLimiter, async (req, res) => {
   try {
     const changePasswordSchema = Joi.object({
       current_password: Joi.string().required().max(128),
