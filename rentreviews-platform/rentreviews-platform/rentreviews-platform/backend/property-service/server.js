@@ -131,8 +131,11 @@ const createPropertySchema = Joi.object({
   bathrooms: Joi.number().positive().precision(1).max(20),
   square_feet: Joi.number().integer().positive().max(50000),
   description: Joi.string().trim().max(2000).allow('').default(''),
-  data_source: Joi.string().valid('landlord_submitted', 'community_submitted').default('landlord_submitted'),
-  source_url: Joi.string().uri().allow('').default(''),
+  data_source: Joi.string().valid(
+    'landlord_submitted', 'community_submitted',
+    'craigslist', 'zillow', 'apartments.com', 'rentals.com', 'streeteasy', 'padmapper', 'other'
+  ).default('landlord_submitted'),
+  source_url: Joi.string().uri().allow('', null).default(''),
   verification_status: Joi.string().valid('verified', 'community_submitted', 'pending_verification').default('verified')
 });
 
