@@ -135,9 +135,35 @@
         </div>
     </div>
 
+    <!-- Unverified Property Warning Banner (injected by JS when unverified=true) -->
+    <div id="unverifiedWarningBanner" class="hidden">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+            <div class="bg-amber-50 border-l-4 border-amber-500 rounded-lg p-5">
+                <div class="flex items-start gap-3">
+                    <span class="text-2xl flex-shrink-0">⚠️</span>
+                    <div>
+                        <h3 class="font-bold text-amber-800 text-base mb-1">Reviewing an Unverified Property</h3>
+                        <p class="text-amber-700 text-sm mb-2">
+                            This property was <strong>submitted by a community member</strong> and has <strong>not been verified by the landlord</strong>.
+                            Information may be inaccurate or outdated.
+                        </p>
+                        <ul class="text-amber-700 text-sm list-disc list-inside space-y-1">
+                            <li>Rent, room counts, and amenities listed may not reflect current reality.</li>
+                            <li>Your review will be marked as relating to an unverified listing.</li>
+                            <li>Contact the landlord directly to confirm details before signing any lease.</li>
+                        </ul>
+                        <p class="text-amber-600 text-xs mt-3">
+                            Is this your property? <a href="./search.html" class="underline font-medium hover:text-amber-800">Return to search</a> and use the "Claim This Property" button to verify ownership.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Review Form -->
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
+
         <!-- Property Selection -->
         <div class="form-section">
             <h2 class="text-2xl font-bold text-gray-900 mb-6" data-i18n="writeReview:propertySelection.title">Select Property</h2>
@@ -429,18 +455,24 @@
         // Pre-fill form with property data
         function prefillPropertyData() {
             const propertyData = getPropertyFromURL();
-            
+
             if (propertyData) {
                 document.getElementById('propertyAddress').value = propertyData.address || '';
                 document.getElementById('propertyCity').value = propertyData.city || '';
                 document.getElementById('propertyState').value = propertyData.state || '';
                 document.getElementById('propertyZip').value = propertyData.zip_code || '';
                 document.getElementById('landlordName').value = propertyData.landlord_name || '';
-                
+
                 // Show a helpful message
                 const header = document.getElementById('headerTitle');
                 if (header && propertyData.address) {
                     header.innerHTML = `${t('writeReview:header.title')}<br><span class="text-lg font-normal text-indigo-200">${t('writeReview:header.propertySubtitle', { address: propertyData.address })}</span>`;
+                }
+
+                // Show unverified warning banner if property is community-submitted
+                if (propertyData.unverified === true) {
+                    const banner = document.getElementById('unverifiedWarningBanner');
+                    if (banner) banner.classList.remove('hidden');
                 }
             }
         }

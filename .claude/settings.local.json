@@ -27,7 +27,8 @@
       "Bash(if cmp:*)",
       "Bash(BASE=\"c:/Users/johir/OneDrive/Documents/GitHub/landlord-auth-service/rentreviews-platform/rentreviews-platform/rentreviews-platform/frontend/landlord-frontend\" for f in dashboard.html auth.html search.html write-review.html add-property.html market-insights.html verify-landlord.html admin-seed-properties.html index.html)",
       "Bash(do echo:*)",
-      "Bash(grep -v \"^--$\")"
+      "Bash(grep -v \"^--$\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(k,':',json.dumps\\(v\\)\\) for k,v in d.get\\('propertyDetails',{}\\).items\\(\\) if 'source' in k.lower\\(\\) or 'data' in k.lower\\(\\) or 'accuracy' in k.lower\\(\\) or 'unverified' in k.lower\\(\\)]\")"
     ]
   }
 }
