@@ -1,0 +1,24 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+
+# Dependency directories
+node_modules/
+
+# dotenv environment variable files — NEVER commit real secrets
+.env
+.env.*
+!.env.example
+
+# Coverage
+coverage
+*.lcov
+
+# Build output
+dist
+build
