@@ -83,22 +83,20 @@ app.use((req, res, next) => {
 });
 
 // CORS Configuration
+const ALLOWED_ORIGINS = [
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:8080',
+  'http://127.0.0.1:8080',
+  ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
+];
+
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
-    // Hardcoded allowed origins
-    const allowedOrigins = [
-      'http://localhost:5500',
-      'http://127.0.0.1:5500',
-      'http://localhost:3000', 
-      'http://127.0.0.1:3000',
-      'http://localhost:8080',
-      'http://127.0.0.1:8080'
-    ];
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (ALLOWED_ORIGINS.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       console.log('CORS blocked origin:', origin);
@@ -175,12 +173,21 @@ const sendSuccessResponse = (res, statusCode, data, message = null) => {
     timestamp: new Date().toISOString(),
     ...data
   };
-  
+
   if (message) {
     response.message = message;
   }
-  
+
   return res.status(statusCode).json(response);
+};
+
+// Admin-only middleware — requires X-Admin-Secret header matching ADMIN_SECRET env var
+const requireAdminSecret = (req, res, next) => {
+  const secret = req.headers['x-admin-secret'];
+  if (!process.env.ADMIN_SECRET || secret !== process.env.ADMIN_SECRET) {
+    return sendErrorResponse(res, 403, 'Forbidden', 'Admin access required');
+  }
+  next();
 };
 
 // Utility Functions
@@ -251,7 +258,7 @@ app.get('/', (req, res) => {
 });
 
 // Database Migration Endpoint
-app.get('/migrate', async (req, res) => {
+app.get('/migrate', requireAdminSecret, async (req, res) => {
     try {
         console.log('Starting database migration...');
         
@@ -300,12 +307,13 @@ app.get('/migrate', async (req, res) => {
         
     } catch (error) {
         console.error('Migration error:', error);
-        sendErrorResponse(res, 500, 'Migration failed', 'Database migration failed', error.message);
+        sendErrorResponse(res, 500, 'Migration failed', 'Database migration failed',
+          process.env.NODE_ENV === 'development' ? error.message : undefined);
     }
 });
 
 // Additional endpoint to check current table structure
-app.get('/check-schema', async (req, res) => {
+app.get('/check-schema', requireAdminSecret, async (req, res) => {
     try {
         const schemaQuery = `
             SELECT column_name, data_type, is_nullable, column_default
@@ -323,12 +331,13 @@ app.get('/check-schema', async (req, res) => {
         
     } catch (error) {
         console.error('Schema check error:', error);
-        sendErrorResponse(res, 500, 'Schema check failed', 'Failed to check database schema', error.message);
+        sendErrorResponse(res, 500, 'Schema check failed', 'Failed to check database schema',
+          process.env.NODE_ENV === 'development' ? error.message : undefined);
     }
 });
 
 // Database setup endpoint
-app.get('/setup-database', async (req, res) => {
+app.get('/setup-database', requireAdminSecret, async (req, res) => {
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (

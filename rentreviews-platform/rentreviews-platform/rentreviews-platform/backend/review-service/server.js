@@ -121,7 +121,8 @@ app.use(cors({
     'http://localhost:5500',
     'http://127.0.0.1:5500',
     'http://localhost:3000',
-    'http://127.0.0.1:3000'
+    'http://127.0.0.1:3000',
+    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -162,6 +163,15 @@ const searchReviewsSchema = Joi.object({
   offset: Joi.number().integer().min(0).default(0),
   include_responses: Joi.boolean().default(true)
 });
+
+// Admin-only middleware — requires X-Admin-Secret header matching ADMIN_SECRET env var
+const requireAdminSecret = (req, res, next) => {
+  const secret = req.headers['x-admin-secret'];
+  if (!process.env.ADMIN_SECRET || secret !== process.env.ADMIN_SECRET) {
+    return res.status(403).json({ error: 'Forbidden', message: 'Admin access required' });
+  }
+  next();
+};
 
 // Standardized error response helper
 const sendErrorResponse = (res, statusCode, error, message, details = null) => {
@@ -241,8 +251,11 @@ app.get('/', (req, res) => {
   });
 });
 
-// Test endpoint
+// Test endpoint — development only
 app.get('/test', (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Not found', message: 'The requested resource was not found' });
+  }
   res.json({
     message: 'Review service test endpoint working!',
     database: process.env.DATABASE_URL ? 'Connected' : 'Not configured',
@@ -253,7 +266,7 @@ app.get('/test', (req, res) => {
 });
 
 // Database setup endpoint
-app.get('/setup-database', async (req, res) => {
+app.get('/setup-database', requireAdminSecret, async (req, res) => {
   try {
     // Create reviews table
     await pool.query(`
@@ -322,7 +335,8 @@ app.get('/setup-database', async (req, res) => {
     
   } catch (error) {
     console.error('Database setup error:', error);
-    sendErrorResponse(res, 500, 'Database setup failed', 'Failed to create review tables', error.message);
+    sendErrorResponse(res, 500, 'Database setup failed', 'Failed to create review tables',
+      process.env.NODE_ENV === 'development' ? error.message : undefined);
   }
 });
 

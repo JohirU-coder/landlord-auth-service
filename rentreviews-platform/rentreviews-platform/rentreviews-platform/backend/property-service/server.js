@@ -112,7 +112,8 @@ app.use(cors({
     'http://localhost:5500',
     'http://127.0.0.1:5500',
     'http://localhost:3000',
-    'http://127.0.0.1:3000'
+    'http://127.0.0.1:3000',
+    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -192,6 +193,15 @@ const searchPropertiesSchema = Joi.object({
   'custom.sqftRange': 'min_sqft must be less than max_sqft'
 });
 
+// Admin-only middleware — requires X-Admin-Secret header matching ADMIN_SECRET env var
+const requireAdminSecret = (req, res, next) => {
+  const secret = req.headers['x-admin-secret'];
+  if (!process.env.ADMIN_SECRET || secret !== process.env.ADMIN_SECRET) {
+    return res.status(403).json({ error: 'Forbidden', message: 'Admin access required' });
+  }
+  next();
+};
+
 // Standardized error response helper
 const sendErrorResponse = (res, statusCode, error, message, details = null) => {
   const response = {
@@ -268,8 +278,11 @@ app.get('/', (req, res) => {
   });
 });
 
-// Test endpoint
+// Test endpoint — development only
 app.get('/test', (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Not found', message: 'The requested resource was not found' });
+  }
   res.json({
     message: 'Property service test endpoint working!',
     database: process.env.DATABASE_URL ? 'Connected' : 'Not configured',
@@ -280,7 +293,7 @@ app.get('/test', (req, res) => {
 });
 
 // Database setup endpoint - UPDATED with new columns
-app.get('/setup-database', async (req, res) => {
+app.get('/setup-database', requireAdminSecret, async (req, res) => {
   try {
     // Create properties table with new tracking columns
     await pool.query(`
@@ -341,7 +354,8 @@ app.get('/setup-database', async (req, res) => {
     
   } catch (error) {
     console.error('Database setup error:', error);
-    sendErrorResponse(res, 500, 'Database setup failed', 'Failed to create properties table', error.message);
+    sendErrorResponse(res, 500, 'Database setup failed', 'Failed to create properties table',
+      process.env.NODE_ENV === 'development' ? error.message : undefined);
   }
 });
 
@@ -766,79 +780,79 @@ app.get('/properties', async (req, res) => {
     // Add filters based on provided parameters
     if (city) {
       paramCount++;
-      whereConditions.push(`LOWER(p.city) LIKE LOWER(${paramCount})`);
+      whereConditions.push(`LOWER(p.city) LIKE LOWER($${paramCount})`);
       queryParams.push(`%${city}%`);
     }
 
     if (state) {
       paramCount++;
-      whereConditions.push(`LOWER(p.state) = LOWER(${paramCount})`);
+      whereConditions.push(`LOWER(p.state) = LOWER($${paramCount})`);
       queryParams.push(state);
     }
 
     if (zip_code) {
       paramCount++;
-      whereConditions.push(`p.zip_code = ${paramCount}`);
+      whereConditions.push(`p.zip_code = $${paramCount}`);
       queryParams.push(zip_code);
     }
 
     if (min_rent !== undefined) {
       paramCount++;
-      whereConditions.push(`p.rent_amount >= ${paramCount}`);
+      whereConditions.push(`p.rent_amount >= $${paramCount}`);
       queryParams.push(min_rent);
     }
 
     if (max_rent !== undefined) {
       paramCount++;
-      whereConditions.push(`p.rent_amount <= ${paramCount}`);
+      whereConditions.push(`p.rent_amount <= $${paramCount}`);
       queryParams.push(max_rent);
     }
 
     if (min_bedrooms !== undefined) {
       paramCount++;
-      whereConditions.push(`p.bedrooms >= ${paramCount}`);
+      whereConditions.push(`p.bedrooms >= $${paramCount}`);
       queryParams.push(min_bedrooms);
     }
 
     if (max_bedrooms !== undefined) {
       paramCount++;
-      whereConditions.push(`p.bedrooms <= ${paramCount}`);
+      whereConditions.push(`p.bedrooms <= $${paramCount}`);
       queryParams.push(max_bedrooms);
     }
 
     if (min_bathrooms !== undefined) {
       paramCount++;
-      whereConditions.push(`p.bathrooms >= ${paramCount}`);
+      whereConditions.push(`p.bathrooms >= $${paramCount}`);
       queryParams.push(min_bathrooms);
     }
 
     if (max_bathrooms !== undefined) {
       paramCount++;
-      whereConditions.push(`p.bathrooms <= ${paramCount}`);
+      whereConditions.push(`p.bathrooms <= $${paramCount}`);
       queryParams.push(max_bathrooms);
     }
 
     if (min_sqft !== undefined) {
       paramCount++;
-      whereConditions.push(`p.square_feet >= ${paramCount}`);
+      whereConditions.push(`p.square_feet >= $${paramCount}`);
       queryParams.push(min_sqft);
     }
 
     if (max_sqft !== undefined) {
       paramCount++;
-      whereConditions.push(`p.square_feet <= ${paramCount}`);
+      whereConditions.push(`p.square_feet <= $${paramCount}`);
       queryParams.push(max_sqft);
     }
 
     if (landlord_verified !== undefined) {
       paramCount++;
-      whereConditions.push(`p.landlord_verified = ${paramCount}`);
+      whereConditions.push(`p.landlord_verified = $${paramCount}`);
       queryParams.push(landlord_verified);
     }
 
     if (verification_status) {
       paramCount++;
-      whereConditions.push(`p.verification_status = ${paramCount}`);
+      whereConditions.push(`p.verification_status = $${paramCount}`);
       queryParams.push(verification_status);
     }
 
@@ -873,11 +887,11 @@ app.get('/properties', async (req, res) => {
 
     // Add pagination parameters
     paramCount++;
-    const limitParam = `${paramCount}`;
+    const limitParam = `$${paramCount}`;
     queryParams.push(limit);
-    
+
     paramCount++;
-    const offsetParam = `${paramCount}`;
+    const offsetParam = `$${paramCount}`;
     queryParams.push(offset);
 
     // Main search query with review stats and enhanced property tracking
