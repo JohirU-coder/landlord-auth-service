@@ -278,7 +278,7 @@
             constructor() {
                 this.user = null;
                 this.token = null;
-                this.API_BASE_URL = 'https://landlord-auth-service-production.up.railway.app';
+                this.API_BASE_URL = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) || 'http://localhost:8080';
                 this.init();
             }
 
@@ -657,7 +657,7 @@
                 btn.disabled = true;
                 try {
                     const token = localStorage.getItem('rentreviews_token');
-                    const res = await fetch('https://landlord-auth-service-production.up.railway.app/resend-verification', {
+                    const res = await fetch(`${API_BASE_URL}/resend-verification`, {
                         method: 'POST',
                         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                         credentials: 'include'

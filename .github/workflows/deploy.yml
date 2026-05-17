@@ -1,0 +1,67 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment target environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run test suite
+        run: npm test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Generate frontend runtime config
+        run: |
+          cat > rentreviews-platform/rentreviews-platform/rentreviews-platform/frontend/landlord-frontend/config.js <<'EOF'
+          // Generated at deploy time by GitHub Actions.
+          window.APP_CONFIG = window.APP_CONFIG || {
+            API_BASE_URL: "${{ secrets.FRONTEND_API_BASE_URL || 'http://localhost:8080' }}"
+          };
+          EOF
+      - name: Show generated config preview
+        run: |
+          echo '--- config.js contents ---'
+          sed -n '1,20p' rentreviews-platform/rentreviews-platform/rentreviews-platform/frontend/landlord-frontend/config.js
+
+      - name: Deploy via SSH
+        if: ${{ secrets.DEPLOY_HOST && secrets.DEPLOY_USER && secrets.DEPLOY_PATH && secrets.SSH_PRIVATE_KEY }}
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y openssh-client rsync
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+          rsync -avz --delete rentreviews-platform/rentreviews-platform/rentreviews-platform/ "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}"
+      - name: Deploy skipped
+        if: ${{ !secrets.DEPLOY_HOST || !secrets.DEPLOY_USER || !secrets.DEPLOY_PATH || !secrets.SSH_PRIVATE_KEY }}
+        run: |
+          echo 'Skipping SSH deployment because one or more required secrets are not configured:'
+          echo '  DEPLOY_HOST, DEPLOY_USER, DEPLOY_PATH, SSH_PRIVATE_KEY'
