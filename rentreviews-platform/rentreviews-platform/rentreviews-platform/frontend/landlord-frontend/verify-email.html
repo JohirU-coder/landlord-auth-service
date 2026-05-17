@@ -6,6 +6,7 @@
     <title>Verify Email - RentReviews</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./config.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -84,7 +85,7 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'https://landlord-auth-service-production.up.railway.app';
+        const API_BASE_URL = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) || 'https://landlord-auth-service-production.up.railway.app';
 
         const token = new URLSearchParams(window.location.search).get('token');
         const loadingState = document.getElementById('loadingState');
