@@ -224,7 +224,7 @@
                         <input type="checkbox" id="rememberMe" class="rounded border-white/20 bg-white/10 text-purple-600">
                         <span class="ml-2 text-sm text-white/80" data-i18n="auth:login.rememberMe">Remember me</span>
                     </label>
-                    <a href="#" class="text-sm text-purple-200 hover:text-white transition-colors" data-i18n="auth:login.forgotPassword">
+                    <a href="./forgot-password.html" class="text-sm text-purple-200 hover:text-white transition-colors" data-i18n="auth:login.forgotPassword">
                         Forgot password?
                     </a>
                 </div>
@@ -754,33 +754,24 @@
                 // Check for successful registration (multiple conditions for robustness)
                 if ((response.ok || response.status === 201) && data.token) {
                     console.log('✅ Registration successful, JWT received');
-                    
+
                     // Store the JWT token
                     AuthManager.setToken(data.token);
-                    
+
                     // Fetch full profile data
                     const profileData = await AuthManager.fetchAndStoreProfile(data.token);
-                    
-                    if (profileData) {
-                        console.log('✅ Profile data fetched and stored');
-                        showNotification(
-                            t('auth:notifications.signupSuccess'),
-                            t('auth:notifications.signupSuccessMessage', { name: profileData.first_name }),
-                            'success'
-                        );
-                    } else {
-                        // Fallback: use basic user data from registration response
-                        AuthManager.setUser(data.user);
-                        showNotification(
-                            t('auth:notifications.signupSuccess'),
-                            t('auth:notifications.signupSuccessGeneric'),
-                            'success'
-                        );
-                    }
+                    if (!profileData) AuthManager.setUser(data.user);
+
+                    // Show "check your email" notice — email_verification_sent is true
+                    showNotification(
+                        'Account Created!',
+                        'A verification link has been sent to your email. Please check your inbox.',
+                        'success'
+                    );
 
                     setTimeout(() => {
                         window.location.href = './dashboard.html';
-                    }, 1500);
+                    }, 3000);
                 } else {
                     let errorMessage = 'Registration failed';
 

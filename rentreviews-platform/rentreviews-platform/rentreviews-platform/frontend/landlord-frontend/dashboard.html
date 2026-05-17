@@ -115,6 +115,27 @@
         </div>
     </nav>
 
+    <!-- Email verification banner — shown only when email_verified is false -->
+    <div id="emailVerificationBanner" class="hidden bg-amber-50 border-b border-amber-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-amber-500 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <p class="text-sm text-amber-800">
+                    <strong>Please verify your email address.</strong>
+                    Check your inbox for a verification link, or
+                    <button id="resendVerificationBtn" class="underline font-medium hover:text-amber-900 focus:outline-none">resend the email</button>.
+                </p>
+            </div>
+            <button id="dismissVerificationBanner" class="text-amber-500 hover:text-amber-700 ml-4 flex-shrink-0">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div class="px-4 py-6 sm:px-0">
@@ -613,6 +634,41 @@
                 window.location.href = './auth.html';
             }
         }
+
+        // Email verification banner
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('rentreviews_token');
+            if (token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    if (payload.email_verified === false) {
+                        document.getElementById('emailVerificationBanner').classList.remove('hidden');
+                    }
+                } catch (e) { /* invalid token — auth check elsewhere handles redirect */ }
+            }
+
+            document.getElementById('dismissVerificationBanner')?.addEventListener('click', () => {
+                document.getElementById('emailVerificationBanner').classList.add('hidden');
+            });
+
+            document.getElementById('resendVerificationBtn')?.addEventListener('click', async () => {
+                const btn = document.getElementById('resendVerificationBtn');
+                btn.textContent = 'Sending…';
+                btn.disabled = true;
+                try {
+                    const token = localStorage.getItem('rentreviews_token');
+                    const res = await fetch('https://landlord-auth-service-production.up.railway.app/resend-verification', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                        credentials: 'include'
+                    });
+                    const data = await res.json();
+                    btn.textContent = res.ok ? 'Email sent! Check your inbox.' : (data.message || 'Failed to send');
+                } catch (e) {
+                    btn.textContent = 'Failed — check your connection';
+                }
+            });
+        });
 
         // Initialize dashboard when page loads
         document.addEventListener('DOMContentLoaded', () => {
