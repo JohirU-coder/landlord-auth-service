@@ -21,6 +21,7 @@
 
     <!-- i18n Configuration -->
     <script src="./i18n/i18n-config.js"></script>
+    <script src="./config.js"></script>
 
     <style>
         body { font-family: 'Inter', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif; }
@@ -329,7 +330,7 @@
 
     <script>
         // API Configuration
-        const API_BASE_URL = 'https://landlord-property-service-production.up.railway.app';
+        const API_BASE_URL = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) || 'https://landlord-property-service-production.up.railway.app';
         
         // State
         let currentProperties = [];
