@@ -50,6 +50,14 @@ app.use(helmet({
   },
 }));
 
+// Enforce HSTS when running behind HTTPS in production
+if (process.env.NODE_ENV === 'production') {
+  app.use((req, res, next) => {
+    res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+    next();
+  });
+}
+
 // Rate Limiting
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -139,7 +147,7 @@ const authenticateToken = (req, res, next) => {
     });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+  jwt.verify(token, process.env.JWT_SECRET, async (err, user) => {
     if (err) {
       return res.status(403).json({
         error: 'Invalid token',
@@ -147,8 +155,25 @@ const authenticateToken = (req, res, next) => {
         timestamp: new Date().toISOString()
       });
     }
-    req.user = user;
-    next();
+
+    try {
+      // Verify current account status from DB to allow immediate suspension/revocation
+      const result = await pool.query('SELECT account_status FROM users WHERE id = $1', [user.id]);
+      if (result.rows.length === 0) {
+        return res.status(401).json({ error: 'User not found', message: 'User account does not exist' });
+      }
+
+      const status = result.rows[0].account_status || 'active';
+      if (status !== 'active') {
+        return res.status(403).json({ error: 'Account not active', message: 'Account is suspended or disabled' });
+      }
+
+      req.user = user;
+      next();
+    } catch (dbError) {
+      console.error('Account status check failed:', dbError);
+      return res.status(500).json({ error: 'Internal server error', message: 'Failed to validate account status' });
+    }
   });
 };
 

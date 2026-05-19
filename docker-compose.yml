@@ -5,17 +5,18 @@ services:
     build: .
     ports:
       - "8080:8080"
+    env_file: .env
     environment:
       NODE_ENV: development
       PORT: 8080
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/rentreviews_auth
-      # Replace these secrets before use — never commit real values
-      JWT_SECRET: dev-jwt-secret-change-me-min-32-chars
-      JWT_EXPIRES_IN: 7d
-      FRONTEND_URL: http://localhost:5500
-      ADMIN_SECRET: dev-admin-secret-change-me
-      # RESEND_API_KEY: your-key-here  # omit for dev console logging
-      # FROM_EMAIL: RentReviews <noreply@rentreviews.com>
+      DATABASE_URL: ${DATABASE_URL}
+      # Replace these secrets before use — keep them in a local .env file.
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5500}
+      ADMIN_SECRET: ${ADMIN_SECRET}
+      # RESEND_API_KEY: ${RESEND_API_KEY}
+      # FROM_EMAIL: ${FROM_EMAIL}
     depends_on:
       postgres:
         condition: service_healthy
@@ -29,10 +30,11 @@ services:
 
   postgres:
     image: postgres:16-alpine
+    env_file: .env
     environment:
-      POSTGRES_DB: rentreviews_auth
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

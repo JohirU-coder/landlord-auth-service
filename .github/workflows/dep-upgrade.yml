@@ -1,0 +1,54 @@
+name: Dependency Upgrade
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 4 * * 1' # weekly on Monday 04:00 UTC
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install npm-check-updates
+        run: npm install -g npm-check-updates
+
+      - name: Run npm-check-updates and upgrade package.json
+        run: |
+          ncu -u
+          cat package.json | jq '{name: .name, version: .version, dependencies: .dependencies, devDependencies: .devDependencies}'
+
+      - name: Install updated deps
+        run: npm install || true
+
+      - name: Prepare test DB
+        run: |
+          if [ -f scripts/setup_test_db.js ]; then npm run db:setup:test || true; fi
+
+      - name: Run tests
+        run: npm test:ci
+        continue-on-error: true
+
+      - name: Create PR with dependency upgrades
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(deps): upgrade dependencies via npm-check-updates"
+          branch: "chore/deps-upgrade-${{ github.run_id }}"
+          title: "chore(deps): automated dependency upgrades"
+          body: |
+            This PR upgrades dependencies using `npm-check-updates`.
+            Please review, run CI, and merge if acceptable.
+          labels: dependencies, automated-pr

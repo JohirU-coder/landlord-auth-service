@@ -8,7 +8,13 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const Joi = require('joi');
 const { Pool } = require('pg');
-const { Resend } = require('resend');
+// Resend is an optional production dependency — server starts fine without it
+let Resend;
+try {
+  ({ Resend } = require('resend'));
+} catch {
+  console.warn('⚠️  resend package not found — emails will be logged to console (dev mode)');
+}
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -29,8 +35,8 @@ const pool = new Pool({
 pool.on('connect', () => console.log('✅ Database connected'));
 pool.on('error', (err) => { console.error('❌ Database error:', err); process.exit(1); });
 
-// Resend — if no API key, emails are logged to console (dev mode)
-const resendClient = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+// Resend — requires both the package and RESEND_API_KEY; otherwise emails are logged to console
+const resendClient = (Resend && process.env.RESEND_API_KEY) ? new Resend(process.env.RESEND_API_KEY) : null;
 
 // Trust Railway's reverse proxy
 app.set('trust proxy', 1);

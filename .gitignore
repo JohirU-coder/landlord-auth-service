@@ -70,6 +70,11 @@ web_modules/
 .env.*
 !.env.example
 
+# Local tooling, git history cleanup, and temporary clone artifacts
+.claude/
+.git-preserve/
+mirror.git/
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
