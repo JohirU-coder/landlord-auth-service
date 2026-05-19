@@ -37,6 +37,21 @@ jobs:
         run: npm run test:ci
         continue-on-error: true
 
+      - name: Debug branch and repo state
+        run: |
+          echo '--- git status ---'
+          git status --short
+          echo '--- git branch ---'
+          git branch --show-current
+          echo '--- git remote -v ---'
+          git remote -v
+          echo '--- git log last 3 ---'
+          git log -3 --oneline
+          echo '--- git rev-parse HEAD ---'
+          git rev-parse HEAD
+          echo '--- package files ---'
+          ls -1 package.json package-lock.json || true
+
       - name: Create PR if lockfile changed
         uses: peter-evans/create-pull-request@v5
         with:
