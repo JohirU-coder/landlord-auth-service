@@ -8,6 +8,9 @@ on:
 jobs:
   audit-fix:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -45,3 +48,4 @@ jobs:
             This PR was opened automatically by the Auto Audit Fix workflow.
             It runs `npm audit fix` and updates `package-lock.json`/`package.json` where applicable.
           labels: dependency, automated-pr
+          update-existing: true
