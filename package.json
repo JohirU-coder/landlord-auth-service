@@ -15,7 +15,9 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "testTimeout": 30000
+    "testTimeout": 30000,
+    "modulePathIgnorePatterns": ["<rootDir>/rentreviews-platform/"],
+    "testPathIgnorePatterns": ["<rootDir>/rentreviews-platform/"]
   },
   "keywords": [
     "authentication",
