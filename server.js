@@ -53,10 +53,13 @@ app.use(helmet({
   },
 }));
 
+const isTestEnv = process.env.NODE_ENV === 'test';
+
 // Rate limiters
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
+  skip: () => isTestEnv,
   message: { error: 'Too many authentication attempts', message: 'Please try again in 15 minutes' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -65,6 +68,7 @@ const authLimiter = rateLimit({
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
+  skip: () => isTestEnv,
   message: { error: 'Too many requests', message: 'Please try again later' }
 });
 
