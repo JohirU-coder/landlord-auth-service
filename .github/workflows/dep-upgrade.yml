@@ -44,7 +44,7 @@ jobs:
           if [ -f scripts/setup_test_db.js ]; then npm run db:setup:test || true; fi
 
       - name: Run tests
-        run: npm test:ci
+        run: npm run test:ci
         continue-on-error: true
 
       - name: Create PR with dependency upgrades
