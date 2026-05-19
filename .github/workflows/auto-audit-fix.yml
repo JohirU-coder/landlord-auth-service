@@ -1,0 +1,47 @@
+name: Auto Audit Fix
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1' # weekly on Monday at 03:00 UTC
+
+jobs:
+  audit-fix:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit fix
+        run: |
+          npm audit fix || true
+
+      - name: Run db setup (if present)
+        run: |
+          if [ -f scripts/setup_test_db.js ]; then npm run db:setup:test || true; fi
+
+      - name: Run tests
+        run: npm test:ci
+        continue-on-error: true
+
+      - name: Create PR if lockfile changed
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(deps): run npm audit fix and update lockfile"
+          branch: "chore/deps-fix-${{ github.run_id }}"
+          title: "chore(deps): automated audit fixes"
+          body: |
+            This PR was opened automatically by the Auto Audit Fix workflow.
+            It runs `npm audit fix` and updates `package-lock.json`/`package.json` where applicable.
+          labels: dependency, automated-pr
