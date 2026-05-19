@@ -16,7 +16,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+          persist-credentials: true
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -46,13 +48,15 @@ jobs:
         continue-on-error: true
 
       - name: Create PR with dependency upgrades
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore(deps): upgrade dependencies via npm-check-updates"
           branch: "chore/deps-upgrade-${{ github.run_id }}"
+          base: main
           title: "chore(deps): automated dependency upgrades"
           body: |
             This PR upgrades dependencies using `npm-check-updates`.
             Please review, run CI, and merge if acceptable.
           labels: dependencies, automated-pr
+          delete-branch: true
