@@ -70,7 +70,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore(deps): upgrade dependencies via npm-check-updates"
-          branch: "chore/deps-upgrade-${{ github.run_id }}"
+          branch: "chore/deps-upgrade"
           base: main
           title: "chore(deps): automated dependency upgrades"
           body: |
