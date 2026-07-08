@@ -32,8 +32,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-             - name: Clear npm cache
-     run: npm cache clean --force
+      - name: Clear npm cache
+        run: npm cache clean --force
       - name: Install dependencies
         run: npm ci
       - name: Audit dependencies (non-failing)
