@@ -25,7 +25,7 @@ const { app, pool } = require('../server');
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const rand = () => Math.random().toString(36).slice(2, 8);
-const testEmail = () => `test_${rand()}@rentreviews-jest.local`;
+const testEmail = () => `test_${rand()}@example.com`;
 const VALID_PASS = 'Test@12345';
 
 async function register(email = testEmail(), password = VALID_PASS, role = 'renter') {
