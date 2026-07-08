@@ -43,7 +43,8 @@
     "dragDrop": "Drag and drop files here, or click to browse",
     "chooseFiles": "Choose Files",
     "fileFormats": "Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB per file)",
-    "uploadedDocs": "Uploaded Documents"
+    "uploadedDocs": "Uploaded Documents",
+    "sensitiveInfoWarning": "CAUTION: Please ensure no sensitive information is being uploaded. Just proof of address and name is all that is required. Thank you!"
   },
   "step3": {
     "title": "Additional Information",
