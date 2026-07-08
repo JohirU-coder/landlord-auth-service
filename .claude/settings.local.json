@@ -33,7 +33,20 @@
       "Bash(git -C \"c:/Users/johir/OneDrive/Documents/GitHub/landlord-auth-service\" log --all --full-history -- \"**/.env\")",
       "Bash(grep -n \"password\\\\|bcrypt\\\\|saltRounds\\\\|hash\\\\|Joi\\\\|min\\\\|max\\\\|regex\\\\|pattern\\\\|uppercase\\\\|lowercase\\\\|rateLimit\\\\|limiter\\\\|parameterized\\\\|\\\\$[0-9]\" \"c:/Users/johir/OneDrive/Documents/GitHub/landlord-auth-service/rentreviews-platform/rentreviews-platform/rentreviews-platform/backend/auth-service/server.js\")",
       "Bash(grep -n \"rateLimit\\\\|limiter\\\\|app\\\\.post.*register\\\\|app\\\\.post.*login\\\\|UNIQUE\\\\|CONFLICT\\\\|duplicate\\\\|email.*UNIQUE\\\\|\\\\$[0-9]\" \"c:/Users/johir/OneDrive/Documents/GitHub/landlord-auth-service/rentreviews-platform/rentreviews-platform/rentreviews-platform/backend/auth-service/server.js\")",
-      "Bash(grep -n \"UNIQUE\\\\|\\\\$[0-9]\\\\|parameterized\\\\|email.*unique\\\\|duplicate\" \"c:/Users/johir/OneDrive/Documents/GitHub/landlord-auth-service/server.js\")"
+      "Bash(grep -n \"UNIQUE\\\\|\\\\$[0-9]\\\\|parameterized\\\\|email.*unique\\\\|duplicate\" \"c:/Users/johir/OneDrive/Documents/GitHub/landlord-auth-service/server.js\")",
+      "Bash(git stash *)",
+      "Bash(gh run *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(gh workflow *)",
+      "Bash(gh pr *)",
+      "Bash(gh api *)",
+      "Bash(git fetch *)",
+      "Bash(git pull *)",
+      "Bash(git checkout *)",
+      "Bash(npm ci *)",
+      "Bash(wait)"
     ]
   }
 }
