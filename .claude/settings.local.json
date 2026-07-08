@@ -46,7 +46,11 @@
       "Bash(git pull *)",
       "Bash(git checkout *)",
       "Bash(npm ci *)",
-      "Bash(wait)"
+      "Bash(wait)",
+      "Bash(node -e ' *)",
+      "Bash(gh secret *)",
+      "Bash(gh run view 28969121520 --log 2>&1 > /tmp/auditfix.txt *)",
+      "Read(//tmp/**)"
     ]
   }
 }
