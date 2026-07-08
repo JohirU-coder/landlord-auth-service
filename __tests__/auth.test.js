@@ -25,7 +25,7 @@ const { app, pool } = require('../server');
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const rand = () => Math.random().toString(36).slice(2, 8);
-const testEmail = () => `test_${rand()}@example.com`;
+const testEmail = () => `test_${rand()}@rentreviews-jest.example.com`;
 const VALID_PASS = 'Test@12345';
 
 async function register(email = testEmail(), password = VALID_PASS, role = 'renter') {
@@ -74,7 +74,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   // Clean up test data (emails containing our marker domain)
-  await pool.query("DELETE FROM users WHERE email LIKE '%@rentreviews-jest.local'");
+  await pool.query("DELETE FROM users WHERE email LIKE '%@rentreviews-jest.example.com'");
   await pool.end();
 });
 
@@ -146,7 +146,7 @@ describe('POST /login', () => {
   });
 
   it('returns 401 for non-existent email', async () => {
-    const res = await login('nobody@rentreviews-jest.local');
+    const res = await login('nobody@rentreviews-jest.example.com');
     expect(res.status).toBe(401);
   });
 
@@ -154,7 +154,7 @@ describe('POST /login', () => {
     const existingEmail = testEmail();
     await register(existingEmail);
     const r1 = await login(existingEmail, 'WrongPass@9');
-    const r2 = await login('nobody@rentreviews-jest.local');
+    const r2 = await login('nobody@rentreviews-jest.example.com');
     // Both return the same error message (no enumeration)
     expect(r1.body.message).toBe(r2.body.message);
   });
@@ -208,7 +208,7 @@ describe('POST /forgot-password', () => {
   it('always returns 200 (prevents email enumeration)', async () => {
     const res = await request(app)
       .post('/forgot-password')
-      .send({ email: 'doesnotexist@rentreviews-jest.local' });
+      .send({ email: 'doesnotexist@rentreviews-jest.example.com' });
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
   });
