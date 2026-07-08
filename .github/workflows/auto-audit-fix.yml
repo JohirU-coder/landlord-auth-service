@@ -53,14 +53,15 @@ jobs:
           ls -1 package.json package-lock.json || true
 
       - name: Create PR if lockfile changed
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore(deps): run npm audit fix and update lockfile"
-          branch: "chore/deps-fix-${{ github.run_id }}"
+          branch: "chore/deps-fix"
           title: "chore(deps): automated audit fixes"
           body: |
             This PR was opened automatically by the Auto Audit Fix workflow.
             It runs `npm audit fix` and updates `package-lock.json`/`package.json` where applicable.
           labels: dependency, automated-pr
           update-existing: true
+          delete-branch: true
