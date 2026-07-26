@@ -390,6 +390,19 @@
             return path ? `${REVIEW_API_BASE_URL}${path}` : null;
         }
 
+        const GOOGLE_STREETVIEW_API_KEY = (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_STREETVIEW_API_KEY) || '';
+
+        function getStreetViewUrl(latitude, longitude) {
+            if (!GOOGLE_STREETVIEW_API_KEY || latitude == null || longitude == null) return null;
+            return `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${latitude},${longitude}&key=${GOOGLE_STREETVIEW_API_KEY}`;
+        }
+
+        // Real user photo first; Street View as a fallback for properties that
+        // don't have one yet (only when a key is configured).
+        function getPropertyImageUrl(property) {
+            return resolvePhotoUrl(property.photo_path) || getStreetViewUrl(property.latitude, property.longitude);
+        }
+
         // State
         let currentProperties = [];
         let currentPage = 1;
@@ -502,7 +515,7 @@
             const ratingLine = rating
                 ? `★ ${rating.toFixed(1)} (${reviewCount})`
                 : t('search:propertyCard.noReviews');
-            const photoUrl = resolvePhotoUrl(property.photo_path);
+            const photoUrl = getPropertyImageUrl(property);
 
             const div = document.createElement('div');
             div.className = 'map-popup text-sm';
@@ -736,7 +749,7 @@
 
             // Show a real review photo if one exists for this property, instead
             // of the gradient placeholder.
-            const photoUrl = resolvePhotoUrl(property.photo_path);
+            const photoUrl = getPropertyImageUrl(property);
             if (photoUrl) {
                 const imageContainer = template.querySelector('.property-card > div');
                 imageContainer.style.backgroundImage = `url('${photoUrl}')`;
@@ -954,7 +967,7 @@
             };
 
             const isCommunitySubmitted = property.description?.includes('[Community-Submitted Property - Unverified by Landlord]');
-            const photoUrl = resolvePhotoUrl(property.photo_path);
+            const photoUrl = getPropertyImageUrl(property);
 
             const modalContent = document.createElement('div');
             modalContent.className = 'bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto';

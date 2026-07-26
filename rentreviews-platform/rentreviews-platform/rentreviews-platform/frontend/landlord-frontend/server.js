@@ -8,6 +8,11 @@ const PORT = process.env.PORT || 8000;
 const AUTH_API_BASE_URL = process.env.AUTH_API_BASE_URL || process.env.API_BASE_URL || 'http://localhost:8080';
 const PROPERTY_API_BASE_URL = process.env.PROPERTY_API_BASE_URL || AUTH_API_BASE_URL;
 const REVIEW_API_BASE_URL = process.env.REVIEW_API_BASE_URL || AUTH_API_BASE_URL;
+// Used client-side as a Street View Static API image src (fallback for
+// properties with no user-submitted photo). Must be restricted to this
+// site's domain(s) in Google Cloud Console — it's inherently visible in
+// page source, same as any client-side Maps/Street View key.
+const GOOGLE_STREETVIEW_API_KEY = process.env.GOOGLE_STREETVIEW_API_KEY || '';
 
 // Regenerate config.js from environment on every boot so a Railway env var
 // change + redeploy is enough to repoint the frontend — no rebuild step.
@@ -16,7 +21,8 @@ window.APP_CONFIG = window.APP_CONFIG || {
   API_BASE_URL: ${JSON.stringify(AUTH_API_BASE_URL)},
   AUTH_API_BASE_URL: ${JSON.stringify(AUTH_API_BASE_URL)},
   PROPERTY_API_BASE_URL: ${JSON.stringify(PROPERTY_API_BASE_URL)},
-  REVIEW_API_BASE_URL: ${JSON.stringify(REVIEW_API_BASE_URL)}
+  REVIEW_API_BASE_URL: ${JSON.stringify(REVIEW_API_BASE_URL)},
+  GOOGLE_STREETVIEW_API_KEY: ${JSON.stringify(GOOGLE_STREETVIEW_API_KEY)}
 };
 `;
 fs.writeFileSync(path.join(__dirname, 'config.js'), configJs);
