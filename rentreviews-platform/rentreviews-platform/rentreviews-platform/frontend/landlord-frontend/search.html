@@ -23,6 +23,12 @@
     <script src="./i18n/i18n-config.js"></script>
     <script src="./config.js"></script>
 
+    <!-- Leaflet (OpenStreetMap) — free, no API key required -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
     <style>
         body { font-family: 'Inter', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif; }
         
@@ -74,6 +80,35 @@
         
         .filter-tag:hover {
             transform: scale(1.05);
+        }
+
+        #propertyMap {
+            height: 600px;
+            width: 100%;
+            border-radius: 1rem;
+            z-index: 0;
+        }
+
+        .view-toggle-btn {
+            transition: all 0.2s ease;
+        }
+
+        .view-toggle-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .map-popup .price-line {
+            font-weight: 700;
+            color: #4f46e5;
+        }
+
+        .map-popup button {
+            cursor: pointer;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 0.75rem;
         }
     </style>
 </head>
@@ -215,6 +250,15 @@
                 <p id="resultsCount" class="text-gray-600" data-i18n="search:results.loading">Loading properties...</p>
             </div>
             <div class="flex items-center space-x-4">
+                <!-- List / Map toggle -->
+                <div class="flex rounded-lg border border-gray-300 overflow-hidden">
+                    <button id="listViewBtn" class="view-toggle-btn active px-4 py-2 text-sm font-medium" data-i18n="search:results.listView">
+                        📋 List
+                    </button>
+                    <button id="mapViewBtn" class="view-toggle-btn px-4 py-2 text-sm font-medium bg-white text-gray-700" data-i18n="search:results.mapView">
+                        🗺️ Map
+                    </button>
+                </div>
                 <label class="text-sm font-medium text-gray-700" data-i18n="search:results.sortBy">Sort by:</label>
                 <select id="sortBy" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
                     <option value="newest" data-i18n="search:results.sortNewest">Newest First</option>
@@ -223,6 +267,12 @@
                     <option value="rating" data-i18n="search:results.sortRating">Highest Rated</option>
                 </select>
             </div>
+        </div>
+
+        <!-- Map View -->
+        <div id="mapViewContainer" class="hidden mb-6">
+            <div id="propertyMap"></div>
+            <p id="mapCoverageNote" class="text-sm text-gray-500 mt-3 hidden"></p>
         </div>
 
         <!-- Property Grid -->
@@ -331,12 +381,18 @@
     <script>
         // API Configuration
         const API_BASE_URL = (window.APP_CONFIG && window.APP_CONFIG.PROPERTY_API_BASE_URL) || 'http://localhost:8080';
-        
+        const REVIEW_API_BASE_URL = (window.APP_CONFIG && window.APP_CONFIG.REVIEW_API_BASE_URL) || 'http://localhost:3003';
+
         // State
         let currentProperties = [];
         let currentPage = 1;
         let isLoading = false;
         let currentFilters = {};
+        let currentView = 'list'; // 'list' | 'map'
+
+        // Leaflet map state
+        let leafletMap = null;
+        let markersLayer = null;
 
         // DOM Elements
         const propertyGrid = document.getElementById('propertyGrid');
@@ -346,7 +402,9 @@
         const propertyCardTemplate = document.getElementById('propertyCardTemplate');
         const activeFilters = document.getElementById('activeFilters');
         const filterTags = document.getElementById('filterTags');
-        
+        const mapViewContainer = document.getElementById('mapViewContainer');
+        const mapCoverageNote = document.getElementById('mapCoverageNote');
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadProperties();
@@ -359,11 +417,147 @@
             loadMoreBtn.addEventListener('click', loadMoreProperties);
             document.getElementById('clearFilters').addEventListener('click', clearAllFilters);
             document.getElementById('sortBy').addEventListener('change', handleSort);
-            
+            document.getElementById('listViewBtn').addEventListener('click', () => setView('list'));
+            document.getElementById('mapViewBtn').addEventListener('click', () => setView('map'));
+
             // Enter key search
             document.getElementById('locationSearch').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') handleSearch();
             });
+        }
+
+        function setView(view) {
+            currentView = view;
+            const listBtn = document.getElementById('listViewBtn');
+            const mapBtn = document.getElementById('mapViewBtn');
+
+            if (view === 'map') {
+                propertyGrid.classList.add('hidden');
+                loadMoreBtn.classList.add('hidden');
+                mapViewContainer.classList.remove('hidden');
+                mapBtn.classList.add('active');
+                listBtn.classList.remove('active');
+
+                initMap();
+                // Leaflet needs a resize nudge after its container becomes visible,
+                // otherwise tiles render blank/gray.
+                setTimeout(() => leafletMap && leafletMap.invalidateSize(), 0);
+                updateMapMarkers(currentProperties);
+            } else {
+                propertyGrid.classList.remove('hidden');
+                mapViewContainer.classList.add('hidden');
+                listBtn.classList.add('active');
+                mapBtn.classList.remove('active');
+                syncLoadMoreVisibility();
+            }
+        }
+
+        function initMap() {
+            if (leafletMap) return;
+            leafletMap = L.map('propertyMap').setView([39.8283, -98.5795], 4); // Continental US default
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(leafletMap);
+            markersLayer = L.layerGroup().addTo(leafletMap);
+        }
+
+        function updateMapMarkers(properties) {
+            if (!leafletMap || !markersLayer) return;
+
+            markersLayer.clearLayers();
+
+            const withCoords = properties.filter(p => p.latitude != null && p.longitude != null);
+            const withoutCoords = properties.length - withCoords.length;
+
+            withCoords.forEach(property => {
+                const marker = L.marker([property.latitude, property.longitude]);
+                marker.bindPopup(buildMapPopupHtml(property));
+                markersLayer.addLayer(marker);
+            });
+
+            if (withCoords.length > 0) {
+                const bounds = L.latLngBounds(withCoords.map(p => [p.latitude, p.longitude]));
+                leafletMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+            }
+
+            if (withoutCoords > 0) {
+                mapCoverageNote.textContent = t('search:results.mapCoverageNote', { count: withoutCoords });
+                mapCoverageNote.classList.remove('hidden');
+            } else {
+                mapCoverageNote.classList.add('hidden');
+            }
+        }
+
+        function buildMapPopupHtml(property) {
+            const rating = property.review_stats?.avg_rating;
+            const reviewCount = property.review_stats?.count || 0;
+            const ratingLine = rating
+                ? `★ ${rating.toFixed(1)} (${reviewCount})`
+                : t('search:propertyCard.noReviews');
+
+            const div = document.createElement('div');
+            div.className = 'map-popup text-sm';
+            div.innerHTML = `
+                <div class="font-bold text-gray-900 mb-1">${escapeHtml(property.address || '')}</div>
+                <div class="text-gray-600 mb-1">${escapeHtml(`${property.city || ''}, ${property.state || ''}`)}</div>
+                <div class="price-line mb-1">$${property.rent_amount?.toLocaleString() || 'N/A'}/mo</div>
+                <div class="text-yellow-500 mb-3">${ratingLine}</div>
+                <div class="flex gap-2">
+                    <button class="flex-1 bg-indigo-600 text-white px-2 py-1.5 rounded text-xs font-medium hover:bg-indigo-700" data-action="details">
+                        ${t('search:propertyCard.viewDetails')}
+                    </button>
+                    <button class="flex-1 bg-green-600 text-white px-2 py-1.5 rounded text-xs font-medium hover:bg-green-700" data-action="review">
+                        ${t('search:propertyCard.writeReview')}
+                    </button>
+                </div>
+            `;
+
+            div.querySelector('[data-action="details"]').addEventListener('click', () => openPropertyDetails(property.id));
+            div.querySelector('[data-action="review"]').addEventListener('click', () => navigateToWriteReview(property.id));
+
+            return div;
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function openPropertyDetails(propertyId) {
+            const property = currentProperties.find(p => p.id === propertyId);
+            if (property) showPropertyDetailsWithDisclaimer(property);
+        }
+
+        function navigateToWriteReview(propertyId) {
+            const property = currentProperties.find(p => p.id === propertyId);
+            if (!property) return;
+
+            const isCommunitySubmitted = property.description?.includes('[Community-Submitted Property - Unverified by Landlord]');
+            const landlordName = `${property.landlord?.first_name || ''} ${property.landlord?.last_name || ''}`.trim();
+            const propertyData = encodeURIComponent(JSON.stringify({
+                id: property.id,
+                address: property.address,
+                city: property.city,
+                state: property.state,
+                zip_code: property.zip_code,
+                landlord_name: landlordName,
+                unverified: isCommunitySubmitted || undefined
+            }));
+
+            if (isCommunitySubmitted) {
+                showUnverifiedReviewWarning(propertyData);
+            } else {
+                window.location.href = `./write-review.html?property=${propertyData}`;
+            }
+        }
+
+        function syncLoadMoreVisibility() {
+            // Restores whatever visibility loadProperties() last computed for list view.
+            if (loadMoreBtn.dataset.hasNext === 'true') {
+                loadMoreBtn.classList.remove('hidden');
+            }
         }
 
         function setupNavigation() {
@@ -444,12 +638,19 @@
                     
                     displayProperties(currentProperties, append);
                     updateResultsCount(data.pagination?.total_count || currentProperties.length);
-                    
-                    // Show/hide load more button
-                    if (data.pagination?.has_next) {
+
+                    // Show/hide load more button (list view only — remembered via
+                    // dataset so switching back from map view restores it correctly)
+                    const hasNext = !!data.pagination?.has_next;
+                    loadMoreBtn.dataset.hasNext = String(hasNext);
+                    if (hasNext && currentView === 'list') {
                         loadMoreBtn.classList.remove('hidden');
                     } else {
                         loadMoreBtn.classList.add('hidden');
+                    }
+
+                    if (currentView === 'map') {
+                        updateMapMarkers(currentProperties);
                     }
                 } else {
                     console.log('No properties found or invalid response format');
@@ -542,17 +743,18 @@
             template.querySelector('.property-bathrooms').textContent = t('search:propertyCard.bath', { count: property.bathrooms || 0 });
             template.querySelector('.property-sqft').textContent = t('search:propertyCard.sqft', { sqft: property.square_feet || 'N/A' });
             
-            // Enhanced review display
+            // Review display — driven by review_stats the property-service already
+            // computes from the real reviews table (COUNT/AVG join), no mock data.
             const reviewStars = template.querySelector('.rating-stars');
             const reviewCount = template.querySelector('.review-count');
-            
-            // Mock review data (in real app, this would come from your review service)
-            const mockReviewData = generateMockReviewData(property.id);
-            
+
+            const avgRating = property.review_stats?.avg_rating || 0;
+            const totalReviews = property.review_stats?.count || 0;
+
             // Update star rating display
-            const fullStars = Math.floor(mockReviewData.averageRating);
-            const hasHalfStar = mockReviewData.averageRating % 1 >= 0.5;
-            
+            const fullStars = Math.floor(avgRating);
+            const hasHalfStar = avgRating % 1 >= 0.5;
+
             let starsHtml = '';
             for (let i = 0; i < 5; i++) {
                 if (i < fullStars) {
@@ -563,19 +765,21 @@
                     starsHtml += '☆';
                 }
             }
-            
-            reviewStars.innerHTML = `${starsHtml} <span class="review-rating">(${mockReviewData.averageRating.toFixed(1)})</span>`;
-            
+
+            reviewStars.innerHTML = totalReviews > 0
+                ? `${starsHtml} <span class="review-rating">(${avgRating.toFixed(1)})</span>`
+                : '';
+
             // Update review count
-            if (mockReviewData.reviewCount > 0) {
-                const reviewKey = mockReviewData.reviewCount === 1 ? 'search:propertyCard.reviews' : 'search:propertyCard.reviews_plural';
-                reviewCount.textContent = t(reviewKey, { count: mockReviewData.reviewCount });
+            if (totalReviews > 0) {
+                const reviewKey = totalReviews === 1 ? 'search:propertyCard.reviews' : 'search:propertyCard.reviews_plural';
+                reviewCount.textContent = t(reviewKey, { count: totalReviews });
                 reviewCount.classList.remove('hidden');
             } else {
                 reviewCount.textContent = t('search:propertyCard.noReviews');
                 reviewCount.classList.add('text-gray-400');
             }
-            
+
             // Landlord info
             const landlordName = `${property.landlord?.first_name || ''} ${property.landlord?.last_name || 'Unknown'}`.trim();
             template.querySelector('.landlord-name').textContent = landlordName;
@@ -588,19 +792,19 @@
             addPropertyStatusBadge(property, propertyCard, isCommunitySubmitted);
             
             // Add review highlight if rating is good
-            if (mockReviewData.averageRating >= 4.0) {
+            if (totalReviews > 0 && avgRating >= 4.0) {
                 const badge = document.createElement('div');
                 badge.className = 'absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold z-10';
                 badge.textContent = t('search:propertyCard.highlyRated');
                 propertyCard.style.position = 'relative';
                 propertyCard.appendChild(badge);
             }
-            
+
             // Enhanced "View Details" button functionality
             const viewDetailsBtn = template.querySelector('.view-details-btn');
             if (viewDetailsBtn) {
                 viewDetailsBtn.addEventListener('click', () => {
-                    showPropertyDetailsWithDisclaimer(property, mockReviewData);
+                    showPropertyDetailsWithDisclaimer(property);
                 });
             }
             
@@ -720,10 +924,15 @@
             }
         }
 
-        function showPropertyDetailsWithDisclaimer(property, reviewData) {
+        function showPropertyDetailsWithDisclaimer(property) {
             const modalOverlay = document.createElement('div');
             modalOverlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
-            
+
+            const reviewData = {
+                averageRating: property.review_stats?.avg_rating || 0,
+                reviewCount: property.review_stats?.count || 0
+            };
+
             const isCommunitySubmitted = property.description?.includes('[Community-Submitted Property - Unverified by Landlord]');
             
             const modalContent = document.createElement('div');
@@ -753,9 +962,9 @@
                                 ${property.rent_amount?.toLocaleString() || 'N/A'}
                             </span>
                             <div class="ml-4 text-white">
-                                ${reviewData.averageRating > 0 ? 
+                                ${reviewData.reviewCount > 0 ?
                                     `<div class="flex items-center">
-                                        <span class="text-yellow-300">★★★★★</span>
+                                        <span class="text-yellow-300">${'★'.repeat(Math.round(reviewData.averageRating))}${'☆'.repeat(5 - Math.round(reviewData.averageRating))}</span>
                                         <span class="ml-2">${reviewData.averageRating.toFixed(1)} (${reviewData.reviewCount} ${reviewData.reviewCount === 1 ? t('search:propertyCard.reviews', {count: reviewData.reviewCount}) : t('search:propertyCard.reviews_plural', {count: reviewData.reviewCount})})</span>
                                     </div>` :
                                     `<span class="text-indigo-200">${t('search:propertyDetails.noReviews')}</span>`
@@ -834,9 +1043,12 @@
                         <!-- Reviews Section -->
                         <div class="mb-6">
                             <h3 class="text-lg font-bold text-gray-900 mb-4">${t('search:propertyDetails.recentReviews')}</h3>
-                            ${reviewData.reviewCount > 0 ? generateMockReviews(reviewData.reviewCount) :
-                                `<p class="text-gray-500 text-center py-8">${t('search:propertyDetails.noReviewsMessage')}</p>`
-                            }
+                            <div id="recentReviewsContainer">
+                                ${reviewData.reviewCount > 0
+                                    ? `<p class="text-gray-400 text-center py-8">${t('search:propertyDetails.loadingReviews')}</p>`
+                                    : `<p class="text-gray-500 text-center py-8">${t('search:propertyDetails.noReviewsMessage')}</p>`
+                                }
+                            </div>
                         </div>
                         
                         <!-- Action Buttons -->
@@ -897,13 +1109,78 @@
             
             modalOverlay.appendChild(modalContent);
             document.body.appendChild(modalOverlay);
-            
+
             // Close modal when clicking overlay
             modalOverlay.addEventListener('click', (e) => {
                 if (e.target === modalOverlay) {
                     modalOverlay.remove();
                 }
             });
+
+            // Load the real recent reviews for this property in the background
+            if (reviewData.reviewCount > 0) {
+                loadRecentReviewsIntoModal(property.id, modalContent);
+            }
+        }
+
+        async function loadRecentReviewsIntoModal(propertyId, modalContent) {
+            const container = modalContent.querySelector('#recentReviewsContainer');
+            if (!container) return;
+
+            try {
+                const response = await fetch(
+                    `${REVIEW_API_BASE_URL}/reviews?property_id=${propertyId}&limit=3&sort_by=newest`
+                );
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const data = await response.json();
+                const reviews = data.reviews || [];
+
+                container.innerHTML = reviews.length > 0
+                    ? reviews.map(renderReviewHtml).join('')
+                    : `<p class="text-gray-500 text-center py-8">${t('search:propertyDetails.noReviewsMessage')}</p>`;
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                container.innerHTML = `<p class="text-gray-400 text-center py-8">${t('search:propertyDetails.reviewsLoadError')}</p>`;
+            }
+        }
+
+        function renderReviewHtml(review) {
+            const reviewerName = review.anonymous || !review.reviewer
+                ? t('search:propertyDetails.anonymousReviewer')
+                : `${review.reviewer.first_name || ''} ${review.reviewer.last_name || ''}`.trim();
+            const initial = (reviewerName[0] || '?').toUpperCase();
+            const rating = review.ratings?.overall || 0;
+            const date = review.created_at
+                ? new Date(review.created_at).toLocaleDateString()
+                : '';
+
+            return `
+                <div class="border-b border-gray-200 pb-4 mb-4 last:border-b-0">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                                <span class="text-sm font-bold">${escapeHtml(initial)}</span>
+                            </div>
+                            <div class="ml-3">
+                                <p class="font-medium text-gray-900">${escapeHtml(reviewerName)}</p>
+                                <p class="text-sm text-gray-500">${escapeHtml(date)}</p>
+                            </div>
+                        </div>
+                        <div class="text-yellow-400">
+                            ${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}
+                        </div>
+                    </div>
+                    <p class="font-medium text-gray-800 mb-1">${escapeHtml(review.title || '')}</p>
+                    <p class="text-gray-700">${escapeHtml(review.review_text || '')}</p>
+                    ${review.landlord_response ? `
+                        <div class="mt-3 ml-4 pl-3 border-l-2 border-indigo-300 bg-indigo-50 rounded-r-lg p-3">
+                            <p class="text-xs font-semibold text-indigo-700 mb-1">${t('search:propertyDetails.landlordResponse')}</p>
+                            <p class="text-sm text-gray-700">${escapeHtml(review.landlord_response.text || '')}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
         }
 
         function showUnverifiedReviewWarning(propertyDataEncoded) {
@@ -1090,64 +1367,6 @@
             document.body.appendChild(successModal);
         }
 
-        // Function to generate mock review data
-        function generateMockReviewData(propertyId) {
-            const scenarios = [
-                { averageRating: 4.8, reviewCount: 12 },
-                { averageRating: 3.2, reviewCount: 7 },
-                { averageRating: 4.5, reviewCount: 23 },
-                { averageRating: 2.1, reviewCount: 4 },
-                { averageRating: 4.0, reviewCount: 8 },
-                { averageRating: 0, reviewCount: 0 }
-            ];
-            
-            return scenarios[propertyId % scenarios.length];
-        }
-
-        // Generate mock reviews for display
-        function generateMockReviews(count) {
-            const mockReviews = [
-                {
-                    name: "Sarah M.",
-                    rating: 5,
-                    date: "2 weeks ago",
-                    text: "Amazing property! The landlord is very responsive and the apartment is exactly as described. Highly recommend!"
-                },
-                {
-                    name: "Mike R.",
-                    rating: 4,
-                    date: "1 month ago", 
-                    text: "Great location and fair rent. Had a small maintenance issue that was fixed quickly."
-                },
-                {
-                    name: "Jessica L.",
-                    rating: 5,
-                    date: "2 months ago",
-                    text: "Beautiful apartment in a quiet neighborhood. Landlord is professional and respectful."
-                }
-            ];
-            
-            return mockReviews.slice(0, Math.min(count, 3)).map(review => `
-                <div class="border-b border-gray-200 pb-4 mb-4 last:border-b-0">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                                <span class="text-sm font-bold">${review.name[0]}</span>
-                            </div>
-                            <div class="ml-3">
-                                <p class="font-medium text-gray-900">${review.name}</p>
-                                <p class="text-sm text-gray-500">${review.date}</p>
-                            </div>
-                        </div>
-                        <div class="text-yellow-400">
-                            ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
-                        </div>
-                    </div>
-                    <p class="text-gray-700">${review.text}</p>
-                </div>
-            `).join('');
-        }
-
         function updateResultsCount(count) {
             resultsCount.textContent = t('search:results.foundProperties', { count });
         }
@@ -1225,12 +1444,15 @@
                         return (a.rent_amount || 0) - (b.rent_amount || 0);
                     case 'price_high':
                         return (b.rent_amount || 0) - (a.rent_amount || 0);
+                    case 'rating':
+                        return (b.review_stats?.avg_rating || 0) - (a.review_stats?.avg_rating || 0);
                     case 'newest':
                     default:
                         return new Date(b.created_at || 0) - new Date(a.created_at || 0);
                 }
             });
             displayProperties(currentProperties);
+            if (currentView === 'map') updateMapMarkers(currentProperties);
         }
 
         function loadMoreProperties() {

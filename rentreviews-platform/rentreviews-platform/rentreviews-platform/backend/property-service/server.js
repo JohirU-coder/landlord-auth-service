@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const Joi = require('joi');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const { geocodeAddress } = require('./geocode');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -268,6 +269,7 @@ app.get('/', (req, res) => {
       'search-properties': '/properties (GET)',
       'my-properties': '/properties/my (GET) - Auth required',
       'property-stats': '/properties/stats (GET)',
+      'geocode-backfill': '/admin/geocode-properties (POST) - Admin only',
       test: '/test (GET)'
     },
     security: {
@@ -325,6 +327,8 @@ app.get('/setup-database', requireAdminSecret, async (req, res) => {
       await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS source_url TEXT DEFAULT '';`);
       await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS verification_status VARCHAR(20) DEFAULT 'verified';`);
       await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS last_verified_at TIMESTAMP;`);
+      await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION;`);
+      await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION;`);
     } catch (error) {
       // Columns might already exist, continue
       console.log('Some columns already exist, continuing...');
@@ -340,22 +344,77 @@ app.get('/setup-database', requireAdminSecret, async (req, res) => {
       CREATE INDEX IF NOT EXISTS idx_properties_bedrooms ON properties(bedrooms);
       CREATE INDEX IF NOT EXISTS idx_properties_verification_status ON properties(verification_status);
       CREATE INDEX IF NOT EXISTS idx_properties_data_source ON properties(data_source);
+      CREATE INDEX IF NOT EXISTS idx_properties_lat_lng ON properties(latitude, longitude);
     `);
-    
-    sendSuccessResponse(res, 200, { 
+
+    sendSuccessResponse(res, 200, {
       tables: ['properties'],
       indexes: [
-        'idx_properties_city', 'idx_properties_state', 'idx_properties_zip_code', 
+        'idx_properties_city', 'idx_properties_state', 'idx_properties_zip_code',
         'idx_properties_landlord_id', 'idx_properties_rent_amount', 'idx_properties_bedrooms',
-        'idx_properties_verification_status', 'idx_properties_data_source'
+        'idx_properties_verification_status', 'idx_properties_data_source', 'idx_properties_lat_lng'
       ],
-      new_columns: ['data_source', 'source_url', 'verification_status', 'last_verified_at']
+      new_columns: ['data_source', 'source_url', 'verification_status', 'last_verified_at', 'latitude', 'longitude']
     }, 'Properties table, indexes, and tracking columns created successfully');
     
   } catch (error) {
     console.error('Database setup error:', error);
     sendErrorResponse(res, 500, 'Database setup failed', 'Failed to create properties table',
       process.env.NODE_ENV === 'development' ? error.message : undefined);
+  }
+});
+
+// POST /admin/geocode-properties - Backfill lat/lng for properties created before
+// map support was added (ADMIN ONLY). Processes sequentially to respect Nominatim's
+// rate limit, capped per call so the request can't run indefinitely.
+app.post('/admin/geocode-properties', requireAdminSecret, async (req, res) => {
+  const BATCH_CAP = 100;
+
+  try {
+    const pending = await pool.query(
+      `SELECT id, address, city, state, zip_code FROM properties
+       WHERE latitude IS NULL OR longitude IS NULL
+       ORDER BY id ASC
+       LIMIT $1`,
+      [BATCH_CAP]
+    );
+
+    let geocoded = 0;
+    let failed = 0;
+    const failedIds = [];
+
+    for (const property of pending.rows) {
+      const coords = await geocodeAddress(property.address, property.city, property.state, property.zip_code);
+      if (coords) {
+        await pool.query(
+          'UPDATE properties SET latitude = $1, longitude = $2, updated_at = NOW() WHERE id = $3',
+          [coords.latitude, coords.longitude, property.id]
+        );
+        geocoded++;
+      } else {
+        failed++;
+        failedIds.push(property.id);
+      }
+    }
+
+    const remaining = await pool.query(
+      'SELECT COUNT(*) as total FROM properties WHERE latitude IS NULL OR longitude IS NULL'
+    );
+
+    sendSuccessResponse(res, 200, {
+      processed: pending.rows.length,
+      geocoded,
+      failed,
+      failed_ids: failedIds,
+      remaining_without_coordinates: parseInt(remaining.rows[0].total),
+      note: remaining.rows[0].total > 0
+        ? 'Call this endpoint again to continue backfilling remaining properties.'
+        : 'All properties now have coordinates.'
+    }, 'Geocoding backfill batch complete');
+
+  } catch (error) {
+    console.error('Error backfilling geocoding:', error);
+    sendErrorResponse(res, 500, 'Internal server error', 'Failed to backfill property coordinates');
   }
 });
 
@@ -454,20 +513,26 @@ app.post('/properties', authenticateToken, requireRole(['landlord']), createProp
     // Set verification timestamp for verified properties
     const last_verified_at = verification_status === 'verified' ? new Date() : null;
 
+    // Geocode the address so the property can be plotted on the map. Best-effort:
+    // a failed/slow geocode should never block property creation.
+    const coords = await geocodeAddress(address, city, state, zip_code);
+
     // Insert the new property with enhanced tracking
     const insertQuery = `
       INSERT INTO properties (
-        address, city, state, zip_code, rent_amount, 
+        address, city, state, zip_code, rent_amount,
         bedrooms, bathrooms, square_feet, description, landlord_id,
-        data_source, source_url, verification_status, last_verified_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+        data_source, source_url, verification_status, last_verified_at,
+        latitude, longitude
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       RETURNING *
     `;
 
     const result = await pool.query(insertQuery, [
       address, city, state, zip_code, rent_amount,
       bedrooms, bathrooms, square_feet, description, landlord_id,
-      data_source, source_url, verification_status, last_verified_at
+      data_source, source_url, verification_status, last_verified_at,
+      coords?.latitude ?? null, coords?.longitude ?? null
     ]);
 
     const newProperty = result.rows[0];
@@ -492,6 +557,8 @@ app.post('/properties', authenticateToken, requireRole(['landlord']), createProp
         source_url: newProperty.source_url,
         verification_status: newProperty.verification_status,
         last_verified_at: newProperty.last_verified_at,
+        latitude: newProperty.latitude,
+        longitude: newProperty.longitude,
         created_at: newProperty.created_at
       }
     }, 'Property created successfully');
@@ -520,7 +587,7 @@ app.put('/properties/:id', authenticateToken, requireRole(['landlord']), async (
 
     // Check if property exists and belongs to the authenticated landlord
     const propertyCheck = await pool.query(
-      'SELECT id, landlord_id FROM properties WHERE id = $1',
+      'SELECT id, landlord_id, address, city, state, zip_code FROM properties WHERE id = $1',
       [propertyId]
     );
 
@@ -531,6 +598,19 @@ app.put('/properties/:id', authenticateToken, requireRole(['landlord']), async (
     const property = propertyCheck.rows[0];
     if (property.landlord_id !== req.user.id) {
       return sendErrorResponse(res, 403, 'Unauthorized', 'You can only update your own properties');
+    }
+
+    // Re-geocode if any address component changed, so the map pin stays accurate.
+    const addressChanged = ['address', 'city', 'state', 'zip_code'].some(key => value[key] !== undefined);
+    if (addressChanged) {
+      const coords = await geocodeAddress(
+        value.address ?? property.address,
+        value.city ?? property.city,
+        value.state ?? property.state,
+        value.zip_code ?? property.zip_code
+      );
+      value.latitude = coords?.latitude ?? null;
+      value.longitude = coords?.longitude ?? null;
     }
 
     // Build dynamic update query
@@ -587,6 +667,8 @@ app.put('/properties/:id', authenticateToken, requireRole(['landlord']), async (
         source_url: updatedProperty.source_url,
         verification_status: updatedProperty.verification_status,
         last_verified_at: updatedProperty.last_verified_at,
+        latitude: updatedProperty.latitude,
+        longitude: updatedProperty.longitude,
         created_at: updatedProperty.created_at,
         updated_at: updatedProperty.updated_at
       }
@@ -669,6 +751,8 @@ app.get('/properties/my', authenticateToken, requireRole(['landlord']), async (r
       source_url: property.source_url,
       verification_status: property.verification_status,
       last_verified_at: property.last_verified_at,
+      latitude: property.latitude,
+      longitude: property.longitude,
       created_at: property.created_at,
       updated_at: property.updated_at,
       review_count: parseInt(property.review_count) || 0,
@@ -736,6 +820,8 @@ app.get('/properties/:id', async (req, res) => {
         source_url: property.source_url,
         verification_status: property.verification_status,
         last_verified_at: property.last_verified_at,
+        latitude: property.latitude,
+        longitude: property.longitude,
         created_at: property.created_at,
         landlord: {
           id: property.landlord_id,
@@ -912,6 +998,8 @@ app.get('/properties', async (req, res) => {
         p.source_url,
         p.verification_status,
         p.last_verified_at,
+        p.latitude,
+        p.longitude,
         p.created_at,
         u.first_name as landlord_first_name,
         u.last_name as landlord_last_name,
@@ -962,6 +1050,8 @@ app.get('/properties', async (req, res) => {
       source_url: property.source_url,
       verification_status: property.verification_status,
       last_verified_at: property.last_verified_at,
+      latitude: property.latitude,
+      longitude: property.longitude,
       created_at: property.created_at,
       landlord: {
         first_name: property.landlord_first_name,

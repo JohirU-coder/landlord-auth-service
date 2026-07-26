@@ -439,6 +439,18 @@
             }
         }
         
+        // Where to send the user after a successful login/signup. Honors a
+        // ?returnTo= param (e.g. set by write-review.html when it bounces an
+        // unauthenticated visitor here) but only for same-origin relative
+        // paths, to avoid becoming an open redirect.
+        function getPostAuthRedirect() {
+            const returnTo = new URLSearchParams(window.location.search).get('returnTo');
+            if (returnTo && returnTo.startsWith('/') && !returnTo.startsWith('//') && !returnTo.includes('://')) {
+                return returnTo;
+            }
+            return './dashboard.html';
+        }
+
         // 🔧 FIXED: Enhanced Token Management with Profile Integration
         class AuthManager {
             static TOKEN_KEY = 'rentreviews_token';
@@ -655,7 +667,7 @@
                         );
 
                         setTimeout(() => {
-                            window.location.href = './dashboard.html';
+                            window.location.href = getPostAuthRedirect();
                         }, 1500);
                     } else {
                         // Fallback: use basic user data from login response if profile fetch fails
@@ -668,7 +680,7 @@
                             'success'
                         );
                         setTimeout(() => {
-                            window.location.href = './dashboard.html';
+                            window.location.href = getPostAuthRedirect();
                         }, 1500);
                     }
                 } else {
@@ -771,7 +783,7 @@
                     );
 
                     setTimeout(() => {
-                        window.location.href = './dashboard.html';
+                        window.location.href = getPostAuthRedirect();
                     }, 3000);
                 } else {
                     let errorMessage = 'Registration failed';
@@ -876,7 +888,7 @@
         // Check if user is already logged in
         if (AuthManager.isAuthenticated()) {
             console.log('👤 User already authenticated, redirecting to dashboard...');
-            window.location.href = './dashboard.html';
+            window.location.href = getPostAuthRedirect();
         }
         
         // Console security warning

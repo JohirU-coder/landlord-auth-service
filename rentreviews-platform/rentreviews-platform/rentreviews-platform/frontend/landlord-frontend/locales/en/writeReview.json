@@ -22,6 +22,7 @@
   },
   "landlordInfo": {
     "title": "Landlord Information",
+    "notPersistedNote": "Not shown publicly or saved to your review yet — for our records only.",
     "nameLabel": "Landlord/Property Manager Name",
     "namePlaceholder": "Full name or company name",
     "contactMethodLabel": "Contact Method",
@@ -73,6 +74,7 @@
   },
   "submit": {
     "button": "📝 Submit Review",
+    "submitting": "Submitting...",
     "terms": "By submitting this review, you agree to our",
     "termsLink": "Terms of Service",
     "termsAnd": "and confirm that this review is based on your genuine experience."
@@ -80,6 +82,7 @@
   "photos": {
     "title": "Property Photos",
     "subtitle": "Optionally upload 1–2 photos of the property (max 10 MB each).",
+    "notPersistedNote": "Photo storage is coming soon — photos you add here won't be saved with your review yet.",
     "clickToSelect": "Click to select photos",
     "hint": "Up to 2 images • JPG, PNG, WEBP • 10 MB max each",
     "maxReached": "Maximum photos uploaded",
@@ -89,7 +92,16 @@
   },
   "validation": {
     "missingFields": "Please fill in all required fields (property address, review title, and review text).",
-    "missingRating": "Please provide at least an overall rating.",
-    "successMessage": "Thank you for your review of {{address}}! Your review helps other renters make informed decisions. It will be published after verification."
+    "missingRating": "Please rate all five categories (overall, communication, maintenance, condition, and value).",
+    "titleTooShort": "Review title must be at least 10 characters.",
+    "textTooShort": "Detailed review must be at least 50 characters.",
+    "successMessage": "Thank you for your review of {{address}}! Your review is now live and helps other renters make informed decisions.",
+    "errorAuth": "Please log in as a renter to submit a review.",
+    "errorOwnProperty": "You can't review your own property.",
+    "errorDuplicate": "You've already reviewed this property.",
+    "errorPropertyNotFound": "We couldn't find that property. Please find it via Search and click \"Write Review\" from there.",
+    "errorPropertyAmbiguous": "Multiple properties matched that address. Please find the exact one via Search and click \"Write Review\" from there.",
+    "errorNetwork": "Something went wrong submitting your review. Please check your connection and try again.",
+    "errorGeneric": "We couldn't submit your review. Please try again."
   }
 }

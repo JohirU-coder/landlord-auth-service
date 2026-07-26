@@ -40,7 +40,10 @@
     "sortPriceLow": "Price: Low to High",
     "sortPriceHigh": "Price: High to Low",
     "sortRating": "Highest Rated",
-    "loadMore": "Load More Properties"
+    "loadMore": "Load More Properties",
+    "listView": "📋 List",
+    "mapView": "🗺️ Map",
+    "mapCoverageNote": "{{count}} properties don't have a map location yet and aren't shown as pins."
   },
   "propertyCard": {
     "verifiedLandlord": "Verified Landlord",
@@ -93,6 +96,10 @@
     "accuracyValue": "Not guaranteed",
     "recentReviews": "Recent Reviews",
     "noReviewsMessage": "No reviews yet. Be the first to review this property!",
+    "loadingReviews": "Loading reviews...",
+    "reviewsLoadError": "Couldn't load reviews right now. Please try again later.",
+    "anonymousReviewer": "Anonymous",
+    "landlordResponse": "Landlord response:",
     "verifyBeforeReviewing": "Review This Property",
     "writeReview": "Write a Review",
     "close": "Close"
