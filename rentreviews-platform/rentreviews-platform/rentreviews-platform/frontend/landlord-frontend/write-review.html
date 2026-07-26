@@ -739,7 +739,9 @@
                     value_rating: ratings.value,
                     title,
                     review_text: reviewText,
-                    move_in_date: moveInDate || null,
+                    // move_in_date must be omitted (not null) when empty — the
+                    // review-service schema treats it as optional-but-not-nullable.
+                    ...(moveInDate ? { move_in_date: moveInDate } : {}),
                     move_out_date: moveOutDate || null,
                     would_recommend: wouldRecommend,
                     anonymous
