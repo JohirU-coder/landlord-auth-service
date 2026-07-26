@@ -43,7 +43,8 @@
     "dragDrop": "Arrastra y suelta los archivos aquí, o haz clic para buscarlos.",
     "chooseFiles": "Seleccionar archivos",
     "fileFormats": "Formatos compatibles: PDF, JPG, PNG, DOC, DOCX (máximo 10 MB por archivo)",
-    "uploadedDocs": "Documentos cargados"
+    "uploadedDocs": "Documentos cargados",
+    "sensitiveInfoWarning": "PRECAUCIÓN: Asegúrese de no subir información sensible. Solo se requiere comprobante de domicilio y nombre. ¡Gracias!"
   },
   "step3": {
     "title": "Información adicional",
