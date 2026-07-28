@@ -37,7 +37,7 @@
     "joi": "^18.2.3",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.22.0",
-    "resend": "^6.17.2"
+    "resend": "^6.18.1"
   },
   "devDependencies": {
     "jest": "^30.4.2",
