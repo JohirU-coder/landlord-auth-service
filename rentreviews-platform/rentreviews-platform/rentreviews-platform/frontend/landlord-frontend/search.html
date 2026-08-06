@@ -674,6 +674,13 @@
                     if (currentView === 'map') {
                         updateMapMarkers(currentProperties);
                     }
+
+                    // No DB match for a specific-looking address (has a street
+                    // number) — offer a live Street View preview instead of a
+                    // dead end, since the property may just not be added yet.
+                    if (!append && currentProperties.length === 0 && /\d/.test(currentFilters.location || '')) {
+                        showAddressPreview(currentFilters.location);
+                    }
                 } else {
                     console.log('No properties found or invalid response format');
                     displayNoResults();
@@ -1419,6 +1426,121 @@
                     <p class="text-gray-500">${t('search:messages.noResultsHint')}</p>
                 </div>
             `;
+        }
+
+        // Shown when a searched address has no matching property yet. Geocodes
+        // the typed text (server-side, via property-service) and offers a
+        // Street View preview + a way to add the address and write its first
+        // review, instead of a dead-end "no results" message.
+        async function showAddressPreview(locationQuery) {
+            propertyGrid.innerHTML = `
+                <div class="col-span-full text-center py-8">
+                    <p class="text-gray-400 text-sm">${t('search:addressPreview.looking')}</p>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/geocode?q=${encodeURIComponent(locationQuery)}`);
+                if (!response.ok) {
+                    displayNoResults();
+                    return;
+                }
+
+                const geo = await response.json();
+                if (!geo.success) {
+                    displayNoResults();
+                    return;
+                }
+
+                const streetViewUrl = getStreetViewUrl(geo.latitude, geo.longitude);
+
+                propertyGrid.innerHTML = `
+                    <div class="col-span-full flex justify-center">
+                        <div class="max-w-md w-full bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+                            ${streetViewUrl
+                                ? `<img src="${streetViewUrl}" alt="" class="w-full h-56 object-cover">`
+                                : `<div class="h-56 bg-gradient-to-br from-blue-500 to-purple-600"></div>`
+                            }
+                            <div class="p-6 text-center">
+                                <p class="text-xs font-medium text-indigo-600 uppercase tracking-wide mb-2">${t('search:addressPreview.notListedYet')}</p>
+                                <h3 class="font-bold text-lg text-gray-900 mb-4">${escapeHtml(geo.display_name || locationQuery)}</h3>
+                                <button id="addressPreviewReviewBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors">
+                                    ${t('search:addressPreview.writeFirstReview')}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('addressPreviewReviewBtn').addEventListener('click', () => {
+                    handleWriteFirstReview(geo);
+                });
+            } catch (error) {
+                console.error('Error previewing address:', error);
+                displayNoResults();
+            }
+        }
+
+        async function handleWriteFirstReview(geo) {
+            const token = localStorage.getItem('rentreviews_token');
+            if (!token) {
+                const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
+                window.location.href = `./auth.html?returnTo=${returnTo}`;
+                return;
+            }
+
+            if (!geo.city || !geo.state || !geo.zip_code) {
+                alert(t('search:addressPreview.incompleteAddress'));
+                return;
+            }
+
+            const btn = document.getElementById('addressPreviewReviewBtn');
+            const resetButton = () => {
+                if (btn) { btn.disabled = false; btn.textContent = t('search:addressPreview.writeFirstReview'); }
+            };
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = t('search:addressPreview.adding');
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/properties/community`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        address: geo.address,
+                        city: geo.city,
+                        state: geo.state,
+                        zip_code: geo.zip_code
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    alert(t('search:addressPreview.addFailed'));
+                    resetButton();
+                    return;
+                }
+
+                const property = data.property;
+                const propertyData = encodeURIComponent(JSON.stringify({
+                    id: property.id,
+                    address: property.address,
+                    city: property.city,
+                    state: property.state,
+                    zip_code: property.zip_code,
+                    unverified: true
+                }));
+                window.location.href = `./write-review.html?property=${propertyData}`;
+            } catch (error) {
+                console.error('Error adding community property:', error);
+                alert(t('search:addressPreview.addFailed'));
+                resetButton();
+            }
         }
 
         function displayError() {

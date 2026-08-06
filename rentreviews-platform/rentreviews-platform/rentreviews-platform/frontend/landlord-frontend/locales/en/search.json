@@ -66,6 +66,14 @@
     "title": "Unverified Property:",
     "message": "This property was submitted by a community member and has not been verified by the landlord. Information may be inaccurate."
   },
+  "addressPreview": {
+    "looking": "Looking up that address...",
+    "notListedYet": "Not listed yet",
+    "writeFirstReview": "Be the first to write a review",
+    "adding": "Adding...",
+    "incompleteAddress": "We couldn't determine a full address (city/state/zip) for that location. Try a more specific search.",
+    "addFailed": "Something went wrong adding this property. Please try again."
+  },
   "messages": {
     "noResults": "No properties found",
     "noResultsHint": "Try adjusting your search criteria or browse all properties",
