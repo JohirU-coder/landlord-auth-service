@@ -118,7 +118,11 @@
         }
     </style>
 </head>
-<body class="min-h-screen gradient-bg flex items-center justify-center p-4">
+<body class="min-h-screen gradient-bg flex flex-col">
+    <!-- Centers the auth form vertically within the space above the footer,
+         instead of body itself being a row-flex (which was pulling the
+         footer up beside the form instead of below it). -->
+    <div class="flex-1 flex items-center justify-center p-4">
     <!-- Notification -->
     <div id="notification" class="notification">
         <div class="bg-white rounded-lg shadow-lg p-4 max-w-sm">
@@ -924,6 +928,7 @@
             return originalShowNotification(title, message, type);
         }
     </script>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-gray-900 text-white py-16 mt-auto">
