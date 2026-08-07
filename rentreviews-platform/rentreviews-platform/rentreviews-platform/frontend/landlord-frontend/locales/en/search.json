@@ -68,6 +68,7 @@
   },
   "addressPreview": {
     "looking": "Looking up that address...",
+    "foundAddress": "Found this address — not listed yet",
     "notListedYet": "Not listed yet",
     "writeFirstReview": "Be the first to write a review",
     "adding": "Adding...",
