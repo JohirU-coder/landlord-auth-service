@@ -69,45 +69,80 @@
                         <span class="ml-3 text-xl font-bold text-gray-900">RentReviews</span>
                     </div>
                 </div>
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-8">
-                        <a href="#features" class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors">Features</a>
-                        <a href="#how-it-works" class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors">How It Works</a>
-                        <a href="#about" class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors">About</a>
 
-                        <!-- Language Selector -->
-                        <div class="relative inline-block text-left" id="languageSelector">
-                            <button id="languageSelectorBtn"
-                                    class="flex items-center space-x-2 text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                                    aria-label="Select language">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                          d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
-                                </svg>
-                                <span id="currentLanguageName">English</span>
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                </svg>
-                            </button>
+                <!-- Desktop nav links -->
+                <div class="hidden md:flex items-center ml-10 space-x-8">
+                    <a href="#features" class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors">Features</a>
+                    <a href="#how-it-works" class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors">How It Works</a>
+                    <a href="#about" class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors">About</a>
+                    <button onclick="window.location.href='./auth.html'" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors" data-i18n="common:nav.signUp">Sign Up</button>
+                </div>
 
-                            <div id="languageDropdown"
-                                 class="hidden absolute right-0 mt-2 w-48 rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50">
-                                <div class="py-1">
-                                    <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="en">English</button>
-                                    <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="es">Español</button>
-                                    <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="zh">简体中文</button>
-                                    <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="bn">বাংলা</button>
-                                    <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="hi">हिन्दी</button>
-                                </div>
+                <!-- Language selector + hamburger — always visible regardless of viewport -->
+                <div class="flex items-center space-x-2">
+                    <!-- Language Selector -->
+                    <div class="relative inline-block text-left" id="languageSelector">
+                        <button id="languageSelectorBtn"
+                                class="flex items-center space-x-2 text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                                aria-label="Select language">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
+                            </svg>
+                            <span id="currentLanguageName" class="hidden sm:inline">English</span>
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+
+                        <div id="languageDropdown"
+                             class="hidden absolute right-0 mt-2 w-48 rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50">
+                            <div class="py-1">
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="en">English</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="es">Español</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="zh">简体中文</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="bn">বাংলা</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="hi">हिन्दी</button>
                             </div>
                         </div>
-
-                        <button onclick="window.location.href='./auth.html'" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors" data-i18n="common:nav.signUp">Sign Up</button>
                     </div>
+
+                    <!-- Hamburger toggle — mobile only -->
+                    <button id="mobileMenuBtn" class="md:hidden p-2 text-gray-700 hover:text-indigo-600" aria-label="Open menu" aria-expanded="false">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
                 </div>
+            </div>
+
+            <!-- Mobile menu panel -->
+            <div id="mobileMenu" class="hidden md:hidden pb-4 space-y-1">
+                <a href="#features" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-indigo-600">Features</a>
+                <a href="#how-it-works" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-indigo-600">How It Works</a>
+                <a href="#about" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-indigo-600">About</a>
+                <button onclick="window.location.href='./auth.html'" class="w-full mt-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors" data-i18n="common:nav.signUp">Sign Up</button>
             </div>
         </div>
     </nav>
+
+    <script>
+        // Mobile nav toggle
+        (() => {
+            const btn = document.getElementById('mobileMenuBtn');
+            const menu = document.getElementById('mobileMenu');
+            if (!btn || !menu) return;
+            btn.addEventListener('click', () => {
+                const isOpen = !menu.classList.contains('hidden');
+                menu.classList.toggle('hidden');
+                btn.setAttribute('aria-expanded', String(!isOpen));
+            });
+            // Close on nav link click (anchors scroll to a section)
+            menu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => menu.classList.add('hidden'));
+            });
+        })();
+    </script>
 
     <!-- Hero Section -->
     <section class="relative gradient-bg pt-20 pb-20 overflow-hidden">

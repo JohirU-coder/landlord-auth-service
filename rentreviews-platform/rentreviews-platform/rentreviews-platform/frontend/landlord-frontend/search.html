@@ -83,10 +83,16 @@
         }
 
         #propertyMap {
-            height: 600px;
+            height: 400px;
             width: 100%;
             border-radius: 1rem;
             z-index: 0;
+        }
+
+        @media (min-width: 640px) {
+            #propertyMap {
+                height: 600px;
+            }
         }
 
         .view-toggle-btn {
@@ -126,13 +132,15 @@
                         <span class="ml-3 text-xl font-bold text-gray-900">RentReviews</span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button id="dashboardBtn" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium" data-i18n="search:nav.dashboard">
-                        Dashboard
-                    </button>
-                    <button id="logoutBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors" data-i18n="search:nav.signOut">
-                        Sign Out
-                    </button>
+                <div class="flex items-center space-x-2">
+                    <div class="hidden md:flex items-center space-x-4">
+                        <button id="dashboardBtn" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium" data-i18n="search:nav.dashboard">
+                            Dashboard
+                        </button>
+                        <button id="logoutBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors" data-i18n="search:nav.signOut">
+                            Sign Out
+                        </button>
+                    </div>
 
                     <!-- Language Selector -->
                     <div class="relative inline-block text-left" id="languageSelector">
@@ -143,7 +151,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
                             </svg>
-                            <span id="currentLanguageName">English</span>
+                            <span id="currentLanguageName" class="hidden sm:inline">English</span>
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                             </svg>
@@ -160,10 +168,43 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Hamburger toggle — mobile only -->
+                    <button id="mobileMenuBtn" class="md:hidden p-2 text-gray-700 hover:text-indigo-600" aria-label="Open menu" aria-expanded="false">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
                 </div>
+            </div>
+
+            <!-- Mobile menu panel -->
+            <div id="mobileMenu" class="hidden md:hidden pb-4 space-y-1">
+                <button id="dashboardBtnMobile" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50" data-i18n="search:nav.dashboard">
+                    Dashboard
+                </button>
+                <button id="logoutBtnMobile" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50" data-i18n="search:nav.signOut">
+                    Sign Out
+                </button>
             </div>
         </div>
     </nav>
+
+    <script>
+        // Mobile nav toggle
+        (() => {
+            const btn = document.getElementById('mobileMenuBtn');
+            const menu = document.getElementById('mobileMenu');
+            if (!btn || !menu) return;
+            btn.addEventListener('click', () => {
+                const isOpen = !menu.classList.contains('hidden');
+                menu.classList.toggle('hidden');
+                btn.setAttribute('aria-expanded', String(!isOpen));
+            });
+            document.getElementById('dashboardBtnMobile')?.addEventListener('click', () => document.getElementById('dashboardBtn')?.click());
+            document.getElementById('logoutBtnMobile')?.addEventListener('click', () => document.getElementById('logoutBtn')?.click());
+        })();
+    </script>
 
     <!-- Search Header -->
     <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 py-16">
@@ -246,12 +287,12 @@
         </div>
 
         <!-- Results Header -->
-        <div class="flex justify-between items-center mb-6">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div>
                 <h2 class="text-2xl font-bold text-gray-900" data-i18n="search:results.title">Available Properties</h2>
                 <p id="resultsCount" class="text-gray-600" data-i18n="search:results.loading">Loading properties...</p>
             </div>
-            <div class="flex items-center space-x-4">
+            <div class="flex flex-wrap items-center gap-3">
                 <!-- List / Map toggle -->
                 <div class="flex rounded-lg border border-gray-300 overflow-hidden">
                     <button id="listViewBtn" class="view-toggle-btn active px-4 py-2 text-sm font-medium" data-i18n="search:results.listView">
@@ -261,13 +302,15 @@
                         🗺️ Map
                     </button>
                 </div>
-                <label class="text-sm font-medium text-gray-700" data-i18n="search:results.sortBy">Sort by:</label>
-                <select id="sortBy" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                    <option value="newest" data-i18n="search:results.sortNewest">Newest First</option>
-                    <option value="price_low" data-i18n="search:results.sortPriceLow">Price: Low to High</option>
-                    <option value="price_high" data-i18n="search:results.sortPriceHigh">Price: High to Low</option>
-                    <option value="rating" data-i18n="search:results.sortRating">Highest Rated</option>
-                </select>
+                <div class="flex items-center gap-2">
+                    <label class="text-sm font-medium text-gray-700 whitespace-nowrap" data-i18n="search:results.sortBy">Sort by:</label>
+                    <select id="sortBy" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                        <option value="newest" data-i18n="search:results.sortNewest">Newest First</option>
+                        <option value="price_low" data-i18n="search:results.sortPriceLow">Price: Low to High</option>
+                        <option value="price_high" data-i18n="search:results.sortPriceHigh">Price: High to Low</option>
+                        <option value="rating" data-i18n="search:results.sortRating">Highest Rated</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -359,7 +402,7 @@
                 
                 <!-- Landlord Info -->
                 <div class="border-t pt-4">
-                    <div class="flex items-center justify-between">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <div class="flex items-center">
                             <div class="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
                                 <span class="text-white text-sm font-bold landlord-initial"></span>
@@ -369,7 +412,7 @@
                                 <p class="text-xs text-gray-500 landlord-status" data-i18n="search:propertyCard.verifiedLandlord">Verified Landlord</p>
                             </div>
                         </div>
-                        <div class="button-container flex">
+                        <div class="button-container flex flex-wrap gap-2">
                             <button class="view-details-btn bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors" data-i18n="search:propertyCard.viewDetails">
                                 View Details
                             </button>

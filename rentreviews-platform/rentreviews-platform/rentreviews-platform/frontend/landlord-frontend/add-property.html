@@ -163,10 +163,15 @@
                         <span class="ml-3 text-xl font-bold text-gray-900">RentReviews</span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <button onclick="window.location.href='./dashboard.html'" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium" data-i18n="addProperty:nav.dashboard">
-                        Dashboard
-                    </button>
+                <div class="flex items-center space-x-2">
+                    <div class="hidden md:flex items-center space-x-4">
+                        <button onclick="window.location.href='./dashboard.html'" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium" data-i18n="addProperty:nav.dashboard">
+                            Dashboard
+                        </button>
+                        <button id="logoutBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors" data-i18n="addProperty:nav.signOut">
+                            Sign Out
+                        </button>
+                    </div>
 
                     <!-- Language Selector -->
                     <div class="relative inline-block text-left" id="languageSelector">
@@ -177,7 +182,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/>
                             </svg>
-                            <span id="currentLanguageName">English</span>
+                            <span id="currentLanguageName" class="hidden sm:inline">English</span>
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                             </svg>
@@ -195,13 +200,41 @@
                         </div>
                     </div>
 
-                    <button id="logoutBtn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors" data-i18n="addProperty:nav.signOut">
-                        Sign Out
+                    <!-- Hamburger toggle — mobile only -->
+                    <button id="mobileMenuBtn" class="md:hidden p-2 text-gray-700 hover:text-indigo-600" aria-label="Open menu" aria-expanded="false">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
                     </button>
                 </div>
             </div>
+
+            <!-- Mobile menu panel -->
+            <div id="mobileMenu" class="hidden md:hidden pb-4 space-y-1">
+                <button onclick="window.location.href='./dashboard.html'" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50" data-i18n="addProperty:nav.dashboard">
+                    Dashboard
+                </button>
+                <button id="logoutBtnMobile" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50" data-i18n="addProperty:nav.signOut">
+                    Sign Out
+                </button>
+            </div>
         </div>
     </nav>
+
+    <script>
+        // Mobile nav toggle
+        (() => {
+            const btn = document.getElementById('mobileMenuBtn');
+            const menu = document.getElementById('mobileMenu');
+            if (!btn || !menu) return;
+            btn.addEventListener('click', () => {
+                const isOpen = !menu.classList.contains('hidden');
+                menu.classList.toggle('hidden');
+                btn.setAttribute('aria-expanded', String(!isOpen));
+            });
+            document.getElementById('logoutBtnMobile')?.addEventListener('click', () => document.getElementById('logoutBtn')?.click());
+        })();
+    </script>
 
     <!-- Header -->
     <div class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 py-12">
