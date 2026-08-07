@@ -470,9 +470,10 @@
         const mapViewContainer = document.getElementById('mapViewContainer');
         const mapCoverageNote = document.getElementById('mapCoverageNote');
 
-        // Initialize
+        // Initialize (the search prompt itself is shown once i18n finishes
+        // loading — see the i18n Initialization script below — since it
+        // calls t() and would otherwise render before translations exist)
         document.addEventListener('DOMContentLoaded', () => {
-            showSearchPrompt();
             setupEventListeners();
             setupNavigation();
         });
@@ -1835,9 +1836,21 @@
                 // Update HTML lang attribute
                 updateHtmlLangAttribute(i18next.language);
 
+                // Now that t() actually works, show the initial search prompt
+                showSearchPrompt();
+
                 console.log('i18n initialized successfully for search page');
             } catch (error) {
                 console.error('i18n initialization failed:', error);
+                // Fallback so the page doesn't sit blank/stuck if i18n never
+                // loads — plain English, since t() isn't safe to call here.
+                resultsCount.textContent = 'Enter a location to search';
+                propertyGrid.innerHTML = `
+                    <div class="col-span-full text-center py-16">
+                        <div class="text-gray-300 text-7xl mb-4">🔍</div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Search for a property to get started</h3>
+                    </div>
+                `;
             }
         });
     </script>
