@@ -437,15 +437,21 @@
 
         const GOOGLE_STREETVIEW_API_KEY = (window.APP_CONFIG && window.APP_CONFIG.GOOGLE_STREETVIEW_API_KEY) || '';
 
-        function getStreetViewUrl(latitude, longitude) {
+        // heading is computed server-side (property-service) from the real
+        // Street View panorama location, so the camera actually faces the
+        // building instead of Google's default/arbitrary orientation. Falls
+        // back to no heading (Google's default) if it hasn't been computed
+        // for this property yet.
+        function getStreetViewUrl(latitude, longitude, heading) {
             if (!GOOGLE_STREETVIEW_API_KEY || latitude == null || longitude == null) return null;
-            return `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${latitude},${longitude}&key=${GOOGLE_STREETVIEW_API_KEY}`;
+            const headingParam = heading != null ? `&heading=${heading}&pitch=0&fov=80` : '';
+            return `https://maps.googleapis.com/maps/api/streetview?size=400x300&location=${latitude},${longitude}${headingParam}&key=${GOOGLE_STREETVIEW_API_KEY}`;
         }
 
         // Real user photo first; Street View as a fallback for properties that
         // don't have one yet (only when a key is configured).
         function getPropertyImageUrl(property) {
-            return resolvePhotoUrl(property.photo_path) || getStreetViewUrl(property.latitude, property.longitude);
+            return resolvePhotoUrl(property.photo_path) || getStreetViewUrl(property.latitude, property.longitude, property.street_view_heading);
         }
 
         // State
@@ -1133,7 +1139,14 @@
 
             modalContent.innerHTML = `
                 <div class="relative">
-                    ${photoUrl ? `<img src="${photoUrl}" alt="" class="w-full h-56 object-cover rounded-t-2xl">` : ''}
+                    <div id="propertyMediaContainer" class="relative rounded-t-2xl overflow-hidden">
+                        ${photoUrl ? `<img src="${photoUrl}" alt="" class="w-full h-56 object-cover">` : ''}
+                        ${(property.latitude != null && property.longitude != null && GOOGLE_STREETVIEW_API_KEY) ? `
+                            <button id="streetViewToggleBtn" class="absolute bottom-3 right-3 bg-black/60 hover:bg-black/80 text-white text-sm font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 backdrop-blur-sm transition-colors">
+                                🌐 ${t('search:propertyDetails.explore360')}
+                            </button>
+                        ` : ''}
+                    </div>
                     <!-- Header with Status Badge -->
                     <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 ${photoUrl ? '' : 'rounded-t-2xl'}">
                         <button class="absolute top-4 right-4 text-white hover:text-gray-200" onclick="this.closest('.fixed').remove()">
@@ -1314,6 +1327,23 @@
             // Load the real recent reviews for this property in the background
             if (reviewData.reviewCount > 0) {
                 loadRecentReviewsIntoModal(property.id, modalContent);
+            }
+
+            // 360° Street View — loaded on demand (not by default) since an
+            // embedded panorama iframe is much heavier than a static image.
+            const streetViewBtn = modalContent.querySelector('#streetViewToggleBtn');
+            if (streetViewBtn) {
+                streetViewBtn.addEventListener('click', () => {
+                    const mediaContainer = modalContent.querySelector('#propertyMediaContainer');
+                    const headingParam = property.street_view_heading != null ? `&heading=${property.street_view_heading}` : '';
+                    mediaContainer.innerHTML = `
+                        <iframe
+                            width="100%" height="224" style="border:0" loading="lazy" allowfullscreen
+                            referrerpolicy="no-referrer-when-downgrade"
+                            src="https://www.google.com/maps/embed/v1/streetview?key=${GOOGLE_STREETVIEW_API_KEY}&location=${property.latitude},${property.longitude}${headingParam}&pitch=0&fov=90">
+                        </iframe>
+                    `;
+                });
             }
         }
 
@@ -1623,7 +1653,7 @@
                     return;
                 }
 
-                const streetViewUrl = getStreetViewUrl(geo.latitude, geo.longitude);
+                const streetViewUrl = getStreetViewUrl(geo.latitude, geo.longitude, geo.street_view_heading);
                 resultsCount.textContent = t('search:addressPreview.foundAddress');
 
                 propertyGrid.innerHTML = `
