@@ -31,8 +31,6 @@ const I18N_CONFIG = {
         'writeReview': ['common', 'writeReview'],
         'add-property.html': ['common', 'addProperty'],
         'addProperty': ['common', 'addProperty'],
-        'market-insights.html': ['common', 'marketInsights'],
-        'marketInsights': ['common', 'marketInsights'],
         'verify-landlord.html': ['common', 'verifyLandlord'],
         'verifyLandlord': ['common', 'verifyLandlord'],
         'admin-seed-properties.html': ['common', 'adminSeed'],
