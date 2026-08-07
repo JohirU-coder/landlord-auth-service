@@ -472,7 +472,7 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            loadProperties();
+            showSearchPrompt();
             setupEventListeners();
             setupNavigation();
         });
@@ -854,9 +854,14 @@
             };
             
             console.log('Current filters set to:', currentFilters);
-            
+
             updateActiveFilters();
-            loadProperties();
+
+            if (hasActiveFilters()) {
+                loadProperties();
+            } else {
+                showSearchPrompt();
+            }
         }
 
         function showLoadingSkeleton() {
@@ -1564,6 +1569,25 @@
             resultsCount.textContent = t('search:results.foundProperties', { count });
         }
 
+        // Default/empty state — shown on page load and whenever no filters are
+        // active, instead of dumping every property in the database.
+        function showSearchPrompt() {
+            currentProperties = [];
+            resultsCount.textContent = t('search:messages.searchPromptHint');
+            loadMoreBtn.classList.add('hidden');
+            propertyGrid.classList.remove('hidden');
+            propertyGrid.innerHTML = `
+                <div class="col-span-full text-center py-16">
+                    <div class="text-gray-300 text-7xl mb-4">🔍</div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">${t('search:messages.searchPrompt')}</h3>
+                    <p class="text-gray-500">${t('search:messages.searchPromptHint')}</p>
+                </div>
+            `;
+            if (currentView === 'map') {
+                updateMapMarkers(currentProperties);
+            }
+        }
+
         function displayNoResults() {
             propertyGrid.innerHTML = `
                 <div class="col-span-full text-center py-12">
@@ -1729,11 +1753,19 @@
             return span;
         }
 
+        function hasActiveFilters() {
+            return Object.values(currentFilters).some(v => v !== null && v !== undefined && v !== '');
+        }
+
         function removeFilter(key) {
             currentFilters[key] = null;
             document.getElementById(key === 'location' ? 'locationSearch' : key).value = '';
             updateActiveFilters();
-            loadProperties();
+            if (hasActiveFilters()) {
+                loadProperties();
+            } else {
+                showSearchPrompt();
+            }
         }
 
         function clearAllFilters() {
@@ -1742,7 +1774,7 @@
             document.getElementById('maxPrice').value = '';
             document.getElementById('bedrooms').value = '';
             activeFilters.classList.add('hidden');
-            loadProperties();
+            showSearchPrompt();
         }
 
         function handleSort() {

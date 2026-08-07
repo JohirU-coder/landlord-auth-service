@@ -76,6 +76,8 @@
     "addFailed": "Something went wrong adding this property. Please try again."
   },
   "messages": {
+    "searchPrompt": "Search for a property to get started",
+    "searchPromptHint": "Enter a city, neighborhood, or address above to see available properties and reviews",
     "noResults": "No properties found",
     "noResultsHint": "Try adjusting your search criteria or browse all properties",
     "errorTitle": "Failed to load properties",
