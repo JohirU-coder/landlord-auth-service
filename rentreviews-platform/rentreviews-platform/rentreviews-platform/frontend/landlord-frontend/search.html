@@ -442,6 +442,16 @@
         // building instead of Google's default/arbitrary orientation. Falls
         // back to no heading (Google's default) if it hasn't been computed
         // for this property yet.
+        // Nominatim's display_name is comma-joined raw geocoding output (e.g.
+        // "138, Albion Avenue, Paterson, Passaic County, New Jersey, 07502,
+        // United States") -- fine for disambiguation, not for display. Build
+        // a normal-looking address from the structured fields instead.
+        function formatGeoAddress(geo) {
+            if (!geo) return '';
+            const line2 = [geo.city, geo.state].filter(Boolean).join(', ') + (geo.zip_code ? ` ${geo.zip_code}` : '');
+            return [geo.address, line2].filter(Boolean).join(', ');
+        }
+
         function getStreetViewUrl(latitude, longitude, heading) {
             if (!GOOGLE_STREETVIEW_API_KEY || latitude == null || longitude == null) return null;
             const headingParam = heading != null ? `&heading=${heading}&pitch=0&fov=80` : '';
@@ -1864,7 +1874,7 @@
                             </div>
                             <div class="p-6 text-center">
                                 <p class="text-xs font-medium text-indigo-600 uppercase tracking-wide mb-2">${t('search:addressPreview.notListedYet')}</p>
-                                <h3 class="font-bold text-lg text-gray-900 mb-4">${escapeHtml(geo.display_name || locationQuery)}</h3>
+                                <h3 class="font-bold text-lg text-gray-900 mb-4">${escapeHtml(formatGeoAddress(geo) || locationQuery)}</h3>
                                 <button id="addressPreviewReviewBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors">
                                     ${t('search:addressPreview.writeFirstReview')}
                                 </button>
