@@ -492,14 +492,6 @@
             document.getElementById('listViewBtn').addEventListener('click', () => setView('list'));
             document.getElementById('mapViewBtn').addEventListener('click', () => setView('map'));
 
-            // Enter key search
-            document.getElementById('locationSearch').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    hideLocationSuggestions();
-                    handleSearch();
-                }
-            });
-
             setupLocationAutocomplete();
         }
 
@@ -512,6 +504,23 @@
         // and built specifically for this use case.
         let autocompleteDebounceTimer = null;
         let autocompleteAbortController = null;
+
+        // Tracks which dropdown item (suggestion or recent search) is
+        // keyboard-highlighted; -1 means none. Reset whenever the dropdown's
+        // contents change (new render, or hidden).
+        let highlightedIndex = -1;
+
+        function getDropdownItems() {
+            return Array.from(document.querySelectorAll('#locationSuggestions .suggestion-item, #locationSuggestions .recent-search-item'));
+        }
+
+        function updateDropdownHighlight() {
+            const items = getDropdownItems();
+            items.forEach((item, i) => item.classList.toggle('bg-indigo-50', i === highlightedIndex));
+            if (highlightedIndex >= 0 && items[highlightedIndex]) {
+                items[highlightedIndex].scrollIntoView({ block: 'nearest' });
+            }
+        }
 
         function setupLocationAutocomplete() {
             const input = document.getElementById('locationSearch');
@@ -539,7 +548,30 @@
             });
 
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') hideLocationSuggestions();
+                const dropdownVisible = !dropdown.classList.contains('hidden');
+                const items = getDropdownItems();
+
+                if (e.key === 'ArrowDown') {
+                    if (!dropdownVisible || items.length === 0) return;
+                    e.preventDefault();
+                    highlightedIndex = (highlightedIndex + 1) % items.length;
+                    updateDropdownHighlight();
+                } else if (e.key === 'ArrowUp') {
+                    if (!dropdownVisible || items.length === 0) return;
+                    e.preventDefault();
+                    highlightedIndex = (highlightedIndex - 1 + items.length) % items.length;
+                    updateDropdownHighlight();
+                } else if (e.key === 'Enter') {
+                    if (dropdownVisible && highlightedIndex >= 0 && items[highlightedIndex]) {
+                        e.preventDefault();
+                        items[highlightedIndex].click();
+                    } else {
+                        hideLocationSuggestions();
+                        handleSearch();
+                    }
+                } else if (e.key === 'Escape') {
+                    hideLocationSuggestions();
+                }
             });
 
             document.addEventListener('click', (e) => {
@@ -597,13 +629,17 @@
         function renderRecentSearches() {
             const dropdown = document.getElementById('locationSuggestions');
             const recents = getRecentSearches();
+            highlightedIndex = -1;
             if (recents.length === 0) {
                 hideLocationSuggestions();
                 return;
             }
 
             dropdown.innerHTML = `
-                <div class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wide">${t('search:searchForm.recentSearches')}</div>
+                <div class="px-4 py-2 flex items-center justify-between">
+                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">${t('search:searchForm.recentSearches')}</span>
+                    <button type="button" id="clearRecentSearchesBtn" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">${t('search:searchForm.clearRecentSearches')}</button>
+                </div>
                 ${recents.map((q, i) => `
                     <button type="button" class="recent-search-item w-full text-left px-4 py-3 hover:bg-indigo-50 text-sm text-gray-700 border-b border-gray-100 last:border-b-0 flex items-center gap-2" data-index="${i}">
                         <span class="text-gray-400">🕐</span>
@@ -620,6 +656,12 @@
                 });
             });
 
+            document.getElementById('clearRecentSearchesBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                localStorage.removeItem(RECENT_SEARCHES_KEY);
+                hideLocationSuggestions();
+            });
+
             dropdown.classList.remove('hidden');
         }
 
@@ -633,6 +675,7 @@
 
         function renderLocationSuggestions(features) {
             const dropdown = document.getElementById('locationSuggestions');
+            highlightedIndex = -1;
 
             if (features.length === 0) {
                 hideLocationSuggestions();
@@ -660,6 +703,7 @@
             const dropdown = document.getElementById('locationSuggestions');
             dropdown.classList.add('hidden');
             dropdown.innerHTML = '';
+            highlightedIndex = -1;
         }
 
         function setView(view) {
@@ -830,9 +874,13 @@
                 queryParams.append('limit', '6');
                 queryParams.append('offset', ((currentPage - 1) * 6).toString());
                 
-                // Add filters if they exist
+                // Add filters if they exist. Uses the free-text "q" search
+                // (tokenized server-side across address/city/state/zip)
+                // instead of a city-only match, so a full address selected
+                // from autocomplete actually matches an existing property
+                // instead of always falling through to "not listed yet".
                 if (currentFilters.location) {
-                    queryParams.append('city', currentFilters.location);
+                    queryParams.append('q', currentFilters.location);
                 }
                 
                 if (currentFilters.maxPrice) {
