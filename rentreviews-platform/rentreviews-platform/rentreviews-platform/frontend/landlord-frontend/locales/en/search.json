@@ -12,6 +12,7 @@
     "locationPlaceholder": "Full address, city, or zip code",
     "recentSearches": "Recent Searches",
     "clearRecentSearches": "Clear",
+    "searchingLocations": "Searching...",
     "maxPriceLabel": "Max Price",
     "anyPrice": "Any Price",
     "under1000": "Under $1,000",

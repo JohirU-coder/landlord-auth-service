@@ -540,7 +540,7 @@
                     return;
                 }
 
-                autocompleteDebounceTimer = setTimeout(() => fetchLocationSuggestions(query), 300);
+                autocompleteDebounceTimer = setTimeout(() => fetchLocationSuggestions(query), 200);
             });
 
             input.addEventListener('focus', () => {
@@ -598,44 +598,30 @@
             return Math.abs(lat - NJ_NY_BIAS_LAT) < 1.2 && Math.abs(lon - NJ_NY_BIAS_LON) < 1.5;
         }
 
-        // Two suggestion sources, fetched in parallel and merged:
+        // Two suggestion sources, fetched independently and merged as each
+        // one lands — not awaited together, so the (usually faster) source
+        // shows up right away instead of both being held back by the
+        // (occasionally slower) other one:
         //  - Photon: fast, but its free index has real coverage gaps for some
         //    addresses (confirmed by direct testing — some NJ addresses have
         //    zero Photon entries anywhere nearby).
         //  - Our own backend (/geocode/suggestions, backed by Nominatim): the
         //    same accurate source used for the actual search, so if an
         //    address is findable at all, it shows up here even when Photon
-        //    has nothing. Slower (globally throttled to Nominatim's 1 req/sec
-        //    server-side), which is why both fire together instead of one
-        //    waiting on the other.
+        //    has nothing.
         // Both filtered to house-number-level results and to the NJ/NY metro
         // area — a bare street/city match isn't specific enough to identify
         // a single property, and out-of-region matches aren't relevant here.
-        async function fetchLocationSuggestions(query) {
+        function fetchLocationSuggestions(query) {
             if (autocompleteAbortController) autocompleteAbortController.abort();
             autocompleteAbortController = new AbortController();
             const signal = autocompleteAbortController.signal;
 
-            try {
-                const [photonResult, backendResult] = await Promise.allSettled([
-                    fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=10&lang=en&lat=${NJ_NY_BIAS_LAT}&lon=${NJ_NY_BIAS_LON}`, { signal })
-                        .then(r => r.ok ? r.json() : null),
-                    fetch(`${API_BASE_URL}/geocode/suggestions?q=${encodeURIComponent(query)}`, { signal })
-                        .then(r => r.ok ? r.json() : null)
-                ]);
+            let photonAddresses = [];
+            let backendAddresses = [];
+            let pendingSources = 2;
 
-                const photonAddresses = ((photonResult.status === 'fulfilled' && photonResult.value?.features) || [])
-                    .filter(f => f.properties?.housenumber)
-                    .filter(f => {
-                        const [lon, lat] = f.geometry?.coordinates || [];
-                        return lat != null && lon != null && isNearNJNY(lat, lon);
-                    })
-                    .map(f => ({ label: formatSuggestion(f) }));
-
-                const backendAddresses = ((backendResult.status === 'fulfilled' && backendResult.value?.suggestions) || [])
-                    .filter(s => s.latitude != null && s.longitude != null && isNearNJNY(s.latitude, s.longitude))
-                    .map(s => ({ label: s.display_name }));
-
+            const renderMerged = () => {
                 // Backend results first — same geocoder as the actual search,
                 // so they're the most trustworthy. Dedupe near-identical labels.
                 const merged = [];
@@ -648,12 +634,55 @@
                     if (merged.length >= 6) break;
                 }
 
-                renderLocationSuggestions(merged);
-            } catch (error) {
-                if (error.name !== 'AbortError') {
-                    console.error('Error fetching address suggestions:', error);
+                if (merged.length === 0 && pendingSources > 0) {
+                    showSuggestionsLoading();
+                } else {
+                    renderLocationSuggestions(merged);
                 }
-            }
+            };
+
+            fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=10&lang=en&lat=${NJ_NY_BIAS_LAT}&lon=${NJ_NY_BIAS_LON}`, { signal })
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                    photonAddresses = (data?.features || [])
+                        .filter(f => f.properties?.housenumber)
+                        .filter(f => {
+                            const [lon, lat] = f.geometry?.coordinates || [];
+                            return lat != null && lon != null && isNearNJNY(lat, lon);
+                        })
+                        .map(f => ({ label: formatSuggestion(f) }));
+                })
+                .catch(error => {
+                    if (error.name !== 'AbortError') console.error('Error fetching Photon suggestions:', error);
+                })
+                .finally(() => {
+                    if (signal.aborted) return;
+                    pendingSources--;
+                    renderMerged();
+                });
+
+            fetch(`${API_BASE_URL}/geocode/suggestions?q=${encodeURIComponent(query)}`, { signal })
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                    backendAddresses = (data?.suggestions || [])
+                        .filter(s => s.latitude != null && s.longitude != null && isNearNJNY(s.latitude, s.longitude))
+                        .map(s => ({ label: s.display_name }));
+                })
+                .catch(error => {
+                    if (error.name !== 'AbortError') console.error('Error fetching backend suggestions:', error);
+                })
+                .finally(() => {
+                    if (signal.aborted) return;
+                    pendingSources--;
+                    renderMerged();
+                });
+        }
+
+        function showSuggestionsLoading() {
+            const dropdown = document.getElementById('locationSuggestions');
+            highlightedIndex = -1;
+            dropdown.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">${t('search:searchForm.searchingLocations')}</div>`;
+            dropdown.classList.remove('hidden');
         }
 
         const RECENT_SEARCHES_KEY = 'rentreviews_recent_searches';
