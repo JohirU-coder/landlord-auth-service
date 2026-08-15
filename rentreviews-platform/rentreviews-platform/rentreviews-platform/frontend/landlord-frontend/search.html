@@ -631,7 +631,7 @@
                     if (seen.has(key)) continue;
                     seen.add(key);
                     merged.push(item);
-                    if (merged.length >= 6) break;
+                    if (merged.length >= 10) break;
                 }
 
                 if (merged.length === 0 && pendingSources > 0) {
@@ -641,7 +641,7 @@
                 }
             };
 
-            fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=10&lang=en&lat=${NJ_NY_BIAS_LAT}&lon=${NJ_NY_BIAS_LON}`, { signal })
+            fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=20&lang=en&lat=${NJ_NY_BIAS_LAT}&lon=${NJ_NY_BIAS_LON}`, { signal })
                 .then(r => r.ok ? r.json() : null)
                 .then(data => {
                     photonAddresses = (data?.features || [])
