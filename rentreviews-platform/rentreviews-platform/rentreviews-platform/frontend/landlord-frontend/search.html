@@ -676,7 +676,7 @@
                 .then(data => {
                     backendAddresses = (data?.suggestions || [])
                         .filter(s => s.latitude != null && s.longitude != null && isNearNJNY(s.latitude, s.longitude))
-                        .map(s => ({ label: s.display_name }));
+                        .map(s => ({ label: formatBackendSuggestion(s) }));
                 })
                 .catch(error => {
                     if (error.name !== 'AbortError') console.error('Error fetching backend suggestions:', error);
@@ -758,6 +758,15 @@
             return [streetPart, p.city || p.town || p.village, p.state, p.postcode]
                 .filter(Boolean)
                 .join(', ');
+        }
+
+        // Same shape/style as formatSuggestion above, for our backend's
+        // suggestions (already-structured address/city/state/zip_code, no
+        // raw Nominatim display_name comma-after-housenumber formatting) --
+        // kept as one comma-joined line here so the two sources look
+        // consistent when merged in the same dropdown.
+        function formatBackendSuggestion(s) {
+            return [s.address, s.city, s.state, s.zip_code].filter(Boolean).join(', ');
         }
 
         // items: array of { label } — already normalized/merged by
