@@ -1,4 +1,5 @@
 require('dotenv').config();
+const crypto = require('crypto');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -7,6 +8,15 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const Joi = require('joi');
 const { Pool } = require('pg');
+// SendGrid is an optional production dependency — server starts fine without
+// it, just falls back to logging the email instead of sending it.
+let sgMail;
+try {
+  sgMail = require('@sendgrid/mail');
+  if (process.env.SENDGRID_API_KEY) sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+} catch {
+  console.warn('⚠️  @sendgrid/mail package not found — emails will be logged to console (dev mode)');
+}
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -134,6 +144,17 @@ const loginSchema = Joi.object({
   password: Joi.string().required().max(128)
 });
 
+const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().required().max(255).lowercase().trim()
+});
+
+const resetPasswordSchema = Joi.object({
+  token: Joi.string().hex().length(64).required(),
+  new_password: Joi.string().min(8).max(128).required()
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
+    .message('Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character (@$!%*?&)')
+});
+
 // JWT Middleware
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -233,6 +254,47 @@ const generateToken = (user) => {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 };
 
+const generateSecureToken = () => crypto.randomBytes(32).toString('hex');
+
+// Emails a reset link via SendGrid. Falls back to console logging if the
+// package/API key isn't configured, so registration/login etc. never break
+// because of an email-sending problem.
+const sendPasswordResetEmail = async (email, token) => {
+  const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5500'}/reset-password.html?token=${token}`;
+  const subject = 'Reset your RentReviews password';
+  const html = `
+    <div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08)">
+      <div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:40px 32px;text-align:center">
+        <h1 style="color:#fff;margin:0;font-size:24px;font-weight:700">RentReviews</h1>
+        <p style="color:rgba(255,255,255,.85);margin:8px 0 0;font-size:14px">Rental Property Reviews</p>
+      </div>
+      <div style="padding:40px 32px">
+        <h2 style="margin:0 0 16px;font-size:20px;color:#111">Reset your password</h2>
+        <p style="color:#555;line-height:1.6;margin:0 0 24px">We received a request to reset your password. Click the button below to choose a new one. This link expires in 15 minutes.</p>
+        <a href="${resetUrl}" style="display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px">Reset Password</a>
+        <p style="color:#888;font-size:12px;margin:24px 0 0">If you didn't request a password reset, you can safely ignore this email. Your password won't change.</p>
+      </div>
+    </div>
+  `;
+
+  if (!sgMail || !process.env.SENDGRID_API_KEY) {
+    console.log(`\n📧 [DEV EMAIL] To: ${email} | Subject: ${subject}\n${resetUrl}\n`);
+    return;
+  }
+
+  if (!process.env.FROM_EMAIL) {
+    console.error('❌ FROM_EMAIL not set — cannot send password reset email');
+    throw new Error('Email sender not configured');
+  }
+
+  await sgMail.send({
+    to: email,
+    from: { email: process.env.FROM_EMAIL, name: 'RentReviews' },
+    subject,
+    html
+  });
+};
+
 // Health check endpoint
 app.get('/health', async (req, res) => {
   try {
@@ -264,6 +326,8 @@ app.get('/', (req, res) => {
       health: '/health (GET)',
       register: '/register (POST)',
       login: '/login (POST)',
+      'forgot-password': '/forgot-password (POST)',
+      'reset-password': '/reset-password (POST)',
       profile: '/profile (GET) - Auth required',
       refresh: '/refresh (POST) - Auth required',
       'update-profile': '/profile (PUT) - Auth required',
@@ -550,6 +614,92 @@ app.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     sendErrorResponse(res, 500, 'Internal server error', 'Failed to authenticate user');
+  }
+});
+
+// Request a password reset email
+app.post('/forgot-password', authLimiter, async (req, res) => {
+  try {
+    const { error, value } = forgotPasswordSchema.validate(req.body);
+    if (error) {
+      return sendErrorResponse(res, 400, 'Validation failed', 'Invalid request',
+        error.details.map(d => d.message));
+    }
+
+    const { email } = value;
+
+    // Always return success regardless of whether the account exists, to
+    // prevent email enumeration.
+    const result = await pool.query(
+      'SELECT id, email FROM users WHERE email = $1 AND account_status = $2',
+      [email, 'active']
+    );
+
+    if (result.rows.length > 0) {
+      const user = result.rows[0];
+
+      await pool.query(
+        "UPDATE verification_tokens SET used = true WHERE user_id = $1 AND type = 'password_reset' AND used = false",
+        [user.id]
+      );
+
+      const resetToken = generateSecureToken();
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+      await pool.query(
+        'INSERT INTO verification_tokens (user_id, token, type, expires_at) VALUES ($1, $2, $3, $4)',
+        [user.id, resetToken, 'password_reset', expiresAt]
+      );
+
+      sendPasswordResetEmail(user.email, resetToken).catch(err =>
+        console.error('Password reset email failed to send:', err)
+      );
+    }
+
+    sendSuccessResponse(res, 200, {}, 'If an account with that email exists, a password reset link has been sent. Check your inbox (and spam folder).');
+
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    sendErrorResponse(res, 500, 'Internal server error', 'Failed to process request');
+  }
+});
+
+// Complete a password reset using the emailed token
+app.post('/reset-password', authLimiter, async (req, res) => {
+  try {
+    const { error, value } = resetPasswordSchema.validate(req.body);
+    if (error) {
+      return sendErrorResponse(res, 400, 'Validation failed', 'Invalid request',
+        error.details.map(d => d.message));
+    }
+
+    const { token, new_password } = value;
+
+    const tokenResult = await pool.query(
+      "SELECT id, user_id, expires_at, used FROM verification_tokens WHERE token = $1 AND type = 'password_reset'",
+      [token]
+    );
+
+    if (
+      tokenResult.rows.length === 0 ||
+      tokenResult.rows[0].used ||
+      new Date() > new Date(tokenResult.rows[0].expires_at)
+    ) {
+      return sendErrorResponse(res, 400, 'Invalid or expired token', 'This password reset link is invalid or has expired. Please request a new one.');
+    }
+
+    const { user_id, id: tokenId } = tokenResult.rows[0];
+    const newPasswordHash = await bcrypt.hash(new_password, 12);
+
+    await pool.query('UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2', [newPasswordHash, user_id]);
+    await pool.query('UPDATE verification_tokens SET used = true WHERE id = $1', [tokenId]);
+
+    console.log(`✅ Password reset for user ${user_id}`);
+
+    sendSuccessResponse(res, 200, {}, 'Password reset successfully. You can now log in with your new password.');
+
+  } catch (error) {
+    console.error('Reset password error:', error);
+    sendErrorResponse(res, 500, 'Internal server error', 'Failed to reset password');
   }
 });
 
