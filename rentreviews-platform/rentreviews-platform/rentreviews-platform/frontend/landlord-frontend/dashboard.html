@@ -654,11 +654,6 @@
             });
         });
 
-        // Initialize dashboard when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            new Dashboard();
-        });
-
         // Security warning
         console.warn(
             '%cStop!',
@@ -682,6 +677,15 @@
                 console.log('✅ i18n initialized:', i18next.language);
             } catch (error) {
                 console.error('❌ i18n initialization failed:', error);
+            } finally {
+                // Dashboard fetches user data and calls t() directly (e.g. for
+                // the welcome message) as soon as that fetch resolves. Starting
+                // it here -- after i18next has loaded, or definitely failed --
+                // instead of in its own parallel DOMContentLoaded listener
+                // avoids a race where that fetch beats i18next's own (also
+                // async) init, which renders raw keys like "welcome.greeting"
+                // instead of real text.
+                new Dashboard();
             }
         });
     </script>
