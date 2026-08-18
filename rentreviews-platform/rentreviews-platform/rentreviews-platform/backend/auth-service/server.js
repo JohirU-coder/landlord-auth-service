@@ -108,6 +108,12 @@ const ALLOWED_ORIGINS = [
   'http://127.0.0.1:3000',
   'http://localhost:8080',
   'http://127.0.0.1:8080',
+  // Capacitor's default WebView origins -- iOS uses the custom 'capacitor'
+  // scheme, Android serves over 'https' at the bare 'localhost' host.
+  // Neither is a real internet host; both only ever originate from the
+  // wrapped mobile app.
+  'capacitor://localhost',
+  'https://localhost',
   ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [])
 ];
 
