@@ -1255,7 +1255,7 @@
             const propertyCard = template.querySelector('.property-card');
             
             // Add verification status badge
-            addPropertyStatusBadge(property, propertyCard, isCommunitySubmitted);
+            addPropertyStatusBadge(property, propertyCard, isCommunitySubmitted, totalReviews);
             
             // Add review highlight if rating is good
             if (totalReviews > 0 && avgRating >= 4.0) {
@@ -1277,12 +1277,26 @@
             // Add action buttons based on user role and property status
             const buttonContainer = template.querySelector('.button-container');
             if (buttonContainer) {
-                // Write Review button with appropriate warning for unverified properties
-                const writeReviewBtn = document.createElement('button');
                 if (isCommunitySubmitted) {
-                    writeReviewBtn.className = 'bg-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors ml-2';
-                    writeReviewBtn.textContent = t('search:propertyCard.reviewUnverified');
-                    writeReviewBtn.addEventListener('click', (e) => {
+                    // "View Reviews" only makes sense once there's something to
+                    // view -- mirrors the badge being suppressed until then.
+                    // "Rate it!" (the actual write-review action) is always
+                    // available regardless of review count.
+                    if (totalReviews > 0) {
+                        const viewReviewsBtn = document.createElement('button');
+                        viewReviewsBtn.className = 'border border-orange-600 text-orange-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-orange-50 transition-colors ml-2';
+                        viewReviewsBtn.textContent = t('search:propertyCard.reviewUnverified');
+                        viewReviewsBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            showPropertyDetailsWithDisclaimer(property);
+                        });
+                        buttonContainer.appendChild(viewReviewsBtn);
+                    }
+
+                    const rateItBtn = document.createElement('button');
+                    rateItBtn.className = 'bg-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors ml-2';
+                    rateItBtn.textContent = t('search:propertyCard.rateIt');
+                    rateItBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const confirmReview = confirm(t('search:disclaimer.message'));
                         if (confirmReview) {
@@ -1298,7 +1312,9 @@
                             window.location.href = `./write-review.html?property=${propertyData}`;
                         }
                     });
+                    buttonContainer.appendChild(rateItBtn);
                 } else {
+                    const writeReviewBtn = document.createElement('button');
                     writeReviewBtn.className = 'bg-green-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors ml-2';
                     writeReviewBtn.textContent = t('search:propertyCard.writeReview');
                     writeReviewBtn.addEventListener('click', (e) => {
@@ -1313,9 +1329,9 @@
                         }));
                         window.location.href = `./write-review.html?property=${propertyData}`;
                     });
+                    buttonContainer.appendChild(writeReviewBtn);
                 }
-                buttonContainer.appendChild(writeReviewBtn);
-                
+
                 // Add "Claim Property" button for landlords on unverified properties
                 const currentUser = JSON.parse(localStorage.getItem('rentreviews_user') || '{}');
                 if (currentUser.role === 'landlord' && isCommunitySubmitted) {
@@ -1338,7 +1354,13 @@
             return template;
         }
 
-        function addPropertyStatusBadge(property, propertyCard, isCommunitySubmitted) {
+        function addPropertyStatusBadge(property, propertyCard, isCommunitySubmitted, totalReviews) {
+            // Don't call out a community-submitted property as such until it
+            // actually has a review -- an empty listing with a "Community
+            // Submitted" badge and nothing else reads as more/different than
+            // it is. Once someone's rated it, the badge is useful context.
+            if (isCommunitySubmitted && !totalReviews) return;
+
             const badgeContainer = document.createElement('div');
             badgeContainer.className = 'absolute top-2 left-2 z-10';
 
