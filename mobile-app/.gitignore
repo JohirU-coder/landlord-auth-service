@@ -1,5 +1,12 @@
 node_modules/
 
+# Signing keystore + credentials -- never commit. Losing these means you
+# can never release an update under the same app identity again, but
+# leaking them is worse: anyone with the .jks + password can sign a
+# malicious APK that Android treats as a legitimate update to this app.
+keystore/
+android/keystore.properties
+
 # Android
 android/app/build/
 android/build/
