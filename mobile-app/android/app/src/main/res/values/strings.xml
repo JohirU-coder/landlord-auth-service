@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">RentReviews</string>
+    <string name="title_activity_main">RentReviews</string>
+    <string name="package_name">net.rentreviews.app</string>
+    <string name="custom_url_scheme">net.rentreviews.app</string>
+</resources>

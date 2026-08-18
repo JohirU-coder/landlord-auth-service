@@ -1,0 +1,27 @@
+node_modules/
+
+# Android
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/app/release/
+android/captures/
+android/*.iml
+android/.idea/
+# Synced from the frontend's webDir by `cap sync` -- source of truth
+# lives there, not here.
+android/app/src/main/assets/public/
+
+# iOS
+ios/App/Pods/
+ios/App/build/
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/xcuserdata/
+*.xcuserstate
+# Synced from the frontend's webDir by `cap sync` -- source of truth
+# lives there, not here.
+ios/App/App/public/
+
+# General
+.DS_Store
