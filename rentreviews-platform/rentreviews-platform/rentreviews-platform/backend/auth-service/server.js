@@ -136,8 +136,19 @@ const registerSchema = Joi.object({
     .message('Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character'),
   firstName: Joi.string().required().trim().min(1).max(50).pattern(/^[a-zA-Z\s'-]+$/),
   lastName: Joi.string().required().trim().min(1).max(50).pattern(/^[a-zA-Z\s'-]+$/),
-  role: Joi.string().valid('renter', 'landlord').required()
+  role: Joi.string().valid('renter', 'landlord').required(),
+  // Server-side enforcement, not just the checkbox's HTML `required` attribute
+  // -- that only stops the browser form, not a direct API call. `valid(true)`
+  // rejects false/missing outright rather than silently coercing.
+  agreedToTerms: Joi.boolean().valid(true).required().messages({
+    'any.only': 'You must agree to the Terms of Service and Privacy Policy to create an account.',
+    'any.required': 'You must agree to the Terms of Service and Privacy Policy to create an account.'
+  })
 });
+
+// Bump whenever terms.html materially changes, so terms_version on existing
+// accounts reflects what they actually agreed to, not the current text.
+const CURRENT_TERMS_VERSION = '2026-08-18';
 
 const loginSchema = Joi.object({
   email: Joi.string().email().required().trim().max(255).lowercase(),
@@ -444,7 +455,9 @@ app.get('/setup-database', requireAdminSecret, async (req, res) => {
         failed_login_attempts INTEGER DEFAULT 0,
         locked_until TIMESTAMP,
         created_at TIMESTAMP DEFAULT NOW(),
-        updated_at TIMESTAMP DEFAULT NOW()
+        updated_at TIMESTAMP DEFAULT NOW(),
+        terms_accepted_at TIMESTAMP,
+        terms_version VARCHAR(20)
       );
     `);
 
@@ -513,10 +526,10 @@ app.post('/register', async (req, res) => {
 
     // Insert user
     const result = await pool.query(
-      `INSERT INTO users (email, password_hash, first_name, last_name, role) 
-       VALUES ($1, $2, $3, $4, $5) 
+      `INSERT INTO users (email, password_hash, first_name, last_name, role, terms_accepted_at, terms_version)
+       VALUES ($1, $2, $3, $4, $5, NOW(), $6)
        RETURNING id, email, first_name, last_name, role, created_at`,
-      [email, passwordHash, firstName, lastName, role]
+      [email, passwordHash, firstName, lastName, role, CURRENT_TERMS_VERSION]
     );
 
     const newUser = result.rows[0];
