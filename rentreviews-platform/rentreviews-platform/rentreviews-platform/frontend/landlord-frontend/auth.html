@@ -720,9 +720,15 @@
             const email = document.getElementById('signupEmail').value.trim();
             const password = document.getElementById('signupPassword').value;
             const role = document.getElementById('userRole').value;
-            
+            const agreedToTerms = document.getElementById('agreeTerms').checked;
+
             if (!firstName || !lastName || !email || !password || !role) {
                 showNotification(t('auth:notifications.missingInfo'), t('auth:notifications.missingInfoMessage'), 'error');
+                return;
+            }
+
+            if (!agreedToTerms) {
+                showNotification('Terms required', 'You must agree to the Terms of Service and Privacy Policy to create an account.', 'error');
                 return;
             }
 
@@ -744,7 +750,8 @@
                         password,
                         firstName,
                         lastName,
-                        role
+                        role,
+                        agreedToTerms
                     })
                 });
                 

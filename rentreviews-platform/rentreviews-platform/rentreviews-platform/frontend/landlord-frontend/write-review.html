@@ -419,6 +419,14 @@
                 <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" multiple class="hidden">
             </div>
 
+            <!-- Sensitive info warning -->
+            <div class="mt-3 flex items-start gap-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <span class="text-base leading-none">⚠️</span>
+                <p data-i18n="writeReview:photos.sensitiveWarning">
+                    Only upload photos of the property itself. Don't include IDs, leases, mail, financial documents, license plates, or anything showing your (or anyone else's) personal or sensitive information — anything you upload is at your own risk, and RentReviews isn't responsible for information you choose to include in a photo.
+                </p>
+            </div>
+
             <!-- Error message -->
             <p id="photoError" class="text-red-600 text-sm mt-2 hidden"></p>
 

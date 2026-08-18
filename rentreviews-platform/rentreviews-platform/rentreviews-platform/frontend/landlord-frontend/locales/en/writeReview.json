@@ -83,6 +83,7 @@
     "title": "Property Photos",
     "subtitle": "Optionally upload 1–2 photos of the property (max 10 MB each).",
     "notPersistedNote": "Photo storage is coming soon — photos you add here won't be saved with your review yet.",
+    "sensitiveWarning": "Only upload photos of the property itself. Don't include IDs, leases, mail, financial documents, license plates, or anything showing your (or anyone else's) personal or sensitive information — anything you upload is at your own risk, and RentReviews isn't responsible for information you choose to include in a photo.",
     "clickToSelect": "Click to select photos",
     "hint": "Up to 2 images • JPG, PNG, WEBP • 10 MB max each",
     "maxReached": "Maximum photos uploaded",
