@@ -56,7 +56,7 @@
     "sqft": "{{sqft}} sq ft",
     "noReviews": "No reviews yet",
     "highlyRated": "⭐ Highly Rated",
-    "reviewUnverified": "Review (Unverified)",
+    "reviewUnverified": "Write Review (Unverified)",
     "writeReview": "Write Review",
     "claimProperty": "Claim Property",
     "communitySubmitted": "Community Submitted",
@@ -89,6 +89,7 @@
   },
   "propertyDetails": {
     "explore360": "Explore in 360°",
+    "fullscreen": "Fullscreen",
     "unverifiedBadge": "⚠️ Community Submitted — Unverified",
     "unverifiedWarningTitle": "Important Notice",
     "unverifiedWarning1": "This property listing was submitted by a community member, not by the landlord.",
