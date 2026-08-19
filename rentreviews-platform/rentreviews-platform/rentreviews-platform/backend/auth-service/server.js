@@ -306,6 +306,42 @@ const sendPasswordResetEmail = async (email, token) => {
   });
 };
 
+const sendVerificationEmail = async (email, token) => {
+  const verifyUrl = `${process.env.FRONTEND_URL || 'http://localhost:5500'}/verify-email.html?token=${token}`;
+  const subject = 'Verify your RentReviews email';
+  const html = `
+    <div style="font-family:Inter,Arial,sans-serif;max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08)">
+      <div style="background:linear-gradient(135deg,#667eea,#764ba2);padding:40px 32px;text-align:center">
+        <h1 style="color:#fff;margin:0;font-size:24px;font-weight:700">RentReviews</h1>
+        <p style="color:rgba(255,255,255,.85);margin:8px 0 0;font-size:14px">Rental Property Reviews</p>
+      </div>
+      <div style="padding:40px 32px">
+        <h2 style="margin:0 0 16px;font-size:20px;color:#111">Verify your email address</h2>
+        <p style="color:#555;line-height:1.6;margin:0 0 24px">Thanks for signing up! Click the button below to verify your email address. This link expires in 24 hours.</p>
+        <a href="${verifyUrl}" style="display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px">Verify Email</a>
+        <p style="color:#888;font-size:12px;margin:24px 0 0">If you didn't create a RentReviews account, you can safely ignore this email.</p>
+      </div>
+    </div>
+  `;
+
+  if (!sgMail || !process.env.SENDGRID_API_KEY) {
+    console.log(`\n📧 [DEV EMAIL] To: ${email} | Subject: ${subject}\n${verifyUrl}\n`);
+    return;
+  }
+
+  if (!process.env.FROM_EMAIL) {
+    console.error('❌ FROM_EMAIL not set — cannot send verification email');
+    throw new Error('Email sender not configured');
+  }
+
+  await sgMail.send({
+    to: email,
+    from: { email: process.env.FROM_EMAIL, name: 'RentReviews' },
+    subject,
+    html
+  });
+};
+
 // Health check endpoint
 app.get('/health', async (req, res) => {
   try {
@@ -339,6 +375,8 @@ app.get('/', (req, res) => {
       login: '/login (POST)',
       'forgot-password': '/forgot-password (POST)',
       'reset-password': '/reset-password (POST)',
+      'verify-email': '/verify-email (POST)',
+      'resend-verification': '/resend-verification (POST) - Auth required',
       profile: '/profile (GET) - Auth required',
       refresh: '/refresh (POST) - Auth required',
       'update-profile': '/profile (PUT) - Auth required',
@@ -537,6 +575,20 @@ app.post('/register', async (req, res) => {
 
     console.log('User created successfully:', { id: newUser.id, email: newUser.email });
 
+    // Fire-and-forget: don't fail registration if the verification email
+    // can't be sent. The user can request a fresh link via the dashboard's
+    // "resend the email" button either way.
+    const verifyToken = generateSecureToken();
+    const verifyExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    pool.query(
+      'INSERT INTO verification_tokens (user_id, token, type, expires_at) VALUES ($1, $2, $3, $4)',
+      [newUser.id, verifyToken, 'email_verification', verifyExpiresAt]
+    ).then(() => {
+      sendVerificationEmail(newUser.email, verifyToken).catch(err =>
+        console.error('Verification email failed to send:', err)
+      );
+    }).catch(err => console.error('Failed to store verification token:', err));
+
     sendSuccessResponse(res, 201, {
       user: sanitizeUser(newUser),
       token,
@@ -713,6 +765,84 @@ app.post('/reset-password', authLimiter, async (req, res) => {
   } catch (error) {
     console.error('Reset password error:', error);
     sendErrorResponse(res, 500, 'Internal server error', 'Failed to reset password');
+  }
+});
+
+// Complete email verification using the emailed token
+app.post('/verify-email', async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      token: Joi.string().hex().length(64).required()
+    }).validate(req.body);
+    if (error) {
+      return sendErrorResponse(res, 400, 'Validation failed', 'Invalid request',
+        error.details.map(d => d.message));
+    }
+
+    const { token } = value;
+
+    const tokenResult = await pool.query(
+      "SELECT id, user_id, expires_at, used FROM verification_tokens WHERE token = $1 AND type = 'email_verification'",
+      [token]
+    );
+
+    if (
+      tokenResult.rows.length === 0 ||
+      tokenResult.rows[0].used ||
+      new Date() > new Date(tokenResult.rows[0].expires_at)
+    ) {
+      return sendErrorResponse(res, 400, 'Invalid or expired token', 'This verification link is invalid or has expired. Please request a new one.');
+    }
+
+    const { user_id, id: tokenId } = tokenResult.rows[0];
+
+    await pool.query('UPDATE users SET email_verified = true, updated_at = NOW() WHERE id = $1', [user_id]);
+    await pool.query('UPDATE verification_tokens SET used = true WHERE id = $1', [tokenId]);
+
+    console.log(`✅ Email verified for user ${user_id}`);
+
+    sendSuccessResponse(res, 200, {}, 'Email verified successfully.');
+
+  } catch (error) {
+    console.error('Verify email error:', error);
+    sendErrorResponse(res, 500, 'Internal server error', 'Failed to verify email');
+  }
+});
+
+// Resend the verification email (authenticated -- resends for the logged-in
+// user, not an arbitrary address, so this can't be used to spam other
+// people's inboxes)
+app.post('/resend-verification', authenticateToken, authLimiter, async (req, res) => {
+  try {
+    const userResult = await pool.query('SELECT id, email, email_verified FROM users WHERE id = $1', [req.user.id]);
+    if (userResult.rows.length === 0) {
+      return sendErrorResponse(res, 404, 'User not found', 'User account does not exist');
+    }
+
+    const user = userResult.rows[0];
+    if (user.email_verified) {
+      return sendSuccessResponse(res, 200, {}, 'Your email is already verified.');
+    }
+
+    await pool.query(
+      "UPDATE verification_tokens SET used = true WHERE user_id = $1 AND type = 'email_verification' AND used = false",
+      [user.id]
+    );
+
+    const verifyToken = generateSecureToken();
+    const verifyExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    await pool.query(
+      'INSERT INTO verification_tokens (user_id, token, type, expires_at) VALUES ($1, $2, $3, $4)',
+      [user.id, verifyToken, 'email_verification', verifyExpiresAt]
+    );
+
+    await sendVerificationEmail(user.email, verifyToken);
+
+    sendSuccessResponse(res, 200, {}, 'Verification email sent. Check your inbox (and spam folder).');
+
+  } catch (error) {
+    console.error('Resend verification error:', error);
+    sendErrorResponse(res, 500, 'Internal server error', 'Failed to resend verification email');
   }
 });
 
