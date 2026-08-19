@@ -243,6 +243,13 @@
                     Sign In
                 </button>
 
+                <div id="resendVerificationPrompt" class="hidden text-center bg-white/10 rounded-xl p-4">
+                    <p class="text-sm text-white/80 mb-2">Didn't get the verification email?</p>
+                    <button type="button" id="resendVerificationLink" class="text-sm font-semibold text-white underline hover:text-purple-200 transition-colors">
+                        Resend verification email
+                    </button>
+                </div>
+
                 <div class="text-center">
                     <span class="text-white/80 text-sm" data-i18n="auth:login.noAccount">Don't have an account? </span>
                     <button
@@ -690,7 +697,7 @@
                     }
                 } else {
                     let errorMessage = 'Login failed';
-                    
+
                     if (response.status === 401) {
                         errorMessage = data.message || 'Invalid email or password';
                     } else if (response.status === 423) {
@@ -700,9 +707,13 @@
                     } else if (data && (data.message || data.error)) {
                         errorMessage = data.message || data.error;
                     }
-                    
+
                     console.log('❌ Login failed:', errorMessage);
                     showNotification(t('auth:notifications.loginFailed'), errorMessage, 'error');
+
+                    document.getElementById('resendVerificationPrompt').classList.toggle(
+                        'hidden', !(response.status === 403 && data.error === 'Email not verified')
+                    );
                 }
             } catch (error) {
                 console.error('Login error:', error);
@@ -711,7 +722,30 @@
             
             setLoading(loginBtn, false);
         });
-        
+
+        document.getElementById('resendVerificationLink').addEventListener('click', async () => {
+            const btn = document.getElementById('resendVerificationLink');
+            const email = document.getElementById('loginEmail').value.trim();
+            if (!email) {
+                showNotification('Email required', 'Enter your email address above first.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Sending…';
+            try {
+                await ApiClient.makeRequest('/resend-verification', {
+                    method: 'POST',
+                    body: JSON.stringify({ email })
+                });
+                showNotification('Email sent', 'If that account needs verifying, a new link is on its way. Check your inbox (and spam folder).', 'success');
+            } catch (error) {
+                showNotification('Connection Error', 'Unable to connect to server. Please try again.', 'error');
+            }
+            btn.disabled = false;
+            btn.textContent = 'Resend verification email';
+        });
+
         // Signup Form Handler (already correct)
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -776,27 +810,21 @@
                     hasUser: !!data.user
                 });
 
-                // Check for successful registration (multiple conditions for robustness)
-                if ((response.ok || response.status === 201) && data.token) {
-                    console.log('✅ Registration successful, JWT received');
+                // Registration no longer returns a session token -- login is
+                // blocked until the account is verified, so there's nothing
+                // to auto-login with. Success just means the account exists
+                // and a verification email is on its way.
+                if (response.ok || response.status === 201) {
+                    console.log('✅ Registration successful, verification email sent');
 
-                    // Store the JWT token
-                    AuthManager.setToken(data.token);
-
-                    // Fetch full profile data
-                    const profileData = await AuthManager.fetchAndStoreProfile(data.token);
-                    if (!profileData) AuthManager.setUser(data.user);
-
-                    // Show "check your email" notice — email_verification_sent is true
                     showNotification(
                         'Account Created!',
-                        'A verification link has been sent to your email. Please check your inbox.',
+                        'A verification link has been sent to your email. Verify it, then sign in below.',
                         'success'
                     );
 
-                    setTimeout(() => {
-                        window.location.href = getPostAuthRedirect();
-                    }, 3000);
+                    signupForm.reset();
+                    showLoginBtn.click();
                 } else {
                     let errorMessage = 'Registration failed';
 

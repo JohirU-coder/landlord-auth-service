@@ -640,11 +640,16 @@
                 btn.textContent = 'Sending…';
                 btn.disabled = true;
                 try {
-                    const token = localStorage.getItem('rentreviews_token');
+                    // /resend-verification is public (takes an email, not a
+                    // token) -- an unverified account can no longer obtain a
+                    // session token in the first place, since login is
+                    // blocked until verified.
+                    const user = JSON.parse(localStorage.getItem('rentreviews_user') || '{}');
                     const res = await fetch(`${API_BASE_URL}/resend-verification`, {
                         method: 'POST',
-                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                        credentials: 'include'
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ email: user.email })
                     });
                     const data = await res.json();
                     btn.textContent = res.ok ? 'Email sent! Check your inbox.' : (data.message || 'Failed to send');

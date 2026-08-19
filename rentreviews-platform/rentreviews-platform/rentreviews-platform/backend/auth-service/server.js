@@ -376,7 +376,7 @@ app.get('/', (req, res) => {
       'forgot-password': '/forgot-password (POST)',
       'reset-password': '/reset-password (POST)',
       'verify-email': '/verify-email (POST)',
-      'resend-verification': '/resend-verification (POST) - Auth required',
+      'resend-verification': '/resend-verification (POST)',
       profile: '/profile (GET) - Auth required',
       refresh: '/refresh (POST) - Auth required',
       'update-profile': '/profile (PUT) - Auth required',
@@ -571,13 +571,12 @@ app.post('/register', async (req, res) => {
     );
 
     const newUser = result.rows[0];
-    const token = generateToken(newUser);
 
     console.log('User created successfully:', { id: newUser.id, email: newUser.email });
 
     // Fire-and-forget: don't fail registration if the verification email
-    // can't be sent. The user can request a fresh link via the dashboard's
-    // "resend the email" button either way.
+    // can't be sent. The user can request a fresh one via /resend-verification
+    // either way.
     const verifyToken = generateSecureToken();
     const verifyExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
     pool.query(
@@ -589,11 +588,12 @@ app.post('/register', async (req, res) => {
       );
     }).catch(err => console.error('Failed to store verification token:', err));
 
+    // Deliberately no token in the response -- login is blocked until the
+    // account is verified (see /login), so issuing a usable session here
+    // would let it be used directly instead of going through that gate.
     sendSuccessResponse(res, 201, {
-      user: sanitizeUser(newUser),
-      token,
-      expiresIn: JWT_EXPIRES_IN
-    }, 'User created successfully');
+      user: sanitizeUser(newUser)
+    }, 'Account created! Check your email for a verification link before logging in.');
 
   } catch (error) {
     console.error('Registration error:', error);
@@ -654,6 +654,16 @@ app.post('/login', async (req, res) => {
       );
 
       return sendErrorResponse(res, 401, 'Invalid credentials', 'Email or password is incorrect');
+    }
+
+    // Block login until the email is verified -- prevents disposable-email
+    // signups from ever reaching an authenticated session. Checked after
+    // password validation (not before) so a wrong-password guess against an
+    // unverified account still can't be used to enumerate which emails are
+    // registered vs. registered-but-unverified.
+    if (!user.email_verified) {
+      console.log('Login blocked, email not verified:', email);
+      return sendErrorResponse(res, 403, 'Email not verified', 'Please verify your email before logging in. Check your inbox for the verification link, or request a new one.');
     }
 
     // Reset failed attempts and update last login
@@ -812,33 +822,47 @@ app.post('/verify-email', async (req, res) => {
 // Resend the verification email (authenticated -- resends for the logged-in
 // user, not an arbitrary address, so this can't be used to spam other
 // people's inboxes)
-app.post('/resend-verification', authenticateToken, authLimiter, async (req, res) => {
+// Public (not authenticated) -- an unverified user has no valid session to
+// authenticate with in the first place, since /login now blocks them before
+// issuing a token. Takes an email address instead, same anti-enumeration
+// shape as /forgot-password: always the same generic response regardless of
+// whether the account exists or is already verified.
+app.post('/resend-verification', authLimiter, async (req, res) => {
   try {
-    const userResult = await pool.query('SELECT id, email, email_verified FROM users WHERE id = $1', [req.user.id]);
-    if (userResult.rows.length === 0) {
-      return sendErrorResponse(res, 404, 'User not found', 'User account does not exist');
+    const { error, value } = forgotPasswordSchema.validate(req.body);
+    if (error) {
+      return sendErrorResponse(res, 400, 'Validation failed', 'Invalid request',
+        error.details.map(d => d.message));
     }
 
-    const user = userResult.rows[0];
-    if (user.email_verified) {
-      return sendSuccessResponse(res, 200, {}, 'Your email is already verified.');
+    const { email } = value;
+
+    const userResult = await pool.query(
+      'SELECT id, email, email_verified FROM users WHERE email = $1 AND account_status = $2',
+      [email, 'active']
+    );
+
+    if (userResult.rows.length > 0 && !userResult.rows[0].email_verified) {
+      const user = userResult.rows[0];
+
+      await pool.query(
+        "UPDATE verification_tokens SET used = true WHERE user_id = $1 AND type = 'email_verification' AND used = false",
+        [user.id]
+      );
+
+      const verifyToken = generateSecureToken();
+      const verifyExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      await pool.query(
+        'INSERT INTO verification_tokens (user_id, token, type, expires_at) VALUES ($1, $2, $3, $4)',
+        [user.id, verifyToken, 'email_verification', verifyExpiresAt]
+      );
+
+      sendVerificationEmail(user.email, verifyToken).catch(err =>
+        console.error('Verification email failed to send:', err)
+      );
     }
 
-    await pool.query(
-      "UPDATE verification_tokens SET used = true WHERE user_id = $1 AND type = 'email_verification' AND used = false",
-      [user.id]
-    );
-
-    const verifyToken = generateSecureToken();
-    const verifyExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-    await pool.query(
-      'INSERT INTO verification_tokens (user_id, token, type, expires_at) VALUES ($1, $2, $3, $4)',
-      [user.id, verifyToken, 'email_verification', verifyExpiresAt]
-    );
-
-    await sendVerificationEmail(user.email, verifyToken);
-
-    sendSuccessResponse(res, 200, {}, 'Verification email sent. Check your inbox (and spam folder).');
+    sendSuccessResponse(res, 200, {}, 'If an account with that email exists and needs verifying, a new link has been sent. Check your inbox (and spam folder).');
 
   } catch (error) {
     console.error('Resend verification error:', error);
