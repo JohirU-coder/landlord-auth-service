@@ -615,6 +615,15 @@
             }
 
             redirectToAuth() {
+                // Clear the stale session first -- a token can be
+                // structurally valid (right signature, not expired) but
+                // belong to a deleted/deactivated account. auth.html's
+                // "already logged in" check only looks at token structure,
+                // not whether the account still exists, so leaving a stale
+                // token behind sends the user straight back here, straight
+                // back to auth.html, forever.
+                localStorage.removeItem('rentreviews_token');
+                localStorage.removeItem('rentreviews_user');
                 window.location.href = './auth.html';
             }
         }

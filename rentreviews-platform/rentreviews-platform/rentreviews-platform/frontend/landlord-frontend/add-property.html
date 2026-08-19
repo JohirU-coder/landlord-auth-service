@@ -906,6 +906,13 @@
 
                     if (response.status === 401) {
                         errorMessage = t('addProperty:validation.authenticationFailed');
+                        // Clear the stale session -- a 401 here means the
+                        // token doesn't correspond to a valid account
+                        // anymore, so leaving it in localStorage would send
+                        // auth.html's "already logged in" check straight
+                        // back here.
+                        localStorage.removeItem('rentreviews_token');
+                        localStorage.removeItem('rentreviews_user');
                         setTimeout(() => {
                             window.location.href = './auth.html';
                         }, 2000);

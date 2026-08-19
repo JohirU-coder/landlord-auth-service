@@ -812,6 +812,12 @@
 
                 if (response.status === 401) {
                     alert(t('writeReview:validation.errorAuth'));
+                    // Clear the stale session -- a 401 here means the token
+                    // doesn't correspond to a valid account anymore, so
+                    // leaving it in localStorage would send auth.html's
+                    // "already logged in" check straight back here.
+                    localStorage.removeItem('rentreviews_token');
+                    localStorage.removeItem('rentreviews_user');
                     window.location.href = `./auth.html?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`;
                 } else if (response.status === 403 && data.error === 'Cannot review own property') {
                     alert(t('writeReview:validation.errorOwnProperty'));
