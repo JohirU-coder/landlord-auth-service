@@ -806,12 +806,26 @@ app.post('/verify-email', async (req, res) => {
 
     const { user_id, id: tokenId } = tokenResult.rows[0];
 
-    await pool.query('UPDATE users SET email_verified = true, updated_at = NOW() WHERE id = $1', [user_id]);
+    const updateResult = await pool.query(
+      'UPDATE users SET email_verified = true, updated_at = NOW() WHERE id = $1 RETURNING id, email, role',
+      [user_id]
+    );
     await pool.query('UPDATE verification_tokens SET used = true WHERE id = $1', [tokenId]);
 
     console.log(`✅ Email verified for user ${user_id}`);
 
-    sendSuccessResponse(res, 200, {}, 'Email verified successfully.');
+    // Issue a session token here -- clicking a link from their own inbox is
+    // exactly the proof-of-identity login normally requires, so there's no
+    // reason to make them re-enter their password right after. Lets the
+    // verify page redirect straight to the dashboard instead of bouncing to
+    // sign-in with no valid session.
+    const verifiedUser = updateResult.rows[0];
+    const sessionToken = generateToken(verifiedUser);
+
+    sendSuccessResponse(res, 200, {
+      token: sessionToken,
+      expiresIn: JWT_EXPIRES_IN
+    }, 'Email verified successfully.');
 
   } catch (error) {
     console.error('Verify email error:', error);

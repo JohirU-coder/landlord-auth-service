@@ -46,10 +46,10 @@
                     </svg>
                 </div>
                 <h2 class="text-xl font-bold text-white mb-2">Email verified!</h2>
-                <p class="text-purple-100 mb-6">Your email address has been verified. Your account is now fully active.</p>
+                <p class="text-purple-100 mb-6">Your email address has been verified. Taking you to your dashboard…</p>
                 <a href="./dashboard.html"
                     class="inline-block bg-white text-purple-600 py-3 px-8 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
-                    Go to Dashboard
+                    Go to Dashboard Now
                 </a>
             </div>
 
@@ -63,12 +63,12 @@
                 <h2 class="text-xl font-bold text-white mb-2">Verification failed</h2>
                 <p id="errorText" class="text-purple-100 mb-6">This verification link is invalid or has expired.</p>
                 <div class="flex flex-col gap-3">
-                    <a href="./dashboard.html"
+                    <a href="./auth.html"
                         class="inline-block bg-white text-purple-600 py-3 px-8 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
-                        Go to Dashboard
+                        Go to Sign In
                     </a>
                     <p class="text-purple-200 text-sm">
-                        From the dashboard you can request a new verification email.
+                        Try signing in — if your account still needs verifying, you'll get an option to resend the link.
                     </p>
                 </div>
             </div>
@@ -115,18 +115,16 @@
                 if (res.ok) {
                     successState.classList.remove('hidden');
 
-                    // Update stored JWT so the banner disappears on dashboard
-                    // The user will need to log in again to get a fresh token with email_verified: true,
-                    // but we can at least update the cached user object.
-                    const storedToken = localStorage.getItem('rentreviews_token');
-                    if (storedToken) {
-                        try {
-                            const payload = JSON.parse(atob(storedToken.split('.')[1]));
-                            payload.email_verified = true;
-                            // Note: we can't re-sign the JWT client-side; user's next login will get updated token.
-                            // Cache the flag so banner hides immediately.
-                            localStorage.setItem('rentreviews_email_verified', 'true');
-                        } catch (e) { /* ignore */ }
+                    // /verify-email issues a real session token -- clicking
+                    // the emailed link already proves identity, so there's
+                    // no reason to make them log in again with a password.
+                    // dashboard.html fetches the full profile itself once it
+                    // sees a token, so storing just this is enough.
+                    if (data.token) {
+                        localStorage.setItem('rentreviews_token', data.token);
+                        setTimeout(() => {
+                            window.location.href = './dashboard.html';
+                        }, 2000);
                     }
                 } else {
                     errorText.textContent = data.message || 'This verification link is invalid or has expired.';
