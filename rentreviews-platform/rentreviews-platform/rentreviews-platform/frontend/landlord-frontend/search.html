@@ -22,6 +22,7 @@
     <!-- i18n Configuration -->
     <script src="./i18n/i18n-config.js"></script>
     <script src="./config.js"></script>
+    <script src="./session-guard.js"></script>
 
     <!-- Leaflet (OpenStreetMap) — free, no API key required -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -1046,8 +1047,8 @@
         }
 
         function logout() {
-            localStorage.removeItem('rentreviews_token');
-            localStorage.removeItem('rentreviews_user');
+            sessionStorage.removeItem('rentreviews_token');
+            sessionStorage.removeItem('rentreviews_user');
             window.location.href = 'auth.html';
         }
 
@@ -1451,7 +1452,7 @@
                 }
 
                 // Add "Claim Property" button for landlords on unverified properties
-                const currentUser = JSON.parse(localStorage.getItem('rentreviews_user') || '{}');
+                const currentUser = JSON.parse(sessionStorage.getItem('rentreviews_user') || '{}');
                 if (currentUser.role === 'landlord' && isCommunitySubmitted) {
                     const claimBtn = document.createElement('button');
                     claimBtn.className = 'bg-orange-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors ml-2';
@@ -1701,7 +1702,7 @@
                                 </button>
                             </div>
                             ${(() => {
-                                const currentUser = JSON.parse(localStorage.getItem('rentreviews_user') || '{}');
+                                const currentUser = JSON.parse(sessionStorage.getItem('rentreviews_user') || '{}');
                                 if (!isCommunitySubmitted || currentUser.role !== 'landlord') return '';
                                 const encodedProp = encodeURIComponent(JSON.stringify({
                                     id: property.id,
@@ -1943,8 +1944,8 @@
                 const newClaim = {
                     id: Date.now(),
                     propertyId: propertyId,
-                    userId: JSON.parse(localStorage.getItem('rentreviews_user')).id,
-                    userEmail: JSON.parse(localStorage.getItem('rentreviews_user')).email,
+                    userId: JSON.parse(sessionStorage.getItem('rentreviews_user')).id,
+                    userEmail: JSON.parse(sessionStorage.getItem('rentreviews_user')).email,
                     documentationDetails: details,
                     legalConfirmation: true,
                     status: 'pending_documentation',
@@ -2117,7 +2118,7 @@
         }
 
         async function handleWriteFirstReview(geo) {
-            const token = localStorage.getItem('rentreviews_token');
+            const token = sessionStorage.getItem('rentreviews_token');
             if (!token) {
                 const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
                 window.location.href = `./auth.html?returnTo=${returnTo}`;

@@ -15,6 +15,7 @@
     <!-- i18n Configuration -->
     <script src="./i18n/i18n-config.js"></script>
     <script src="./config.js"></script>
+    <script src="./session-guard.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -490,25 +491,25 @@
             static USER_KEY = 'rentreviews_user';
             
             static setToken(token) {
-                localStorage.setItem(this.TOKEN_KEY, token);
+                sessionStorage.setItem(this.TOKEN_KEY, token);
             }
-            
+
             static getToken() {
-                return localStorage.getItem(this.TOKEN_KEY);
+                return sessionStorage.getItem(this.TOKEN_KEY);
             }
-            
+
             static setUser(user) {
-                localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+                sessionStorage.setItem(this.USER_KEY, JSON.stringify(user));
             }
-            
+
             static getUser() {
-                const user = localStorage.getItem(this.USER_KEY);
+                const user = sessionStorage.getItem(this.USER_KEY);
                 return user ? JSON.parse(user) : null;
             }
-            
+
             static clearAuth() {
-                localStorage.removeItem(this.TOKEN_KEY);
-                localStorage.removeItem(this.USER_KEY);
+                sessionStorage.removeItem(this.TOKEN_KEY);
+                sessionStorage.removeItem(this.USER_KEY);
             }
             
             static isAuthenticated() {

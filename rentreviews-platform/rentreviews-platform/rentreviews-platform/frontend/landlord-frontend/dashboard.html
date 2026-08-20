@@ -14,6 +14,7 @@
 
     <!-- i18n Configuration -->
     <script src="./i18n/i18n-config.js"></script>
+    <script src="./session-guard.js"></script>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
@@ -285,7 +286,7 @@
             async loadUserData() {
                 try {
                     // Get token from localStorage
-                    this.token = localStorage.getItem('rentreviews_token');
+                    this.token = sessionStorage.getItem('rentreviews_token');
                     
                     if (!this.token) {
                         console.warn('⚠️ No authentication token found');
@@ -303,7 +304,7 @@
                     console.log('✅ Valid token found, fetching profile...');
 
                     // Try to get cached user data first
-                    const cachedUser = localStorage.getItem('rentreviews_user');
+                    const cachedUser = sessionStorage.getItem('rentreviews_user');
                     if (cachedUser) {
                         this.user = JSON.parse(cachedUser);
                         console.log('📱 Using cached user data:', this.user);
@@ -350,7 +351,7 @@
                             
                             // Update stored user data
                             this.user = userData;
-                            localStorage.setItem('rentreviews_user', JSON.stringify(userData));
+                            sessionStorage.setItem('rentreviews_user', JSON.stringify(userData));
                             
                             // Update UI with fresh data
                             this.updateUI();
@@ -601,8 +602,8 @@
                     console.log('👋 Logging out...');
                     
                     // Clear all authentication data
-                    localStorage.removeItem('rentreviews_token');
-                    localStorage.removeItem('rentreviews_user');
+                    sessionStorage.removeItem('rentreviews_token');
+                    sessionStorage.removeItem('rentreviews_user');
                     localStorage.removeItem('token'); // Clear old format too
                     localStorage.removeItem('user'); // Clear old format too
                     
@@ -622,15 +623,15 @@
                 // not whether the account still exists, so leaving a stale
                 // token behind sends the user straight back here, straight
                 // back to auth.html, forever.
-                localStorage.removeItem('rentreviews_token');
-                localStorage.removeItem('rentreviews_user');
+                sessionStorage.removeItem('rentreviews_token');
+                sessionStorage.removeItem('rentreviews_user');
                 window.location.href = './auth.html';
             }
         }
 
         // Email verification banner
         document.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('rentreviews_token');
+            const token = sessionStorage.getItem('rentreviews_token');
             if (token) {
                 try {
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -653,7 +654,7 @@
                     // token) -- an unverified account can no longer obtain a
                     // session token in the first place, since login is
                     // blocked until verified.
-                    const user = JSON.parse(localStorage.getItem('rentreviews_user') || '{}');
+                    const user = JSON.parse(sessionStorage.getItem('rentreviews_user') || '{}');
                     const res = await fetch(`${API_BASE_URL}/resend-verification`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },

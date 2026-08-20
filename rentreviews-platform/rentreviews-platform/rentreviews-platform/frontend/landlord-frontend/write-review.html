@@ -22,6 +22,7 @@
     <!-- i18n Configuration -->
     <script src="./i18n/i18n-config.js"></script>
     <script src="./config.js"></script>
+    <script src="./session-guard.js"></script>
 
     <style>
         body { font-family: 'Inter', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif; }
@@ -526,7 +527,7 @@
 
         // Require login before writing a review (POST /reviews is auth-protected)
         function requireAuth() {
-            const token = localStorage.getItem('rentreviews_token');
+            const token = sessionStorage.getItem('rentreviews_token');
             if (!token) {
                 const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
                 window.location.href = `./auth.html?returnTo=${returnTo}`;
@@ -792,7 +793,7 @@
                     photos: selectedPhotos.map(p => p.dataURL)
                 };
 
-                const token = localStorage.getItem('rentreviews_token');
+                const token = sessionStorage.getItem('rentreviews_token');
                 const response = await fetch(`${REVIEW_API_BASE_URL}/reviews`, {
                     method: 'POST',
                     headers: {
@@ -816,8 +817,8 @@
                     // doesn't correspond to a valid account anymore, so
                     // leaving it in localStorage would send auth.html's
                     // "already logged in" check straight back here.
-                    localStorage.removeItem('rentreviews_token');
-                    localStorage.removeItem('rentreviews_user');
+                    sessionStorage.removeItem('rentreviews_token');
+                    sessionStorage.removeItem('rentreviews_user');
                     window.location.href = `./auth.html?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`;
                 } else if (response.status === 403 && data.error === 'Cannot review own property') {
                     alert(t('writeReview:validation.errorOwnProperty'));
@@ -846,8 +847,8 @@
 
         // Logout functionality
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem('rentreviews_token');
-            localStorage.removeItem('rentreviews_user');
+            sessionStorage.removeItem('rentreviews_token');
+            sessionStorage.removeItem('rentreviews_user');
             window.location.href = './auth.html';
         });
     </script>

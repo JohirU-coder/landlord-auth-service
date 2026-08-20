@@ -22,6 +22,7 @@
     <!-- i18n Configuration -->
     <script src="./i18n/i18n-config.js"></script>
     <script src="./config.js"></script>
+    <script src="./session-guard.js"></script>
 
     <style>
         body { font-family: 'Inter', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif; }
@@ -576,8 +577,8 @@
         }
 
         function checkAuthentication() {
-            const token = localStorage.getItem('rentreviews_token');
-            const user = JSON.parse(localStorage.getItem('rentreviews_user') || '{}');
+            const token = sessionStorage.getItem('rentreviews_token');
+            const user = JSON.parse(sessionStorage.getItem('rentreviews_user') || '{}');
 
             if (!token) {
                 alert(t('addProperty:validation.authRequired'));
@@ -866,7 +867,7 @@
             submitBtn.disabled = true;
 
             try {
-                const token = localStorage.getItem('rentreviews_token');
+                const token = sessionStorage.getItem('rentreviews_token');
 
                 if (!token) {
                     alert(t('addProperty:validation.authenticationFailed'));
@@ -914,8 +915,8 @@
                         // anymore, so leaving it in localStorage would send
                         // auth.html's "already logged in" check straight
                         // back here.
-                        localStorage.removeItem('rentreviews_token');
-                        localStorage.removeItem('rentreviews_user');
+                        sessionStorage.removeItem('rentreviews_token');
+                        sessionStorage.removeItem('rentreviews_user');
                         setTimeout(() => {
                             window.location.href = './auth.html';
                         }, 2000);
@@ -999,8 +1000,8 @@
         }
 
         function logout() {
-            localStorage.removeItem('rentreviews_token');
-            localStorage.removeItem('rentreviews_user');
+            sessionStorage.removeItem('rentreviews_token');
+            sessionStorage.removeItem('rentreviews_user');
             window.location.href = './auth.html';
         }
 

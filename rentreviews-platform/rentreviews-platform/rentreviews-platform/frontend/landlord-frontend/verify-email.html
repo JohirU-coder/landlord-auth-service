@@ -7,6 +7,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="./config.js"></script>
+    <script src="./session-guard.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -121,7 +122,7 @@
                     // dashboard.html fetches the full profile itself once it
                     // sees a token, so storing just this is enough.
                     if (data.token) {
-                        localStorage.setItem('rentreviews_token', data.token);
+                        sessionStorage.setItem('rentreviews_token', data.token);
                         setTimeout(() => {
                             window.location.href = './dashboard.html';
                         }, 2000);
