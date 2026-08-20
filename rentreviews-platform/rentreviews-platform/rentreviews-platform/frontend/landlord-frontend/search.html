@@ -1157,18 +1157,35 @@
                 label.textContent = t('search:searchForm.nearMe');
             };
 
-            const fallbackToIp = () => {
-                fetch('https://ipapi.co/json/')
+            // Two free, no-signup IP geolocation services, tried in order --
+            // relying on just one is fragile (ipapi.co's anonymous tier
+            // turned out to already be rate-limited when this was tested).
+            // Both are plain unauthenticated GETs with no custom headers, so
+            // there's no CORS preflight involved and no Safari/Chrome
+            // divergence risk here.
+            const ipLookupSources = [
+                () => fetch('https://get.geojs.io/v1/ip/geo.json')
                     .then(r => r.ok ? r.json() : Promise.reject())
-                    .then(data => {
-                        if (data.latitude == null || data.longitude == null) throw new Error('no location in response');
-                        applyNear(data.latitude, data.longitude, t('search:searchForm.approximateLocation'));
+                    .then(data => ({ lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) })),
+                () => fetch('https://ipwho.is/')
+                    .then(r => r.ok ? r.json() : Promise.reject())
+                    .then(data => ({ lat: data.latitude, lng: data.longitude }))
+            ];
+
+            const fallbackToIp = (sourceIndex = 0) => {
+                if (sourceIndex >= ipLookupSources.length) {
+                    btn.disabled = false;
+                    label.textContent = t('search:searchForm.nearMe');
+                    alert(t('search:searchForm.locationErrorMessage'));
+                    return;
+                }
+
+                ipLookupSources[sourceIndex]()
+                    .then(({ lat, lng }) => {
+                        if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) throw new Error('no location in response');
+                        applyNear(lat, lng, t('search:searchForm.approximateLocation'));
                     })
-                    .catch(() => {
-                        btn.disabled = false;
-                        label.textContent = t('search:searchForm.nearMe');
-                        alert(t('search:searchForm.locationErrorMessage'));
-                    });
+                    .catch(() => fallbackToIp(sourceIndex + 1));
             };
 
             if (!navigator.geolocation) {
