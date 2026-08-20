@@ -463,6 +463,24 @@
             return [geo.address, line2].filter(Boolean).join(', ');
         }
 
+        // The property/geocode record's own coordinates are the search
+        // target, not necessarily where a real panorama exists -- the
+        // server's Street View lookup already found the nearest actual
+        // panorama (up to 200m away) and stored its coordinates separately
+        // (street_view_lat/lng) alongside the heading that faces back at the
+        // property from there. Requesting the image AT the raw property
+        // point instead would make Google redo its own much tighter
+        // (~50m) nearest-panorama search from scratch, which can miss the
+        // exact panorama we already confirmed exists and silently render
+        // Google's "no imagery" placeholder as if it were a real photo.
+        // Falls back to the raw point for older rows geocoded before this.
+        function getStreetViewImageLocation(source) {
+            if (source.street_view_lat != null && source.street_view_lng != null) {
+                return { lat: source.street_view_lat, lng: source.street_view_lng };
+            }
+            return { lat: source.latitude, lng: source.longitude };
+        }
+
         function getStreetViewUrl(latitude, longitude, heading) {
             if (!GOOGLE_STREETVIEW_API_KEY || latitude == null || longitude == null) return null;
             const headingParam = heading != null ? `&heading=${heading}&pitch=0&fov=80` : '';
@@ -507,7 +525,9 @@
         // Real user photo first; Street View as a fallback for properties that
         // don't have one yet (only when a key is configured).
         function getPropertyImageUrl(property) {
-            return resolvePhotoUrl(property.photo_path) || getStreetViewUrl(property.latitude, property.longitude, property.street_view_heading);
+            if (resolvePhotoUrl(property.photo_path)) return resolvePhotoUrl(property.photo_path);
+            const loc = getStreetViewImageLocation(property);
+            return getStreetViewUrl(loc.lat, loc.lng, property.street_view_heading);
         }
 
         // State
@@ -1288,19 +1308,24 @@
             }
 
             // 360° Street View, right on the card -- available for every
-            // property with coordinates regardless of review count (not just
-            // brand-new address-preview listings). Loaded on click, same as
-            // the detail modal, since the embed iframe is much heavier than
-            // the static thumbnail.
+            // property with confirmed coverage regardless of review count
+            // (not just brand-new address-preview listings). Loaded on
+            // click, same as the detail modal, since the embed iframe is
+            // much heavier than the static thumbnail. Gated on
+            // street_view_heading rather than just having lat/lng --
+            // coordinates alone don't mean Google actually has imagery
+            // there, and showing the button anyway would open a 360 view
+            // onto Google's blank "no imagery" placeholder.
             const card360Btn = template.querySelector('.card-360-btn');
-            if (card360Btn && property.latitude != null && property.longitude != null && GOOGLE_STREETVIEW_API_KEY) {
+            if (card360Btn && property.street_view_heading != null && GOOGLE_STREETVIEW_API_KEY) {
+                const svLoc = getStreetViewImageLocation(property);
                 card360Btn.querySelector('.card-360-label').textContent = t('search:propertyDetails.explore360');
                 card360Btn.classList.remove('hidden');
                 card360Btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     imageContainer.style.backgroundImage = '';
                     imageContainer.innerHTML = buildStreetViewEmbedHtml(
-                        property.latitude, property.longitude, property.street_view_heading, 192
+                        svLoc.lat, svLoc.lng, property.street_view_heading, 192
                     );
                     wireStreetViewFullscreenButtons(imageContainer);
                 });
@@ -1550,7 +1575,7 @@
                 <div class="relative">
                     <div id="propertyMediaContainer" class="relative rounded-t-2xl overflow-hidden">
                         ${photoUrl ? `<img src="${photoUrl}" alt="" class="w-full h-56 object-cover">` : ''}
-                        ${(property.latitude != null && property.longitude != null && GOOGLE_STREETVIEW_API_KEY) ? `
+                        ${(property.street_view_heading != null && GOOGLE_STREETVIEW_API_KEY) ? `
                             <button id="streetViewToggleBtn" class="absolute bottom-3 right-3 bg-black/60 hover:bg-black/80 text-white text-sm font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 backdrop-blur-sm transition-colors">
                                 🌐 ${t('search:propertyDetails.explore360')}
                             </button>
@@ -1744,8 +1769,9 @@
             if (streetViewBtn) {
                 streetViewBtn.addEventListener('click', () => {
                     const mediaContainer = modalContent.querySelector('#propertyMediaContainer');
+                    const svLoc = getStreetViewImageLocation(property);
                     mediaContainer.innerHTML = buildStreetViewEmbedHtml(
-                        property.latitude, property.longitude, property.street_view_heading, 224
+                        svLoc.lat, svLoc.lng, property.street_view_heading, 224
                     );
                     wireStreetViewFullscreenButtons(mediaContainer);
                 });
@@ -2067,8 +2093,9 @@
                 // placeholder graphic with a 200 status, which we'd have
                 // displayed as if it were a real photo.
                 const hasStreetViewCoverage = geo.street_view_heading != null;
+                const geoSvLoc = getStreetViewImageLocation({ latitude: geo.latitude, longitude: geo.longitude, street_view_lat: geo.street_view_lat, street_view_lng: geo.street_view_lng });
                 const streetViewUrl = hasStreetViewCoverage
-                    ? getStreetViewUrl(geo.latitude, geo.longitude, geo.street_view_heading)
+                    ? getStreetViewUrl(geoSvLoc.lat, geoSvLoc.lng, geo.street_view_heading)
                     : null;
                 resultsCount.textContent = t('search:addressPreview.foundAddress');
 
@@ -2106,7 +2133,7 @@
                     preview360Btn.addEventListener('click', () => {
                         const mediaContainer = document.getElementById('addressPreviewMediaContainer');
                         mediaContainer.innerHTML = buildStreetViewEmbedHtml(
-                            geo.latitude, geo.longitude, geo.street_view_heading, 224
+                            geoSvLoc.lat, geoSvLoc.lng, geo.street_view_heading, 224
                         );
                         wireStreetViewFullscreenButtons(mediaContainer);
                     });
