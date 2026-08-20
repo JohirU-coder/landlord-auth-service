@@ -257,13 +257,20 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="mt-6 flex justify-center">
+                        <div class="mt-6 flex justify-center gap-3">
                             <button
                                 id="searchBtn"
                                 class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
                                 data-i18n="search:searchForm.searchButton"
                             >
                                 🔍 Search Properties
+                            </button>
+                            <button
+                                id="nearMeBtn"
+                                type="button"
+                                class="bg-white border-2 border-indigo-600 text-indigo-600 px-6 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition-all shadow-lg"
+                            >
+                                📍 <span id="nearMeBtnLabel" data-i18n="search:searchForm.nearMe">Near Me</span>
                             </button>
                         </div>
                     </div>
@@ -534,6 +541,7 @@
 
         function setupEventListeners() {
             searchBtn.addEventListener('click', handleSearch);
+            document.getElementById('nearMeBtn').addEventListener('click', handleNearMe);
             loadMoreBtn.addEventListener('click', loadMoreProperties);
             document.getElementById('clearFilters').addEventListener('click', clearAllFilters);
             document.getElementById('sortBy').addEventListener('change', handleSort);
@@ -1031,7 +1039,13 @@
                         queryParams.append('max_bedrooms', currentFilters.bedrooms);
                     }
                 }
-                
+
+                if (currentFilters.near) {
+                    queryParams.append('lat', currentFilters.near.lat);
+                    queryParams.append('lng', currentFilters.near.lng);
+                    queryParams.append('sort_by', 'distance');
+                }
+
                 const url = `${API_BASE_URL}/properties?${queryParams.toString()}`;
                 console.log('Making request to:', url);
                 
@@ -1100,13 +1114,16 @@
             
             console.log('Search triggered with:', { location, maxPrice, bedrooms });
             
-            // Update filters
+            // Update filters -- near is intentionally not carried over here:
+            // typing a location and searching is an alternative to "Near Me",
+            // not something that combines with it.
             currentFilters = {
                 location: location || null,
                 maxPrice: maxPrice || null,
-                bedrooms: bedrooms || null
+                bedrooms: bedrooms || null,
+                near: null
             };
-            
+
             console.log('Current filters set to:', currentFilters);
 
             updateActiveFilters();
@@ -1119,6 +1136,53 @@
                 showSearchPrompt();
             }
         }
+
+        // "Near Me" -- tries the browser's Geolocation API first (precise,
+        // needs explicit permission); if that's denied, times out, or isn't
+        // available at all, falls back to a free IP-based geolocation
+        // lookup (approximate, no permission prompt, since resolving an IP
+        // to a rough location doesn't need consent the way device GPS does).
+        function handleNearMe() {
+            const btn = document.getElementById('nearMeBtn');
+            const label = document.getElementById('nearMeBtnLabel');
+            btn.disabled = true;
+            label.textContent = t('search:searchForm.locating');
+
+            const applyNear = (lat, lng, labelText) => {
+                currentFilters = { location: null, maxPrice: currentFilters.maxPrice, bedrooms: currentFilters.bedrooms, near: { lat, lng, label: labelText } };
+                document.getElementById('locationSearch').value = '';
+                updateActiveFilters();
+                loadProperties();
+                btn.disabled = false;
+                label.textContent = t('search:searchForm.nearMe');
+            };
+
+            const fallbackToIp = () => {
+                fetch('https://ipapi.co/json/')
+                    .then(r => r.ok ? r.json() : Promise.reject())
+                    .then(data => {
+                        if (data.latitude == null || data.longitude == null) throw new Error('no location in response');
+                        applyNear(data.latitude, data.longitude, t('search:searchForm.approximateLocation'));
+                    })
+                    .catch(() => {
+                        btn.disabled = false;
+                        label.textContent = t('search:searchForm.nearMe');
+                        alert(t('search:searchForm.locationErrorMessage'));
+                    });
+            };
+
+            if (!navigator.geolocation) {
+                fallbackToIp();
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => applyNear(position.coords.latitude, position.coords.longitude, t('search:searchForm.nearYou')),
+                () => fallbackToIp(),
+                { timeout: 8000, maximumAge: 300000 }
+            );
+        }
+
 
         function showLoadingSkeleton() {
             propertyGrid.innerHTML = '';
@@ -1194,7 +1258,11 @@
             // Fill in property data
             template.querySelector('.price-badge').textContent = `$${property.rent_amount?.toLocaleString() || 'N/A'}`;
             template.querySelector('.property-address').textContent = property.address || 'Address not available';
-            template.querySelector('.property-location').textContent = `${property.city || ''}, ${property.state || ''} ${property.zip_code || ''}`.trim();
+            const locationText = `${property.city || ''}, ${property.state || ''} ${property.zip_code || ''}`.trim();
+            const distanceText = property.distance_miles != null
+                ? ` · ${t('search:propertyCard.distanceAway', { miles: property.distance_miles })}`
+                : '';
+            template.querySelector('.property-location').textContent = locationText + distanceText;
             
             // Clean description and check for community-submitted status
             let cleanDescription = property.description || 'No description available';
@@ -2094,7 +2162,8 @@
         function createFilterTag(key, value) {
             const span = document.createElement('span');
             span.className = 'filter-tag text-white px-3 py-1 rounded-full text-sm cursor-pointer';
-            span.innerHTML = `${key}: ${value} <span class="ml-1">×</span>`;
+            const displayValue = key === 'near' ? value.label : value;
+            span.innerHTML = `${key}: ${displayValue} <span class="ml-1">×</span>`;
             span.onclick = () => removeFilter(key);
             return span;
         }
@@ -2105,7 +2174,11 @@
 
         function removeFilter(key) {
             currentFilters[key] = null;
-            document.getElementById(key === 'location' ? 'locationSearch' : key).value = '';
+            // 'near' has no corresponding form input to clear -- it's set
+            // via the Near Me button, not typed in.
+            if (key !== 'near') {
+                document.getElementById(key === 'location' ? 'locationSearch' : key).value = '';
+            }
             updateActiveFilters();
             if (hasActiveFilters()) {
                 loadProperties();

@@ -28,7 +28,12 @@
     "twoBr": "2 BR",
     "threeBr": "3 BR",
     "fourPlusBr": "4+ BR",
-    "searchButton": "🔍 Search Properties"
+    "searchButton": "🔍 Search Properties",
+    "nearMe": "Near Me",
+    "locating": "Locating…",
+    "nearYou": "Near you",
+    "approximateLocation": "Approximate location",
+    "locationErrorMessage": "We couldn't determine your location. Please check your browser/location settings, or search by typing a location instead."
   },
   "filters": {
     "activeFilters": "Active filters:",
@@ -64,7 +69,8 @@
     "verifiedBadge": "✓ Verified",
     "pendingBadge": "Pending Verification",
     "reviews": "{{count}} review",
-    "reviews_plural": "{{count}} reviews"
+    "reviews_plural": "{{count}} reviews",
+    "distanceAway": "{{miles}} mi away"
   },
   "disclaimer": {
     "title": "Unverified Property:",
