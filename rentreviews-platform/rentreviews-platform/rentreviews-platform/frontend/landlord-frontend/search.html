@@ -1939,7 +1939,18 @@
                     return;
                 }
 
-                const streetViewUrl = getStreetViewUrl(geo.latitude, geo.longitude, geo.street_view_heading);
+                // geo.street_view_heading was just computed fresh (via the
+                // Street View Metadata API) as part of this /geocode call --
+                // unlike a possibly-stale DB value, null here reliably means
+                // there's no real coverage at this address right now.
+                // Showing the Static API image anyway doesn't fail cleanly:
+                // Google returns its own "Sorry, we have no imagery here"
+                // placeholder graphic with a 200 status, which we'd have
+                // displayed as if it were a real photo.
+                const hasStreetViewCoverage = geo.street_view_heading != null;
+                const streetViewUrl = hasStreetViewCoverage
+                    ? getStreetViewUrl(geo.latitude, geo.longitude, geo.street_view_heading)
+                    : null;
                 resultsCount.textContent = t('search:addressPreview.foundAddress');
 
                 propertyGrid.innerHTML = `
@@ -1950,7 +1961,7 @@
                                     ? `<img src="${streetViewUrl}" alt="" class="w-full h-56 object-cover">`
                                     : `<div class="h-56 bg-gradient-to-br from-blue-500 to-purple-600"></div>`
                                 }
-                                ${(geo.latitude != null && geo.longitude != null && GOOGLE_STREETVIEW_API_KEY) ? `
+                                ${(hasStreetViewCoverage && GOOGLE_STREETVIEW_API_KEY) ? `
                                     <button id="addressPreview360Btn" class="absolute bottom-3 right-3 bg-black/60 hover:bg-black/80 text-white text-sm font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 backdrop-blur-sm transition-colors">
                                         🌐 ${t('search:propertyDetails.explore360')}
                                     </button>

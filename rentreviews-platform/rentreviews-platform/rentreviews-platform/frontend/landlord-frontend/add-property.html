@@ -544,7 +544,10 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
-            checkAuthentication();
+            // checkAuthentication() runs after i18n init (see bottom of
+            // page) -- it can alert() a translated message, and calling t()
+            // before i18next has loaded renders literally "undefined"
+            // instead of real text.
         });
 
         function setupEventListeners() {
@@ -1032,6 +1035,11 @@
                 console.log('i18n initialized successfully for add-property page');
             } catch (error) {
                 console.error('i18n initialization failed:', error);
+            } finally {
+                // Runs whether i18n succeeded or failed -- checkAuthentication()
+                // must always run so a logged-out/non-landlord visitor still
+                // gets redirected even if translations never loaded.
+                checkAuthentication();
             }
         });
     </script>

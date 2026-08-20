@@ -700,22 +700,22 @@
 
         // POST /reviews requires a real property_id. If the form wasn't
         // pre-filled from a search result (no id in the URL), look the
-        // property up by address among properties matching city/state/zip.
+        // property up by address. Uses the same tokenized q= search as
+        // search.html rather than an exact client-side string match -- a
+        // manually-typed address ("123 Main St") very often differs slightly
+        // from how it's stored ("123 Main Street"), and an exact match fails
+        // on any such difference even when the property clearly exists.
         async function resolvePropertyId(propertyData, address, city, state, zip) {
             if (propertyData?.id) return propertyData.id;
 
-            const params = new URLSearchParams({ limit: '50' });
-            if (city) params.append('city', city);
-            if (state) params.append('state', state);
-            if (zip) params.append('zip_code', zip);
+            const q = [address, city, state, zip].filter(Boolean).join(' ');
+            const params = new URLSearchParams({ limit: '50', q });
 
             const response = await fetch(`${PROPERTY_API_BASE_URL}/properties?${params.toString()}`);
             if (!response.ok) throw new Error('property_lookup_failed');
 
             const data = await response.json();
-            const matches = (data.properties || []).filter(p =>
-                p.address.trim().toLowerCase() === address.trim().toLowerCase()
-            );
+            const matches = data.properties || [];
 
             if (matches.length === 1) return matches[0].id;
             if (matches.length > 1) throw new Error('property_ambiguous');
