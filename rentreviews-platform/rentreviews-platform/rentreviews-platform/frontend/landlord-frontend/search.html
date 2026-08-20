@@ -637,21 +637,69 @@
             });
         }
 
-        // Center of the NJ/NY metro area, used both as a Photon ranking bias
-        // and as a hard post-filter below. The bias param alone isn't enough:
-        // when Photon has no local match for a query (a real data gap in its
-        // free index — e.g. "138 Albion" has no NJ/NY entry at all), it falls
-        // back to its best *global* match regardless of distance, which can
-        // put an Ontario or Maine address at the top. The distance filter
-        // catches that case and drops the suggestion instead of showing it.
+        // Fallback bias center (NJ/NY metro) for when the user's actual
+        // location isn't known yet -- e.g. the very first keystrokes before
+        // silent IP detection (below) resolves. Once a real location is
+        // known, suggestions are biased around *that* instead: a generic
+        // metro-wide center is why someone in Clifton typing an address was
+        // seeing Manhattan results outrank a closer Clifton match -- NYC is
+        // large and dense enough to dominate relevance ranking within a
+        // fallback box that isn't actually centered on the user.
         const NJ_NY_BIAS_LAT = 40.85;
         const NJ_NY_BIAS_LON = -74.15;
 
-        function isNearNJNY(lat, lon) {
-            // ~1.2°lat / 1.5°lon is a generous box around the metro area
-            // (roughly 80-100 miles) — wide enough for the whole region,
-            // tight enough to exclude other states/countries entirely.
-            return Math.abs(lat - NJ_NY_BIAS_LAT) < 1.2 && Math.abs(lon - NJ_NY_BIAS_LON) < 1.5;
+        // Best known approximate/precise user location, for biasing
+        // suggestions (see below) and pre-filling "Near Me" -- populated by
+        // silent IP detection shortly after page load, and overwritten with
+        // a better value if the user later clicks "Near Me" (precise GPS, or
+        // its own IP fallback, both more current than the passive one).
+        let userBiasLocation = null;
+
+        // Two free, no-signup IP geolocation services, tried in order --
+        // relying on just one is fragile (ipapi.co's anonymous tier turned
+        // out to already be rate-limited when this was tested). Both are
+        // plain unauthenticated GETs with no custom headers, so there's no
+        // CORS preflight involved and no Safari/Chrome divergence risk here.
+        // Resolves { lat, lng } or null -- never rejects, since both callers
+        // (silent background detection and Near Me's fallback) just want a
+        // best-effort result.
+        function detectApproximateIpLocation(sourceIndex = 0) {
+            const ipLookupSources = [
+                () => fetch('https://get.geojs.io/v1/ip/geo.json')
+                    .then(r => r.ok ? r.json() : Promise.reject())
+                    .then(data => ({ lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) })),
+                () => fetch('https://ipwho.is/')
+                    .then(r => r.ok ? r.json() : Promise.reject())
+                    .then(data => ({ lat: data.latitude, lng: data.longitude }))
+            ];
+
+            if (sourceIndex >= ipLookupSources.length) return Promise.resolve(null);
+
+            return ipLookupSources[sourceIndex]()
+                .then(({ lat, lng }) => {
+                    if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) throw new Error('no location in response');
+                    return { lat, lng };
+                })
+                .catch(() => detectApproximateIpLocation(sourceIndex + 1));
+        }
+
+        // No permission prompt involved (unlike navigator.geolocation) --
+        // resolving an IP to a rough location doesn't need consent the way
+        // device GPS does, so this can run passively in the background.
+        detectApproximateIpLocation().then(loc => { if (loc) userBiasLocation = loc; });
+
+        function haversineMiles(lat1, lon1, lat2, lon2) {
+            const toRad = (deg) => deg * Math.PI / 180;
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat / 2) ** 2 +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+            return 3959 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function isWithinBiasRadius(lat, lon) {
+            const center = userBiasLocation || { lat: NJ_NY_BIAS_LAT, lng: NJ_NY_BIAS_LON };
+            return haversineMiles(lat, lon, center.lat, center.lng) <= 20;
         }
 
         // Two suggestion sources, fetched independently and merged as each
@@ -697,14 +745,17 @@
                 }
             };
 
-            fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=20&lang=en&lat=${NJ_NY_BIAS_LAT}&lon=${NJ_NY_BIAS_LON}`, { signal })
+            const biasLat = userBiasLocation?.lat ?? NJ_NY_BIAS_LAT;
+            const biasLon = userBiasLocation?.lng ?? NJ_NY_BIAS_LON;
+
+            fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=20&lang=en&lat=${biasLat}&lon=${biasLon}`, { signal })
                 .then(r => r.ok ? r.json() : null)
                 .then(data => {
                     photonAddresses = (data?.features || [])
                         .filter(f => f.properties?.housenumber)
                         .filter(f => {
                             const [lon, lat] = f.geometry?.coordinates || [];
-                            return lat != null && lon != null && isNearNJNY(lat, lon);
+                            return lat != null && lon != null && isWithinBiasRadius(lat, lon);
                         })
                         .map(f => ({ label: formatSuggestion(f) }));
                 })
@@ -721,7 +772,7 @@
                 .then(r => r.ok ? r.json() : null)
                 .then(data => {
                     backendAddresses = (data?.suggestions || [])
-                        .filter(s => s.latitude != null && s.longitude != null && isNearNJNY(s.latitude, s.longitude))
+                        .filter(s => s.latitude != null && s.longitude != null && isWithinBiasRadius(s.latitude, s.longitude))
                         .map(s => ({ label: formatBackendSuggestion(s) }));
                 })
                 .catch(error => {
@@ -1149,6 +1200,7 @@
             label.textContent = t('search:searchForm.locating');
 
             const applyNear = (lat, lng, labelText) => {
+                userBiasLocation = { lat, lng }; // a fresh, more current value than passive IP detection
                 currentFilters = { location: null, maxPrice: currentFilters.maxPrice, bedrooms: currentFilters.bedrooms, near: { lat, lng, label: labelText } };
                 document.getElementById('locationSearch').value = '';
                 updateActiveFilters();
@@ -1157,35 +1209,16 @@
                 label.textContent = t('search:searchForm.nearMe');
             };
 
-            // Two free, no-signup IP geolocation services, tried in order --
-            // relying on just one is fragile (ipapi.co's anonymous tier
-            // turned out to already be rate-limited when this was tested).
-            // Both are plain unauthenticated GETs with no custom headers, so
-            // there's no CORS preflight involved and no Safari/Chrome
-            // divergence risk here.
-            const ipLookupSources = [
-                () => fetch('https://get.geojs.io/v1/ip/geo.json')
-                    .then(r => r.ok ? r.json() : Promise.reject())
-                    .then(data => ({ lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) })),
-                () => fetch('https://ipwho.is/')
-                    .then(r => r.ok ? r.json() : Promise.reject())
-                    .then(data => ({ lat: data.latitude, lng: data.longitude }))
-            ];
-
-            const fallbackToIp = (sourceIndex = 0) => {
-                if (sourceIndex >= ipLookupSources.length) {
-                    btn.disabled = false;
-                    label.textContent = t('search:searchForm.nearMe');
-                    alert(t('search:searchForm.locationErrorMessage'));
-                    return;
-                }
-
-                ipLookupSources[sourceIndex]()
-                    .then(({ lat, lng }) => {
-                        if (lat == null || lng == null || isNaN(lat) || isNaN(lng)) throw new Error('no location in response');
-                        applyNear(lat, lng, t('search:searchForm.approximateLocation'));
-                    })
-                    .catch(() => fallbackToIp(sourceIndex + 1));
+            const fallbackToIp = () => {
+                detectApproximateIpLocation().then(loc => {
+                    if (loc) {
+                        applyNear(loc.lat, loc.lng, t('search:searchForm.approximateLocation'));
+                    } else {
+                        btn.disabled = false;
+                        label.textContent = t('search:searchForm.nearMe');
+                        alert(t('search:searchForm.locationErrorMessage'));
+                    }
+                });
             };
 
             if (!navigator.geolocation) {
