@@ -748,7 +748,13 @@
 
             const renderMerged = () => {
                 // Backend results first — same geocoder as the actual search,
-                // so they're the most trustworthy. Dedupe near-identical labels.
+                // so they're the most trustworthy. Dedupe near-identical
+                // labels. Nearby-to-the-user matches are sorted first (a
+                // ranking bias, like Google's own autocomplete), but a
+                // correct match further away is still shown rather than
+                // silently dropped — someone searching a property across
+                // town, in another state, or wherever they're about to move
+                // is looking for a real address, not just a local one.
                 const merged = [];
                 const seen = new Set();
                 for (const item of [...backendAddresses, ...photonAddresses]) {
@@ -756,29 +762,26 @@
                     if (seen.has(key)) continue;
                     seen.add(key);
                     merged.push(item);
-                    if (merged.length >= 10) break;
                 }
+                merged.sort((a, b) => (a.nearby === b.nearby) ? 0 : (a.nearby ? -1 : 1));
+                const shown = merged.slice(0, 15);
 
-                if (merged.length === 0 && pendingSources > 0) {
+                if (shown.length === 0 && pendingSources > 0) {
                     showSuggestionsLoading();
                 } else {
-                    renderLocationSuggestions(merged);
+                    renderLocationSuggestions(shown);
                 }
             };
 
-            const biasLat = userBiasLocation?.lat ?? NJ_NY_BIAS_LAT;
-            const biasLon = userBiasLocation?.lng ?? NJ_NY_BIAS_LON;
-
-            fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=20&lang=en&lat=${biasLat}&lon=${biasLon}`, { signal })
+            fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=20&lang=en&lat=${userBiasLocation?.lat ?? NJ_NY_BIAS_LAT}&lon=${userBiasLocation?.lng ?? NJ_NY_BIAS_LON}`, { signal })
                 .then(r => r.ok ? r.json() : null)
                 .then(data => {
                     photonAddresses = (data?.features || [])
-                        .filter(f => f.properties?.housenumber)
-                        .filter(f => {
+                        .filter(f => f.properties?.housenumber) // a bare street/city isn't specific enough to identify a single property
+                        .map(f => {
                             const [lon, lat] = f.geometry?.coordinates || [];
-                            return lat != null && lon != null && isWithinBiasRadius(lat, lon);
-                        })
-                        .map(f => ({ label: formatSuggestion(f) }));
+                            return { label: formatSuggestion(f), nearby: lat != null && lon != null && isWithinBiasRadius(lat, lon) };
+                        });
                 })
                 .catch(error => {
                     if (error.name !== 'AbortError') console.error('Error fetching Photon suggestions:', error);
@@ -793,8 +796,7 @@
                 .then(r => r.ok ? r.json() : null)
                 .then(data => {
                     backendAddresses = (data?.suggestions || [])
-                        .filter(s => s.latitude != null && s.longitude != null && isWithinBiasRadius(s.latitude, s.longitude))
-                        .map(s => ({ label: formatBackendSuggestion(s) }));
+                        .map(s => ({ label: formatBackendSuggestion(s), nearby: s.latitude != null && s.longitude != null && isWithinBiasRadius(s.latitude, s.longitude) }));
                 })
                 .catch(error => {
                     if (error.name !== 'AbortError') console.error('Error fetching backend suggestions:', error);
