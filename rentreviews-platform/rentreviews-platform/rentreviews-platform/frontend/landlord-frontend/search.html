@@ -704,10 +704,25 @@
                 .catch(() => detectApproximateIpLocation(sourceIndex + 1));
         }
 
-        // No permission prompt involved (unlike navigator.geolocation) --
-        // resolving an IP to a rough location doesn't need consent the way
-        // device GPS does, so this can run passively in the background.
-        detectApproximateIpLocation().then(loc => { if (loc) userBiasLocation = loc; });
+        // Ask for the browser's precise location automatically on page load
+        // -- rather than waiting for the user to click "Near Me" -- so
+        // address suggestions are biased around where they actually are
+        // from the first keystroke, not a metro-wide fallback point or a
+        // coarser IP-based guess. Browsers only ever show this prompt once
+        // per origin (a prior allow/deny is remembered), so this doesn't
+        // nag on repeat visits. If it's denied, times out, or the browser
+        // doesn't support it, falls back to the same silent IP-based
+        // detection used elsewhere -- no permission prompt involved there,
+        // so it's a safe no-friction fallback.
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => { userBiasLocation = { lat: position.coords.latitude, lng: position.coords.longitude }; },
+                () => { detectApproximateIpLocation().then(loc => { if (loc) userBiasLocation = loc; }); },
+                { timeout: 8000, maximumAge: 300000 }
+            );
+        } else {
+            detectApproximateIpLocation().then(loc => { if (loc) userBiasLocation = loc; });
+        }
 
         function haversineMiles(lat1, lon1, lat2, lon2) {
             const toRad = (deg) => deg * Math.PI / 180;
@@ -718,9 +733,14 @@
             return 3959 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         }
 
+        // A ranking bias only (see fetchLocationSuggestions) -- never a hard
+        // filter. A wider radius means more real matches get the "nearby"
+        // boost, not that anything further away gets hidden.
+        const BIAS_RADIUS_MILES = 50;
+
         function isWithinBiasRadius(lat, lon) {
             const center = userBiasLocation || { lat: NJ_NY_BIAS_LAT, lng: NJ_NY_BIAS_LON };
-            return haversineMiles(lat, lon, center.lat, center.lng) <= 20;
+            return haversineMiles(lat, lon, center.lat, center.lng) <= BIAS_RADIUS_MILES;
         }
 
         // Two suggestion sources, fetched independently and merged as each
