@@ -23,6 +23,7 @@
     <script src="./i18n/i18n-config.js"></script>
     <script src="./config.js"></script>
     <script src="./session-guard.js"></script>
+    <script src="./address-ranking.js"></script>
 
     <!-- Leaflet (OpenStreetMap) — free, no API key required -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -760,14 +761,29 @@
         //    same accurate source used for the actual search, so if an
         //    address is findable at all, it shows up here even when Photon
         //    has nothing.
-        // Photon and Nominatim are filtered to house-number-level results —
-        // a bare street/city match isn't specific enough to identify a
-        // single property. Listed properties always have a house number by
-        // construction, so no such filter is needed there.
+        // Photon and Nominatim are filtered to results with at least a real
+        // street name — a bare city/region match isn't specific enough to
+        // identify a single property — but NOT to ones with a house number.
+        // Traced live against a real failing search ("18 Liberty Street,
+        // Paterson, NJ"): neither free geocoder (nor even Google's paid one)
+        // has house-number-level data for that address, only the street
+        // itself. Requiring a house number used to throw away that one
+        // genuinely relevant result while still showing house-numbered
+        // matches for the same street name in unrelated states -- see
+        // rankSuggestion() below for how relevance is actually decided now.
         function fetchLocationSuggestions(query) {
             if (autocompleteAbortController) autocompleteAbortController.abort();
             autocompleteAbortController = new AbortController();
             const signal = autocompleteAbortController.signal;
+
+            // See address-ranking.js for the actual ranking rules and why
+            // each priority level outranks the next -- kept as a standalone,
+            // unit-tested module (test-address-ranking.js) rather than
+            // inline here, since this is exactly the logic that was silently
+            // wrong before (distance-from-searcher was the only signal used,
+            // which says nothing about whether the city the user actually
+            // typed matches a given candidate at all).
+            const queryTokens = AddressRanking.tokenize(query);
 
             let listedAddresses = [];
             let photonAddresses = [];
@@ -775,14 +791,6 @@
             let pendingSources = 3;
 
             const renderMerged = () => {
-                // Listed properties first (see above), then nearby-to-the-
-                // user matches ahead of far-away ones (a ranking bias, like
-                // Google's own autocomplete) — but a correct match further
-                // away is still shown rather than silently dropped, since
-                // someone searching a property across town, in another
-                // state, or wherever they're about to move is looking for a
-                // real address, not just a local one. Dedupe near-identical
-                // labels.
                 const merged = [];
                 const seen = new Set();
                 for (const item of [...listedAddresses, ...backendAddresses, ...photonAddresses]) {
@@ -791,14 +799,20 @@
                     seen.add(key);
                     merged.push(item);
                 }
-                merged.sort((a, b) => {
-                    if (a.listed !== b.listed) return a.listed ? -1 : 1;
-                    return (a.nearby === b.nearby) ? 0 : (a.nearby ? -1 : 1);
-                });
+                merged.sort((a, b) => AddressRanking.rankSuggestion(a, queryTokens) - AddressRanking.rankSuggestion(b, queryTokens));
                 const shown = merged.slice(0, 15);
 
-                if (shown.length === 0 && pendingSources > 0) {
-                    showSuggestionsLoading();
+                if (shown.length === 0) {
+                    // All three sources have genuinely found nothing yet vs.
+                    // still finding nothing after every source has answered
+                    // are different states -- still-searching shouldn't
+                    // flash a wrong "not found" a moment before a real
+                    // match arrives from the slower source(s).
+                    if (pendingSources > 0) {
+                        showSuggestionsLoading();
+                    } else {
+                        showNoSuggestionsFound();
+                    }
                 } else {
                     renderLocationSuggestions(shown);
                 }
@@ -808,7 +822,7 @@
                 .then(r => r.ok ? r.json() : null)
                 .then(data => {
                     listedAddresses = (data?.suggestions || [])
-                        .map(s => ({ label: formatBackendSuggestion(s), nearby: true, listed: true }));
+                        .map(s => ({ label: formatBackendSuggestion(s), address: s.address, city: s.city, nearby: true, listed: true, hasHouseNumber: true }));
                 })
                 .catch(error => {
                     if (error.name !== 'AbortError') console.error('Error fetching listed-property suggestions:', error);
@@ -823,10 +837,19 @@
                 .then(r => r.ok ? r.json() : null)
                 .then(data => {
                     photonAddresses = (data?.features || [])
-                        .filter(f => f.properties?.housenumber) // a bare street/city isn't specific enough to identify a single property
+                        .filter(f => f.properties?.street || f.properties?.name) // a bare city/region isn't specific enough to identify a single property
                         .map(f => {
                             const [lon, lat] = f.geometry?.coordinates || [];
-                            return { label: formatSuggestion(f), nearby: lat != null && lon != null && isWithinBiasRadius(lat, lon), listed: false };
+                            const p = f.properties || {};
+                            const city = p.city || p.town || p.village;
+                            return {
+                                label: formatSuggestion(f),
+                                address: [p.housenumber, p.street || p.name].filter(Boolean).join(' '),
+                                city,
+                                nearby: lat != null && lon != null && isWithinBiasRadius(lat, lon),
+                                listed: false,
+                                hasHouseNumber: Boolean(p.housenumber)
+                            };
                         });
                 })
                 .catch(error => {
@@ -842,7 +865,14 @@
                 .then(r => r.ok ? r.json() : null)
                 .then(data => {
                     backendAddresses = (data?.suggestions || [])
-                        .map(s => ({ label: formatBackendSuggestion(s), nearby: s.latitude != null && s.longitude != null && isWithinBiasRadius(s.latitude, s.longitude), listed: false }));
+                        .map(s => ({
+                            label: formatBackendSuggestion(s),
+                            address: s.address,
+                            city: s.city,
+                            nearby: s.latitude != null && s.longitude != null && isWithinBiasRadius(s.latitude, s.longitude),
+                            listed: false,
+                            hasHouseNumber: Boolean(s.hasHouseNumber)
+                        }));
                 })
                 .catch(error => {
                     if (error.name !== 'AbortError') console.error('Error fetching backend suggestions:', error);
@@ -858,6 +888,17 @@
             const dropdown = document.getElementById('locationSuggestions');
             highlightedIndex = -1;
             dropdown.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">${t('search:searchForm.searchingLocations')}</div>`;
+            dropdown.classList.remove('hidden');
+        }
+
+        // Shown once every suggestion source has answered and none of them
+        // found anything -- previously this case just silently hid the
+        // dropdown, which is indistinguishable from the request having not
+        // fired at all.
+        function showNoSuggestionsFound() {
+            const dropdown = document.getElementById('locationSuggestions');
+            highlightedIndex = -1;
+            dropdown.innerHTML = `<div class="px-4 py-3 text-sm text-gray-400">${t('search:searchForm.noAddressesFound')}</div>`;
             dropdown.classList.remove('hidden');
         }
 
