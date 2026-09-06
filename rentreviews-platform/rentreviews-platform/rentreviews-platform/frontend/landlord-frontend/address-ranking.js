@@ -22,10 +22,28 @@ function queryMentionsCity(queryTokens, city) {
     return cityTokens.length > 0 && cityTokens.every(t => queryTokens.includes(t));
 }
 
+// Common USPS street-suffix words, both spelled out and abbreviated. Used to
+// make the suffix optional in queryMentionsStreet below rather than trying
+// to maintain an alias table mapping every abbreviation to its full form --
+// dropping the suffix requirement entirely handles "St" vs "Street" vs the
+// word being left off completely, in either the query or the candidate's own
+// data, all at once.
+const STREET_SUFFIX_WORDS = new Set([
+    'street', 'st', 'avenue', 'ave', 'av', 'road', 'rd', 'drive', 'dr',
+    'lane', 'ln', 'court', 'ct', 'place', 'pl', 'boulevard', 'blvd',
+    'circle', 'cir', 'square', 'sq', 'terrace', 'ter', 'parkway', 'pkwy',
+    'highway', 'hwy', 'trail', 'trl', 'way', 'alley', 'aly', 'loop',
+    'path', 'row', 'walk', 'close', 'crossing', 'xing', 'crescent', 'cres',
+    'plaza', 'plz', 'point', 'pt', 'extension', 'ext'
+]);
+
 // Same idea as queryMentionsCity, but for the street itself -- `address` is
-// just the street part (e.g. "18 Liberty Street" or "Liberty Street"), with
-// the house number stripped before comparing so a query that doesn't
-// include a house number can still match on the street name alone.
+// just the street part (e.g. "18 Liberty Street" or "Liberty Street"). The
+// house number and the suffix word are both stripped before comparing, so
+// what's actually being matched is just the distinctive name ("liberty"),
+// not incidental parts that vary in ways that don't change what street it
+// is: a query with or without a house number, "St" vs "Street" vs no suffix
+// word at all, all compare equal.
 //
 // This exists because a plain city match isn't enough on its own: searching
 // "18 liberty street paterson" was ranking "18 Church Street, Paterson" and
@@ -34,8 +52,15 @@ function queryMentionsCity(queryTokens, city) {
 // and Liberty Street's doesn't (a real data gap -- see geocode.js). Neither
 // Church Street nor East 18th Street is the street the user typed at all;
 // sharing a city should never outrank actually matching the street name.
+// Dropping the suffix word specifically came from testing the abbreviated
+// form of the same query ("18 Liberty St Paterson NJ"): comparing raw
+// tokens required "street" to appear in the query, which "st" doesn't
+// literally match, so the fix for the un-abbreviated case regressed on the
+// abbreviated one until this was caught by a test.
 function queryMentionsStreet(queryTokens, address) {
-    const streetTokens = tokenize(address).filter(t => !/^\d+$/.test(t)); // drop the house number, keep alphanumeric tokens like "18th"
+    const streetTokens = tokenize(address)
+        .filter(t => !/^\d+$/.test(t)) // drop the house number, keep alphanumeric tokens like "18th"
+        .filter(t => !STREET_SUFFIX_WORDS.has(t)); // suffix is optional, not required to match
     return streetTokens.length > 0 && streetTokens.every(t => queryTokens.includes(t));
 }
 

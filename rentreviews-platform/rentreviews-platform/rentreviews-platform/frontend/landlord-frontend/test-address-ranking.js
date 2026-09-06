@@ -53,6 +53,16 @@ test('queryMentionsStreet matches the street name with the house number stripped
     assert.equal(queryMentionsStreet(tokens, 'Liberty Street'), true, 'should match even when the candidate has no house number at all');
 });
 
+test('queryMentionsStreet matches regardless of which side abbreviates the suffix, or omits it entirely', () => {
+    // Real regression caught by this exact test: an earlier version required
+    // the literal token "street" to appear in the query, so typing the
+    // abbreviated "St" (or leaving the suffix off entirely) failed to match
+    // "Liberty Street" even though it's obviously the same street.
+    assert.equal(queryMentionsStreet(tokenize('18 Liberty St Paterson NJ'), 'Liberty Street'), true, 'query abbreviates "Street" as "St"');
+    assert.equal(queryMentionsStreet(tokenize('18 liberty paterson'), 'Liberty Street'), true, 'query drops the suffix word entirely');
+    assert.equal(queryMentionsStreet(tokenize('18 liberty street paterson'), '18 Liberty St'), true, 'candidate\'s own data abbreviates "Street" as "St"');
+});
+
 test('queryMentionsStreet rejects a different street even if a house number happens to line up', () => {
     const tokens = tokenize('18 liberty street paterson');
     assert.equal(queryMentionsStreet(tokens, '18 Church Street'), false);
@@ -145,4 +155,18 @@ test('rankSuggestion: full real-world scenario -- correct order for every candid
 
     assert.equal(ranked[0].city, 'Paterson');
     assert.equal(ranked[0].address, 'Liberty Street', 'the exact street in the exact city must be the top suggestion');
+});
+
+test('rankSuggestion: same real-world scenario still resolves correctly when the query abbreviates "Street" as "St"', () => {
+    const queryTokens = tokenize('18 Liberty St Paterson NJ');
+    const items = [
+        { address: '51 East 18th Street', city: 'Paterson', hasHouseNumber: true, nearby: true, listed: false },
+        { address: '18th Avenue', city: 'Paterson', hasHouseNumber: false, nearby: true, listed: false },
+        { address: '18 Liberty Street', city: 'Old Bridge Township', hasHouseNumber: true, nearby: true, listed: false },
+        { address: 'Liberty Street', city: 'Paterson', hasHouseNumber: false, nearby: true, listed: false }
+    ];
+
+    const ranked = [...items].sort((a, b) => rankSuggestion(a, queryTokens) - rankSuggestion(b, queryTokens));
+
+    assert.equal(ranked[0].address, 'Liberty Street', 'abbreviating "Street" as "St" must not push the correct match out of first place');
 });
