@@ -18,7 +18,7 @@
     <script src="./session-guard.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap');
 
         /* Multi-language font support */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap');
@@ -26,26 +26,48 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap');
 
+        :root {
+            --forest: #4f8a5b;
+            --forest-deep: #3d6e48;
+            --brass: #d1a13e;
+        }
+
         body {
-            font-family: 'Inter', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali',
+            font-family: 'Public Sans', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali',
                          'Noto Sans Devanagari', sans-serif;
         }
-        
+
+        h1, h2 { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.01em; }
+
         .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--forest);
         }
-        
+
         .glass {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
+
         .input-focus:focus {
             outline: none;
-            border-color: #8B5CF6;
-            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+            border-color: var(--brass);
+            box-shadow: 0 0 0 3px rgba(209, 161, 62, 0.25);
         }
+
+        /* Palette repaint: retarget the purple/indigo accent classes already
+           used throughout this page's markup (buttons, links, subtitle text)
+           to the approved forest/brass palette, without touching the class
+           list on any element -- same technique used on search.html. */
+        .text-purple-100, .text-purple-200 { color: #dcece0 !important; }
+        .hover\:text-purple-200:hover { color: #ffffff !important; }
+        .text-purple-600 { color: var(--forest) !important; }
+        .from-indigo-600, .to-purple-600 {
+            background-image: none !important;
+            background-color: var(--forest) !important;
+        }
+        .hover\:text-indigo-600:hover { color: var(--forest-deep) !important; }
+        .hover\:bg-indigo-50:hover { background-color: #eaf1ea !important; }
         
         .btn-loading {
             position: relative;
