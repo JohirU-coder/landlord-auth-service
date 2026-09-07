@@ -84,7 +84,8 @@
     "writeFirstReview": "Be the first to write a review",
     "adding": "Adding...",
     "incompleteAddress": "We couldn't determine a full address (city/state/zip) for that location. Try a more specific search.",
-    "addFailed": "Something went wrong adding this property. Please try again."
+    "addFailed": "Something went wrong adding this property. Please try again.",
+    "addFailedNetwork": "Something went wrong adding this property. If you try again and it says the property already exists, don't worry — it went through the first time."
   },
   "messages": {
     "searchPrompt": "Search for a property to get started",

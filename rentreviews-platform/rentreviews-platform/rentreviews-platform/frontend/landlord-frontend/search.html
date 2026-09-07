@@ -2351,10 +2351,26 @@
                     })
                 });
 
-                const data = await response.json();
+                // A rate-limit response or a gateway-level failure (e.g. a slow
+                // geocode lookup upstream timing out) can come back as plain
+                // text/HTML rather than JSON -- .json() would throw and land in
+                // the catch below, so parse defensively instead of assuming
+                // the body is always well-formed JSON.
+                let data = null;
+                try {
+                    data = await response.json();
+                } catch {
+                    // leave data null -- handled by the !data check below
+                }
 
-                if (!response.ok || !data.success) {
-                    alert(t('search:addressPreview.addFailed'));
+                if (!response.ok || !data || !data.success) {
+                    // Surface the server's actual reason (e.g. "Maximum 10
+                    // property submissions per hour") instead of a generic
+                    // message -- the same generic alert for every failure
+                    // mode made a real cause (rate limit, validation, etc.)
+                    // look identical to a transient glitch.
+                    const reason = data?.message || data?.error;
+                    alert(reason ? `${t('search:addressPreview.addFailed')} (${reason})` : t('search:addressPreview.addFailed'));
                     resetButton();
                     return;
                 }
@@ -2371,7 +2387,12 @@
                 window.location.href = `./write-review.html?property=${propertyData}`;
             } catch (error) {
                 console.error('Error adding community property:', error);
-                alert(t('search:addressPreview.addFailed'));
+                // A network-level failure here (dropped connection, request
+                // timed out) doesn't necessarily mean nothing happened --
+                // property-service can still finish creating the property
+                // server-side after the client gives up. Tell the user to
+                // check before assuming it needs to be redone from scratch.
+                alert(t('search:addressPreview.addFailedNetwork'));
                 resetButton();
             }
         }
