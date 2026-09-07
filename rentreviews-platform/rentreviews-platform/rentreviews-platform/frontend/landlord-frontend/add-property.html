@@ -6,7 +6,7 @@
     <title>Add Property - RentReviews</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Multi-language font support -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -25,84 +25,125 @@
     <script src="./session-guard.js"></script>
 
     <style>
-        body { font-family: 'Inter', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif; }
-        
+        :root {
+            --ink: #2b362f;
+            --paper: #f7f7f0;
+            --paper-raised: #ffffff;
+            --forest: #4f8a5b;
+            --forest-deep: #3d6e48;
+            --brass: #d1a13e;
+            --stone-line: #e3e0d3;
+            --text-muted: #5c6259;
+        }
+
+        body { font-family: 'Public Sans', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif; }
+        h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.01em; }
+
+        /* Palette repaint -- same technique as search.html */
+        body.bg-gradient-to-br.from-gray-50.via-blue-50.to-indigo-50 {
+            background-image: none !important;
+            background-color: var(--paper) !important;
+        }
+        .from-indigo-600.to-purple-600,
+        .from-indigo-600.via-purple-600.to-pink-600 {
+            background-image: none !important;
+            background-color: var(--forest) !important;
+        }
+        .bg-indigo-600 { background-color: var(--forest) !important; }
+        .hover\:bg-indigo-700:hover { background-color: var(--forest-deep) !important; }
+        .text-indigo-600 { color: var(--forest) !important; }
+        .hover\:text-indigo-600:hover, .hover\:text-indigo-800:hover { color: var(--forest-deep) !important; }
+        .hover\:bg-indigo-50:hover, .bg-indigo-50, .to-indigo-50 { background-color: #eaf1ea !important; }
+        .text-indigo-100 { color: #dcece0 !important; }
+        .focus\:ring-indigo-500:focus { --tw-ring-color: var(--forest) !important; }
+        .focus\:border-indigo-500:focus { border-color: var(--forest) !important; }
+
+        .text-gray-900, .text-gray-700 { color: var(--ink) !important; }
+        .text-gray-600, .text-gray-500 { color: var(--text-muted) !important; }
+        .text-gray-400 { color: #9c9684 !important; }
+        .border-gray-300, .border-gray-200 { border-color: var(--stone-line) !important; }
+        .bg-gray-50, .bg-gray-200, .hover\:bg-gray-300:hover, .hover\:bg-gray-200:hover, .hover\:bg-gray-50:hover { background-color: var(--paper) !important; }
+        .bg-gray-900 { background-color: var(--ink) !important; }
+        .border-gray-800 { border-color: #40473e !important; }
+
+        .rounded-2xl, .rounded-xl, .rounded-lg { border-radius: 3px !important; }
+        .shadow-sm, .shadow-xl { box-shadow: none !important; }
+
         .step-indicator {
             transition: all 0.3s ease;
         }
-        
+
         .step-indicator.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--forest);
             color: white;
             transform: scale(1.1);
         }
-        
+
         .step-indicator.completed {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: #059669;
             color: white;
         }
-        
+
         .form-section {
-            background: white;
-            border-radius: 16px;
+            background: var(--paper-raised);
+            border-radius: 3px;
             padding: 32px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--stone-line);
             margin-bottom: 24px;
         }
-        
+
         .property-type-card {
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
+            border: 2px solid var(--stone-line);
+            border-radius: 3px;
             padding: 20px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .property-type-card:hover {
-            border-color: #6366f1;
+            border-color: var(--forest);
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
         }
-        
+
         .property-type-card.selected {
-            border-color: #6366f1;
-            background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+            border-color: var(--forest);
+            background: #eaf1ea;
             transform: translateY(-2px);
         }
-        
+
         .photo-upload-zone {
-            border: 2px dashed #d1d5db;
-            border-radius: 12px;
+            border: 2px dashed var(--stone-line);
+            border-radius: 3px;
             padding: 40px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: #fafafa;
+            background: var(--paper);
         }
-        
+
         .photo-upload-zone:hover {
-            border-color: #6366f1;
-            background: #f8faff;
+            border-color: var(--forest);
+            background: #eef4ee;
         }
-        
+
         .photo-upload-zone.dragover {
-            border-color: #6366f1;
-            background: #f0f4ff;
+            border-color: var(--forest);
+            background: #eaf1ea;
             transform: scale(1.02);
         }
-        
+
         .photo-preview {
             width: 120px;
             height: 120px;
             object-fit: cover;
-            border-radius: 8px;
-            border: 2px solid #e5e7eb;
+            border-radius: 3px;
+            border: 2px solid var(--stone-line);
             cursor: pointer;
         }
-        
+
         .photo-preview:hover {
-            border-color: #6366f1;
+            border-color: var(--forest);
         }
         
         .step-container {

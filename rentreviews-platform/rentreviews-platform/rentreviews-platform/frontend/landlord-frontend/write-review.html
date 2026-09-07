@@ -6,7 +6,7 @@
     <title>Write a Review - RentReviews</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Multi-language font support -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -25,30 +25,75 @@
     <script src="./session-guard.js"></script>
 
     <style>
-        body { font-family: 'Inter', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif; }
-        
+        :root {
+            --ink: #2b362f;
+            --paper: #f7f7f0;
+            --paper-raised: #ffffff;
+            --forest: #4f8a5b;
+            --forest-deep: #3d6e48;
+            --brass: #d1a13e;
+            --stone-line: #e3e0d3;
+            --text-muted: #5c6259;
+        }
+
+        body { font-family: 'Public Sans', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif; }
+        h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.01em; }
+
+        /* Palette repaint -- same technique as search.html */
+        body.bg-gradient-to-br.from-gray-50.via-blue-50.to-indigo-50 {
+            background-image: none !important;
+            background-color: var(--paper) !important;
+        }
+        .from-indigo-600.to-purple-600,
+        .from-indigo-600.via-purple-600.to-pink-600 {
+            background-image: none !important;
+            background-color: var(--forest) !important;
+        }
+        .hover\:from-indigo-700:hover, .hover\:to-purple-700:hover {
+            background-image: none !important;
+            background-color: var(--forest-deep) !important;
+        }
+        .text-indigo-600 { color: var(--forest) !important; }
+        .hover\:text-indigo-600:hover, .hover\:text-indigo-800:hover { color: var(--forest-deep) !important; }
+        .hover\:bg-indigo-50:hover, .bg-indigo-50, .to-indigo-50 { background-color: #eaf1ea !important; }
+        .text-indigo-100, .text-indigo-200 { color: #dcece0 !important; }
+        .border-indigo-400 { border-color: var(--forest) !important; }
+        .focus\:ring-indigo-500:focus { --tw-ring-color: var(--forest) !important; }
+        .focus\:border-indigo-500:focus { border-color: var(--forest) !important; }
+
+        .text-gray-900, .text-gray-700 { color: var(--ink) !important; }
+        .text-gray-600, .text-gray-500 { color: var(--text-muted) !important; }
+        .text-gray-400 { color: #9c9684 !important; }
+        .border-gray-300, .border-gray-200 { border-color: var(--stone-line) !important; }
+        .bg-gray-50, .bg-gray-100, .hover\:bg-gray-200:hover, .hover\:bg-gray-50:hover { background-color: var(--paper) !important; }
+        .bg-gray-900 { background-color: var(--ink) !important; }
+        .border-gray-800 { border-color: #40473e !important; }
+
+        .rounded-2xl, .rounded-xl, .rounded-lg { border-radius: 3px !important; }
+        .shadow-sm, .shadow-lg, .shadow-xl { box-shadow: none !important; }
+
         .rating-stars {
             display: flex;
             gap: 4px;
         }
-        
+
         .star {
             font-size: 1.5rem;
-            color: #d1d5db;
+            color: var(--stone-line);
             cursor: pointer;
             transition: color 0.2s ease;
         }
-        
+
         .star:hover,
         .star.active {
-            color: #fbbf24;
+            color: var(--brass);
         }
-        
+
         .form-section {
-            background: white;
-            border-radius: 12px;
+            background: var(--paper-raised);
+            border-radius: 3px;
             padding: 24px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--stone-line);
             margin-bottom: 24px;
         }
 
