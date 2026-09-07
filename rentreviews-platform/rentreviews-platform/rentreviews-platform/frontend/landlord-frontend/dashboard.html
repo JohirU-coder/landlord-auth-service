@@ -703,12 +703,18 @@
                     });
                 }
                 
-                // Write Review button  
+                // Write Review button -- sends the user through search.html to
+                // find/select the property first rather than straight to a
+                // blank write-review.html. write-review.html can only submit
+                // against a real property_id: pre-filled from a search result
+                // it works, but typed in from scratch here it has to fuzzy-match
+                // an existing address and fails with "Property not found" for
+                // any property that isn't already an exact-ish match in our DB.
                 const writeReviewBtn = document.getElementById('writeReviewBtn');
                 if (writeReviewBtn) {
                     writeReviewBtn.addEventListener('click', () => {
                         console.log('✏️ Write Review clicked!');
-                        window.location.href = './write-review.html';
+                        window.location.href = './search.html';
                     });
                 }
                 

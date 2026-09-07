@@ -1214,11 +1214,11 @@
                 unverified: isCommunitySubmitted || undefined
             }));
 
-            if (isCommunitySubmitted) {
-                showUnverifiedReviewWarning(propertyData);
-            } else {
-                window.location.href = `./write-review.html?property=${propertyData}`;
-            }
+            // The unverified-property notice is shown inline on write-review.html
+            // itself (the property is community-submitted, not landlord-listed)
+            // rather than as a confirmation gate here -- it's context the writer
+            // should see, not a decision they need to make before proceeding.
+            window.location.href = `./write-review.html?property=${propertyData}`;
         }
 
         function syncLoadMoreVisibility() {
@@ -1776,7 +1776,7 @@
                                 ${reviewData.reviewCount > 0 ?
                                     `<div class="flex items-center">
                                         <span class="text-yellow-300">${'★'.repeat(Math.round(reviewData.averageRating))}${'☆'.repeat(5 - Math.round(reviewData.averageRating))}</span>
-                                        <span class="ml-2">${reviewData.averageRating.toFixed(1)} (${reviewData.reviewCount} ${reviewData.reviewCount === 1 ? t('search:propertyCard.reviews', {count: reviewData.reviewCount}) : t('search:propertyCard.reviews_plural', {count: reviewData.reviewCount})})</span>
+                                        <span class="ml-2">${reviewData.averageRating.toFixed(1)} (${reviewData.reviewCount === 1 ? t('search:propertyCard.reviews', {count: reviewData.reviewCount}) : t('search:propertyCard.reviews_plural', {count: reviewData.reviewCount})})</span>
                                     </div>` :
                                     `<span class="text-indigo-200">${t('search:propertyDetails.noReviews')}</span>`
                                 }
@@ -1865,32 +1865,18 @@
                         <!-- Action Buttons -->
                         <div class="flex flex-col gap-3">
                             <div class="flex gap-3">
-                                ${isCommunitySubmitted ? `
-                                    <button class="flex-1 bg-yellow-600 text-white py-3 rounded-lg font-semibold hover:bg-yellow-700 transition-colors"
-                                            onclick="showUnverifiedReviewWarning('${encodeURIComponent(JSON.stringify({
-                                                id: property.id,
-                                                address: property.address,
-                                                city: property.city,
-                                                state: property.state,
-                                                zip_code: property.zip_code,
-                                                landlord_name: `${property.landlord?.first_name || ''} ${property.landlord?.last_name || ''}`,
-                                                unverified: true
-                                            }))}')">
-                                        ${t('search:propertyDetails.verifyBeforeReviewing')}
-                                    </button>
-                                ` : `
-                                    <button class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
-                                            onclick="window.location.href='./write-review.html?property=${encodeURIComponent(JSON.stringify({
-                                                id: property.id,
-                                                address: property.address,
-                                                city: property.city,
-                                                state: property.state,
-                                                zip_code: property.zip_code,
-                                                landlord_name: `${property.landlord?.first_name || ''} ${property.landlord?.last_name || ''}`
-                                            }))}'">
-                                        ${t('search:propertyDetails.writeReview')}
-                                    </button>
-                                `}
+                                <button class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+                                        onclick="window.location.href='./write-review.html?property=${encodeURIComponent(JSON.stringify({
+                                            id: property.id,
+                                            address: property.address,
+                                            city: property.city,
+                                            state: property.state,
+                                            zip_code: property.zip_code,
+                                            landlord_name: `${property.landlord?.first_name || ''} ${property.landlord?.last_name || ''}`,
+                                            unverified: isCommunitySubmitted || undefined
+                                        }))}'">
+                                    ${t('search:propertyDetails.writeReview')}
+                                </button>
                                 <button class="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
                                         onclick="this.closest('.fixed').remove()">
                                     ${t('search:propertyDetails.close')}
@@ -2011,53 +1997,6 @@
                     ` : ''}
                 </div>
             `;
-        }
-
-        function showUnverifiedReviewWarning(propertyDataEncoded) {
-            const warningModal = document.createElement('div');
-            warningModal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4';
-
-            warningModal.innerHTML = `
-                <div class="bg-white rounded-2xl max-w-md w-full p-6">
-                    <div class="text-center mb-6">
-                        <div class="text-4xl mb-4">⚠️</div>
-                        <h2 class="text-xl font-bold text-gray-900">${t('search:reviewWarning.title')}</h2>
-                        <p class="text-gray-600 mt-2">${t('search:reviewWarning.subtitle')}</p>
-                    </div>
-
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                        <h3 class="font-semibold text-yellow-800 mb-2">${t('search:reviewWarning.beforeReviewingTitle')}</h3>
-                        <div class="text-sm text-yellow-700 space-y-1">
-                            <p>${t('search:reviewWarning.warning1')}</p>
-                            <p>${t('search:reviewWarning.warning2')}</p>
-                            <p>${t('search:reviewWarning.warning3')}</p>
-                            <p>${t('search:reviewWarning.warning4')}</p>
-                        </div>
-                    </div>
-
-                    <div class="text-xs text-gray-500 mb-6">
-                        ${t('search:reviewWarning.confirmationText')}
-                    </div>
-
-                    <div class="flex space-x-3">
-                        <button onclick="this.closest('.fixed').remove()"
-                                class="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300">
-                            ${t('search:reviewWarning.cancel')}
-                        </button>
-                        <button onclick="proceedToReview('${propertyDataEncoded}', this)"
-                                class="flex-1 bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700">
-                            ${t('search:reviewWarning.continue')}
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            document.body.appendChild(warningModal);
-        }
-
-        function proceedToReview(propertyDataEncoded, button) {
-            button.closest('.fixed').remove();
-            window.location.href = `./write-review.html?property=${propertyDataEncoded}`;
         }
 
         function showClaimModal(property) {
@@ -2490,8 +2429,6 @@
         }
 
         // Make functions globally available
-        window.showUnverifiedReviewWarning = showUnverifiedReviewWarning;
-        window.proceedToReview = proceedToReview;
         window.showClaimModal = showClaimModal;
         window.submitPropertyClaim = submitPropertyClaim;
 
