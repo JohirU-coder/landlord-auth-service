@@ -1564,6 +1564,14 @@
             const landlordName = `${property.landlord?.first_name || ''} ${property.landlord?.last_name || 'Unknown'}`.trim();
             template.querySelector('.landlord-name').textContent = landlordName;
             template.querySelector('.landlord-initial').textContent = (property.landlord?.first_name || 'U')[0].toUpperCase();
+            // The "Verified Landlord" label was static in the template and never
+            // actually reflected property.landlord_verified, so every card --
+            // including community-submitted ones with no landlord on record at
+            // all -- claimed a verified landlord. Mirrors the same conditional
+            // already used in the property detail modal.
+            template.querySelector('.landlord-status').textContent = property.landlord_verified
+                ? t('search:propertyCard.verifiedLandlord')
+                : t('search:propertyCard.pendingVerification');
             
             // Get the property card element
             const propertyCard = template.querySelector('.property-card');
@@ -1612,19 +1620,20 @@
                     rateItBtn.textContent = t('search:propertyCard.rateIt');
                     rateItBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        const confirmReview = confirm(t('search:disclaimer.message'));
-                        if (confirmReview) {
-                            const propertyData = encodeURIComponent(JSON.stringify({
-                                id: property.id,
-                                address: property.address,
-                                city: property.city,
-                                state: property.state,
-                                zip_code: property.zip_code,
-                                landlord_name: landlordName,
-                                unverified: true
-                            }));
-                            window.location.href = `./write-review.html?property=${propertyData}`;
-                        }
+                        // No confirm() gate here -- the unverified-property notice
+                        // is already visible on this card (the banner below) and
+                        // again on write-review.html itself, so this is context
+                        // to see, not a decision to make before proceeding.
+                        const propertyData = encodeURIComponent(JSON.stringify({
+                            id: property.id,
+                            address: property.address,
+                            city: property.city,
+                            state: property.state,
+                            zip_code: property.zip_code,
+                            landlord_name: landlordName,
+                            unverified: true
+                        }));
+                        window.location.href = `./write-review.html?property=${propertyData}`;
                     });
                     buttonContainer.appendChild(rateItBtn);
                 } else {
