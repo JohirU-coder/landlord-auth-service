@@ -113,11 +113,18 @@
         }
 
         /* ---------- Signature motion: the one moment on this page ---------- */
+        /* Hangs mostly off the card's corner rather than sitting on top of
+           the text -- real reviews vary in length (this is live data, not a
+           fixed placeholder), and a longer one wrapping to a second or
+           third line was colliding with the stamp when it sat further
+           inward. heroReviewQuote's padding-right below is a second,
+           independent safety margin for the same reason: between the two,
+           no review length can push text under the stamp. */
         .stamp {
             position: absolute;
-            top: -16px;
-            right: 20px;
-            width: 84px; height: 84px;
+            top: -20px;
+            right: -16px;
+            width: 74px; height: 74px;
             color: var(--brick);
             transform: rotate(-8deg);
             animation: stamp-in .6s cubic-bezier(.2,1.5,.4,1) .2s both;
@@ -277,7 +284,7 @@
                             <text x="50" y="86" text-anchor="middle" font-family="Public Sans, sans-serif" font-size="8.5" font-weight="700" fill="currentColor" stroke="none" letter-spacing="1.5">RENTER</text>
                         </svg>
                     </div>
-                    <p class="font-display font-medium mb-5" id="heroReviewQuote" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink)">
+                    <p class="font-display font-medium mb-5" id="heroReviewQuote" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink); padding-right: 64px">
                         Loading a recent review…
                     </p>
                     <div class="flex items-center justify-between pt-4" style="border-top: 1px solid var(--stone-line)">
