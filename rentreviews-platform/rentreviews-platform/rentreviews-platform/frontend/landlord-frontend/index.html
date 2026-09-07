@@ -612,7 +612,7 @@
                 if (!reviewStats?.total_reviews) return; // nothing meaningful to show yet -- leave stats hidden rather than show zeros
 
                 document.getElementById('statReviews').textContent = String(reviewStats.total_reviews);
-                document.getElementById('statCities').textContent = String(propertyStats?.cities_count ?? '—');
+                document.getElementById('statCities').textContent = String(propertyStats?.geographic_coverage?.cities ?? '—');
                 document.getElementById('statVerified').textContent = String(reviewStats.verification_rate ?? 0);
                 wrap.classList.remove('hidden');
                 wrap.style.display = 'flex';
