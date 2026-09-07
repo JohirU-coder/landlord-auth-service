@@ -136,9 +136,9 @@
             top: -20px;
             right: -16px;
             width: 74px; height: 74px;
-            color: var(--brick);
             transform: rotate(-8deg);
             animation: stamp-in .6s cubic-bezier(.2,1.5,.4,1) .2s both;
+            filter: drop-shadow(0 3px 8px rgba(43, 54, 47, 0.18));
         }
         @keyframes stamp-in {
             0%   { opacity: 0; transform: rotate(-8deg) scale(2); }
@@ -286,16 +286,17 @@
                      back to a representative quote if the fetch fails or returns
                      nothing, so the hero is never empty. -->
                 <div class="relative card" id="heroReviewCard" style="max-width: 480px; margin: 0 auto;">
-                    <!-- A clean checkmark seal, no lettering -- small curved
-                         text at this size read as cramped and illegible
-                         rather than official, so the "verified" idea is
-                         carried by the double ring + checkmark alone, the
-                         same convention as most verified badges. -->
+                    <!-- A solid checkmark seal, no lettering -- the same
+                         "filled circle + white check" convention as most
+                         real verified badges (Instagram, X, LinkedIn),
+                         which reads as more polished than a thin outline
+                         ring, and stays legible at small sizes without
+                         needing readable text at all. -->
                     <div class="stamp" aria-hidden="true">
                         <svg viewBox="0 0 100 100" fill="none">
-                            <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="4"/>
-                            <circle cx="50" cy="50" r="36" stroke="currentColor" stroke-width="1.5" opacity="0.45"/>
-                            <path d="M32 51.5l12.5 12.5L70 37" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="50" cy="50" r="45" fill="var(--forest)"/>
+                            <circle cx="50" cy="50" r="45" stroke="var(--forest-deep)" stroke-width="1.5"/>
+                            <path d="M32 51.5l12.5 12.5L70 37" stroke="var(--paper-raised)" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
                     <p class="font-display font-medium mb-5" id="heroReviewQuote" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink); padding-right: 64px">
