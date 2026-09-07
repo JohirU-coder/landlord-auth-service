@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RentReviews - Smart Rental Decisions</title>
+    <title>RentReviews - Ask The Neighbors First</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -14,68 +14,146 @@
 
     <!-- i18n Configuration -->
     <script src="./i18n/i18n-config.js"></script>
+    <script src="./config.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap');
 
-        /* Multi-language font support */
+        /* Multi-language font support -- Public Sans covers Latin script;
+           these remain the fallback chain for non-Latin scripts. */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700&display=swap');
 
+        /* -- Design tokens --
+           Light-mode only, matching the rest of the (currently light-only)
+           site -- this is a production redesign, not a Claude Artifact, so
+           there's no forced dual-theme requirement here.
+           ink/paper/forest/brass/brick/stone -- see the approved concept. */
+        :root {
+            --ink: #2b362f;
+            --paper: #f7f7f0;
+            --paper-raised: #ffffff;
+            --forest: #4f8a5b;
+            --forest-deep: #3d6e48;
+            --brass: #d1a13e;
+            --brick: #c15b3f;
+            --brick-deep: #a84832;
+            --stone: #9c9684;
+            --stone-line: #e3e0d3;
+            --text-muted: #5c6259;
+        }
+
         body {
-            font-family: 'Inter', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali',
+            font-family: 'Public Sans', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali',
                          'Noto Sans Devanagari', sans-serif;
+            background: var(--paper);
+            color: var(--ink);
         }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+
+        .font-display {
+            font-family: 'Fraunces', serif;
         }
-        
-        .hover-scale {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+        h1, h2, h3 {
+            text-wrap: balance;
         }
-        
-        .hover-scale:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+
+        /* Buttons -- flat, no gradients, one filled + two outline treatments */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 14px 26px;
+            transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+            white-space: nowrap;
         }
-        
-        .counter {
-            font-variant-numeric: tabular-nums;
+        .btn-primary {
+            background: var(--forest);
+            color: var(--paper-raised);
+            border: 1px solid var(--forest);
         }
-        
-        .stat-animation {
-            animation: countUp 2s ease-out;
+        .btn-primary:hover { background: var(--forest-deep); border-color: var(--forest-deep); }
+        .btn-outline {
+            background: transparent;
+            color: var(--ink);
+            border: 1px solid var(--stone-line);
         }
-        
-        @keyframes countUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .btn-outline:hover { border-color: var(--ink); }
+        .btn:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+
+        /* Cards -- hairline border, no radius, no soft drop-shadow kit */
+        .card {
+            background: var(--paper-raised);
+            border: 1px solid var(--stone-line);
+            padding: 32px 28px;
         }
+
+        .icon-mark {
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--forest);
+            border: 1px solid var(--stone-line);
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .step-number {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            font-size: 1.4rem;
+            width: 56px; height: 56px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1.5px solid var(--brick);
+            color: var(--brick);
+            margin: 0 auto 24px;
+        }
+
+        /* ---------- Signature motion: the one moment on this page ---------- */
+        .stamp {
+            position: absolute;
+            top: -16px;
+            right: 20px;
+            width: 84px; height: 84px;
+            color: var(--brick);
+            transform: rotate(-8deg);
+            animation: stamp-in .6s cubic-bezier(.2,1.5,.4,1) .2s both;
+        }
+        @keyframes stamp-in {
+            0%   { opacity: 0; transform: rotate(-8deg) scale(2); }
+            55%  { opacity: 1; transform: rotate(-8deg) scale(.94); }
+            100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .stamp { animation: none; opacity: 1; }
+        }
+
+        .nav-scrolled { background: var(--paper-raised) !important; }
     </style>
 </head>
-<body class="bg-gray-50">
+<body>
     <!-- Navigation -->
-    <nav class="fixed w-full z-50 bg-white/95 backdrop-blur-md border-b border-gray-200">
+    <nav class="fixed w-full z-50 border-b" style="background: rgba(247,247,240,.9); backdrop-filter: blur(8px); border-color: var(--stone-line);">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 flex items-center">
-                        <div class="w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
-                            <span class="text-white font-bold text-sm">⭐</span>
-                        </div>
-                        <span class="ml-3 text-xl font-bold text-gray-900">RentReviews</span>
+                        <svg class="w-7 h-7" style="color: var(--forest)" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 1.5l2.6 6.3 6.8.55-5.2 4.5 1.6 6.65L12 15.9l-5.8 3.6 1.6-6.65-5.2-4.5 6.8-.55L12 1.5z"/>
+                        </svg>
+                        <span class="ml-3 text-xl font-display font-semibold" data-i18n="common:brand.name">RentReviews</span>
                     </div>
                 </div>
 
                 <!-- Desktop nav links -->
                 <div class="hidden md:flex items-center ml-10 space-x-8">
-                    <a href="#features" class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors">Features</a>
-                    <a href="#how-it-works" class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors">How It Works</a>
-                    <a href="#about" class="text-gray-700 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition-colors">About</a>
-                    <button onclick="window.location.href='./auth.html'" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors" data-i18n="common:nav.signUp">Sign Up</button>
+                    <a href="#features" class="px-3 py-2 text-sm font-medium transition-colors" style="color: var(--ink)" data-i18n="index:nav.features">Features</a>
+                    <a href="#how-it-works" class="px-3 py-2 text-sm font-medium transition-colors" style="color: var(--ink)" data-i18n="index:nav.howItWorks">How It Works</a>
+                    <a href="#about" class="px-3 py-2 text-sm font-medium transition-colors" style="color: var(--ink)" data-i18n="index:nav.about">About</a>
+                    <button onclick="window.location.href='./auth.html'" class="btn btn-primary" style="padding: 10px 20px; font-size: .9rem" data-i18n="common:nav.signUp">Sign Up</button>
                 </div>
 
                 <!-- Language selector + hamburger — always visible regardless of viewport -->
@@ -83,7 +161,8 @@
                     <!-- Language Selector -->
                     <div class="relative inline-block text-left" id="languageSelector">
                         <button id="languageSelectorBtn"
-                                class="flex items-center space-x-2 text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                                class="flex items-center space-x-2 px-3 py-2 text-sm font-medium transition-colors"
+                                style="color: var(--ink)"
                                 aria-label="Select language">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -96,19 +175,20 @@
                         </button>
 
                         <div id="languageDropdown"
-                             class="hidden absolute right-0 mt-2 w-48 rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 z-50">
+                             class="hidden absolute right-0 mt-2 w-48 shadow-lg"
+                             style="background: var(--paper-raised); border: 1px solid var(--stone-line);">
                             <div class="py-1">
-                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="en">English</button>
-                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="es">Español</button>
-                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="zh">简体中文</button>
-                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="bn">বাংলা</button>
-                                <button class="language-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-600" data-lang="hi">हिन्दी</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm hover:bg-black/5" style="color: var(--ink)" data-lang="en">English</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm hover:bg-black/5" style="color: var(--ink)" data-lang="es">Español</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm hover:bg-black/5" style="color: var(--ink)" data-lang="zh">简体中文</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm hover:bg-black/5" style="color: var(--ink)" data-lang="bn">বাংলা</button>
+                                <button class="language-option w-full text-left px-4 py-2 text-sm hover:bg-black/5" style="color: var(--ink)" data-lang="hi">हिन्दी</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Hamburger toggle — mobile only -->
-                    <button id="mobileMenuBtn" class="md:hidden p-2 text-gray-700 hover:text-indigo-600" aria-label="Open menu" aria-expanded="false">
+                    <button id="mobileMenuBtn" class="md:hidden p-2" style="color: var(--ink)" aria-label="Open menu" aria-expanded="false">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
@@ -118,10 +198,10 @@
 
             <!-- Mobile menu panel -->
             <div id="mobileMenu" class="hidden md:hidden pb-4 space-y-1">
-                <a href="#features" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-indigo-600">Features</a>
-                <a href="#how-it-works" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-indigo-600">How It Works</a>
-                <a href="#about" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-indigo-600">About</a>
-                <button onclick="window.location.href='./auth.html'" class="w-full mt-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors" data-i18n="common:nav.signUp">Sign Up</button>
+                <a href="#features" class="block px-3 py-2 text-base font-medium" style="color: var(--ink)" data-i18n="index:nav.features">Features</a>
+                <a href="#how-it-works" class="block px-3 py-2 text-base font-medium" style="color: var(--ink)" data-i18n="index:nav.howItWorks">How It Works</a>
+                <a href="#about" class="block px-3 py-2 text-base font-medium" style="color: var(--ink)" data-i18n="index:nav.about">About</a>
+                <button onclick="window.location.href='./auth.html'" class="btn btn-primary w-full mt-2" data-i18n="common:nav.signUp">Sign Up</button>
             </div>
         </div>
     </nav>
@@ -144,42 +224,65 @@
         })();
     </script>
 
-    <!-- Hero Section -->
-    <section class="relative gradient-bg pt-20 pb-20 overflow-hidden">
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
-            <div class="text-center">
-                <h1 class="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
-                    <span data-i18n="index:hero.title">Smart Rental</span><br>
-                    <span class="text-yellow-300" data-i18n="index:hero.titleHighlight">Decisions</span>
-                </h1>
-                <p class="text-xl md:text-2xl text-indigo-100 mb-12 max-w-4xl mx-auto leading-relaxed" data-i18n="index:hero.subtitle">
-                    Read verified reviews from real tenants before you sign. Make informed decisions and avoid problem landlords.
-                </p>
-                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-                    <button onclick="window.location.href='./search.html'" class="bg-white text-indigo-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-gray-50 transition-colors hover-scale" data-i18n="index:hero.searchProperties">
-                        🔍 Search Properties
-                    </button>
-                    <button onclick="window.location.href='./auth.html'" class="bg-indigo-800 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-indigo-900 transition-colors border border-indigo-700" data-i18n="index:hero.signUpFree">
-                        📝 Sign Up Free
-                    </button>
-                    <button onclick="window.location.href='./add-property.html'" class="bg-emerald-500 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-emerald-600 transition-colors hover-scale" data-i18n="index:hero.addProperty">
-                        🏠 Add Property
-                    </button>
+    <!-- Hero -->
+    <section class="pt-40 pb-20" style="border-bottom: 1px solid var(--stone-line)">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <h1 class="font-display font-semibold mb-6" style="font-size: clamp(2.4rem, 5vw, 3.75rem); line-height: 1.04; letter-spacing: -0.01em;" data-i18n="index:hero.title">
+                        Ask the neighbors first.
+                    </h1>
+                    <p class="text-lg mb-10 max-w-lg" style="color: var(--text-muted); line-height: 1.6" data-i18n="index:hero.subtitle">
+                        Real reviews from renters who've actually lived there. Search any address in Northern New Jersey before you sign.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-3 mb-10">
+                        <button onclick="window.location.href='./search.html'" class="btn btn-primary" data-i18n="index:hero.searchProperties">
+                            Search properties
+                        </button>
+                        <button onclick="window.location.href='./auth.html'" class="btn btn-outline" data-i18n="index:hero.signUpFree">
+                            Create a free account
+                        </button>
+                        <button onclick="window.location.href='./add-property.html'" class="btn btn-outline" data-i18n="index:hero.addProperty">
+                            List a property
+                        </button>
+                    </div>
+
+                    <!-- Real stats, fetched live -- see loadHeroStats() below -->
+                    <div id="heroStats" class="hidden flex flex-wrap gap-x-10 gap-y-3 pt-8" style="border-top: 1px solid var(--stone-line)">
+                        <div>
+                            <div class="text-2xl font-display font-semibold" id="statReviews" style="color: var(--ink)">—</div>
+                            <div class="text-sm" style="color: var(--text-muted)" data-i18n="index:stats.reviewsCount">Reviews from real renters</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-display font-semibold" id="statCities" style="color: var(--ink)">—</div>
+                            <div class="text-sm" style="color: var(--text-muted)" data-i18n="index:stats.citiesCount">Cities covered</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-display font-semibold" id="statVerified" style="color: var(--ink)">—</div>
+                            <div class="text-sm" style="color: var(--text-muted)" data-i18n="index:stats.verifiedRate">% of reviews verified</div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Stats Counter -->
-                <div class="flex flex-wrap justify-center gap-8 md:gap-16">
-                    <div class="text-center stat-animation">
-                        <div class="text-4xl md:text-5xl font-bold text-white counter" data-target="2">0</div>
-                        <div class="text-indigo-200 text-sm md:text-base" data-i18n="index:stats.propertiesListed">Properties Listed</div>
+                <!-- Real review, fetched live -- see loadHeroReview() below. Falls
+                     back to a representative quote if the fetch fails or returns
+                     nothing, so the hero is never empty. -->
+                <div class="relative card" id="heroReviewCard" style="max-width: 480px; margin: 0 auto;">
+                    <div class="stamp" aria-hidden="true">
+                        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <circle cx="50" cy="50" r="42"/>
+                            <circle cx="50" cy="50" r="35"/>
+                            <path d="M35 51l9 9 20-20" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                            <text x="50" y="22" text-anchor="middle" font-family="Public Sans, sans-serif" font-size="8.5" font-weight="700" fill="currentColor" stroke="none" letter-spacing="1.5">VERIFIED</text>
+                            <text x="50" y="86" text-anchor="middle" font-family="Public Sans, sans-serif" font-size="8.5" font-weight="700" fill="currentColor" stroke="none" letter-spacing="1.5">RENTER</text>
+                        </svg>
                     </div>
-                    <div class="text-center stat-animation">
-                        <div class="text-4xl md:text-5xl font-bold text-white counter" data-target="19">0</div>
-                        <div class="text-indigo-200 text-sm md:text-base" data-i18n="index:stats.activeUsers">Active Users</div>
-                    </div>
-                    <div class="text-center stat-animation">
-                        <div class="text-4xl md:text-5xl font-bold text-white counter" data-target="100">0</div>
-                        <div class="text-indigo-200 text-sm md:text-base" data-i18n="index:stats.verifiedReviews">% Verified Reviews</div>
+                    <p class="font-display font-medium mb-5" id="heroReviewQuote" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink)">
+                        Loading a recent review…
+                    </p>
+                    <div class="flex items-center justify-between pt-4" style="border-top: 1px solid var(--stone-line)">
+                        <span class="text-sm" id="heroReviewWho" style="color: var(--text-muted)">&nbsp;</span>
+                        <span id="heroReviewStars" style="color: var(--brass); letter-spacing: 1px;">&nbsp;</span>
                     </div>
                 </div>
             </div>
@@ -187,161 +290,166 @@
     </section>
 
     <!-- Problem Statement -->
-    <section class="py-20 bg-white">
+    <section class="py-20" style="background: var(--paper-raised); border-bottom: 1px solid var(--stone-line)">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                    <span data-i18n="index:problem.heading">The Problem with</span> <span class="text-red-500" data-i18n="index:problem.headingHighlight">Renting Today</span>
+            <div class="max-w-2xl mb-16">
+                <h2 class="font-display font-semibold mb-5" style="font-size: clamp(1.9rem, 3.4vw, 2.6rem)">
+                    <span data-i18n="index:problem.heading">The Problem with</span> <span data-i18n="index:problem.headingHighlight">Renting Today</span>
                 </h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto" data-i18n="index:problem.subtitle">
+                <p class="text-lg" style="color: var(--text-muted); line-height: 1.6" data-i18n="index:problem.subtitle">
                     Millions of renters sign leases without knowing what they're getting into.
                     It's time for transparency in the rental market.
                 </p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="text-center p-8 rounded-2xl bg-gray-50 hover-scale">
-                    <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-3xl">😰</span>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="card">
+                    <div class="icon-mark">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="9"/>
+                            <path stroke-linecap="round" d="M9.5 9a2.5 2.5 0 013.87-2.1c.86.58 1.13 1.77.6 2.65-.4.66-1.06.98-1.6 1.4-.5.4-.87.9-.87 1.55v.3"/>
+                            <circle cx="12" cy="16.2" r=".6" fill="currentColor" stroke="none"/>
+                        </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4" data-i18n="index:problem.noInfo.title">No Information</h3>
-                    <p class="text-gray-600" data-i18n="index:problem.noInfo.description">Renters have no way to research landlords or property management companies before signing.</p>
+                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:problem.noInfo.title">No Information</h3>
+                    <p style="color: var(--text-muted)" data-i18n="index:problem.noInfo.description">Renters have no way to research landlords or property management companies before signing.</p>
                 </div>
 
-                <div class="text-center p-8 rounded-2xl bg-gray-50 hover-scale">
-                    <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-3xl">💸</span>
+                <div class="card">
+                    <div class="icon-mark">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <rect x="3" y="6" width="18" height="12" rx="1"/>
+                            <circle cx="12" cy="12" r="2.5"/>
+                            <path stroke-linecap="round" d="M3 9h1m16 0h1M3 15h1m16 0h1"/>
+                        </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4" data-i18n="index:problem.expensiveMistakes.title">Expensive Mistakes</h3>
-                    <p class="text-gray-600" data-i18n="index:problem.expensiveMistakes.description">Bad landlords cost tenants thousands in deposits, repairs, and legal fees.</p>
+                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:problem.expensiveMistakes.title">Expensive Mistakes</h3>
+                    <p style="color: var(--text-muted)" data-i18n="index:problem.expensiveMistakes.description">Bad landlords cost tenants thousands in deposits, repairs, and legal fees.</p>
                 </div>
 
-                <div class="text-center p-8 rounded-2xl bg-gray-50 hover-scale">
-                    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-3xl">⚖️</span>
+                <div class="card">
+                    <div class="icon-mark">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/>
+                            <path stroke-linecap="round" d="M12 8v4m0 3h.01"/>
+                        </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4" data-i18n="index:problem.noAccountability.title">No Accountability</h3>
-                    <p class="text-gray-600" data-i18n="index:problem.noAccountability.description">Landlords face no public consequences for poor service or unethical behavior.</p>
+                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:problem.noAccountability.title">No Accountability</h3>
+                    <p style="color: var(--text-muted)" data-i18n="index:problem.noAccountability.description">Landlords face no public consequences for poor service or unethical behavior.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features -->
-    <section id="features" class="py-20 bg-gray-50">
+    <section id="features" class="py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                    <span data-i18n="index:features.heading">Our</span> <span class="text-indigo-600" data-i18n="index:features.headingHighlight">Solution</span>
+            <div class="max-w-2xl mb-16">
+                <h2 class="font-display font-semibold mb-5" style="font-size: clamp(1.9rem, 3.4vw, 2.6rem)">
+                    <span data-i18n="index:features.heading">Our</span> <span data-i18n="index:features.headingHighlight">Solution</span>
                 </h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto" data-i18n="index:features.subtitle">
+                <p class="text-lg" style="color: var(--text-muted); line-height: 1.6" data-i18n="index:features.subtitle">
                     Get the inside scoop on landlords and properties from real tenants who've lived there.
                 </p>
             </div>
 
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <div class="bg-white p-8 rounded-2xl shadow-sm hover-scale border border-gray-100">
-                    <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="card">
+                    <div class="icon-mark">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4" data-i18n="index:features.verifiedReviews.title">Verified Reviews</h3>
-                    <p class="text-gray-600" data-i18n="index:features.verifiedReviews.description">Only real tenants can leave reviews. We verify authenticity to ensure trustworthy feedback.</p>
+                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:features.verifiedReviews.title">Verified Reviews</h3>
+                    <p style="color: var(--text-muted)" data-i18n="index:features.verifiedReviews.description">Only real tenants can leave reviews. We verify authenticity to ensure trustworthy feedback.</p>
                 </div>
 
-                <div class="bg-white p-8 rounded-2xl shadow-sm hover-scale border border-gray-100">
-                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <div class="card">
+                    <div class="icon-mark">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4" data-i18n="index:features.smartSearch.title">Smart Search</h3>
-                    <p class="text-gray-600" data-i18n="index:features.smartSearch.description">Find properties by location, price, and ratings. Filter by specific landlord criteria.</p>
+                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:features.smartSearch.title">Smart Search</h3>
+                    <p style="color: var(--text-muted)" data-i18n="index:features.smartSearch.description">Find properties by location, price, and ratings. Filter by specific landlord criteria.</p>
                 </div>
 
-                <div class="bg-white p-8 rounded-2xl shadow-sm hover-scale border border-gray-100">
-                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <div class="card">
+                    <div class="icon-mark">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4" data-i18n="index:features.detailedRatings.title">Detailed Ratings</h3>
-                    <p class="text-gray-600" data-i18n="index:features.detailedRatings.description">Communication, maintenance, property condition, and value - get the complete picture.</p>
+                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:features.detailedRatings.title">Detailed Ratings</h3>
+                    <p style="color: var(--text-muted)" data-i18n="index:features.detailedRatings.description">Communication, maintenance, property condition, and value - get the complete picture.</p>
                 </div>
 
-                <div class="bg-white p-8 rounded-2xl shadow-sm hover-scale border border-gray-100">
-                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                <div class="card">
+                    <div class="icon-mark">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4" data-i18n="index:features.anonymousReviews.title">Anonymous Reviews</h3>
-                    <p class="text-gray-600" data-i18n="index:features.anonymousReviews.description">Leave honest feedback without fear of retaliation. Your identity stays protected.</p>
+                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:features.anonymousReviews.title">Anonymous Reviews</h3>
+                    <p style="color: var(--text-muted)" data-i18n="index:features.anonymousReviews.description">Leave honest feedback without fear of retaliation. Your identity stays protected.</p>
                 </div>
 
-                <div class="bg-white p-8 rounded-2xl shadow-sm hover-scale border border-gray-100">
-                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                <div class="card">
+                    <div class="icon-mark">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4" data-i18n="index:features.landlordInsights.title">Landlord Insights</h3>
-                    <p class="text-gray-600" data-i18n="index:features.landlordInsights.description">See a landlord's complete track record across all their properties and tenants.</p>
+                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:features.landlordInsights.title">Landlord Insights</h3>
+                    <p style="color: var(--text-muted)" data-i18n="index:features.landlordInsights.description">See a landlord's complete track record across all their properties and tenants.</p>
                 </div>
 
-                <div class="bg-white p-8 rounded-2xl shadow-sm hover-scale border border-gray-100">
-                    <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-6">
-                        <svg class="w-6 h-6 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                <div class="card">
+                    <div class="icon-mark">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-4" data-i18n="index:features.propertyHistory.title">Property History</h3>
-                    <p class="text-gray-600" data-i18n="index:features.propertyHistory.description">Access historical data and trends for any property or landlord.</p>
+                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:features.propertyHistory.title">Property History</h3>
+                    <p style="color: var(--text-muted)" data-i18n="index:features.propertyHistory.description">Access historical data and trends for any property or landlord.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- How It Works -->
-    <section id="how-it-works" class="py-20 bg-white">
+    <section id="how-it-works" class="py-20" style="background: var(--paper-raised); border-top: 1px solid var(--stone-line); border-bottom: 1px solid var(--stone-line)">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                    <span data-i18n="index:howItWorks.heading">How It</span> <span class="text-indigo-600" data-i18n="index:howItWorks.headingHighlight">Works</span>
+            <div class="max-w-2xl mb-16">
+                <h2 class="font-display font-semibold mb-5" style="font-size: clamp(1.9rem, 3.4vw, 2.6rem)">
+                    <span data-i18n="index:howItWorks.heading">How It</span> <span data-i18n="index:howItWorks.headingHighlight">Works</span>
                 </h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto" data-i18n="index:howItWorks.subtitle">
+                <p class="text-lg" style="color: var(--text-muted); line-height: 1.6" data-i18n="index:howItWorks.subtitle">
                     Simple, transparent, and effective. Join renters making smarter decisions.
                 </p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-8">
+            <div class="grid md:grid-cols-3 gap-10">
                 <div class="text-center">
-                    <div class="w-20 h-20 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-2xl font-bold text-white">1</span>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4" data-i18n="index:howItWorks.step1.title">Search Properties</h3>
-                    <p class="text-gray-600 leading-relaxed" data-i18n="index:howItWorks.step1.description">
+                    <div class="step-number">1</div>
+                    <h3 class="text-xl font-semibold mb-3" data-i18n="index:howItWorks.step1.title">Search Properties</h3>
+                    <p style="color: var(--text-muted); line-height: 1.6" data-i18n="index:howItWorks.step1.description">
                         Enter your location, budget, and preferences. Our search reveals properties with their review history.
                     </p>
                 </div>
 
                 <div class="text-center">
-                    <div class="w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-2xl font-bold text-white">2</span>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4" data-i18n="index:howItWorks.step2.title">Read Reviews</h3>
-                    <p class="text-gray-600 leading-relaxed" data-i18n="index:howItWorks.step2.description">
+                    <div class="step-number">2</div>
+                    <h3 class="text-xl font-semibold mb-3" data-i18n="index:howItWorks.step2.title">Read Reviews</h3>
+                    <p style="color: var(--text-muted); line-height: 1.6" data-i18n="index:howItWorks.step2.description">
                         Get detailed insights from verified tenants about communication, maintenance, and overall experience.
                     </p>
                 </div>
 
                 <div class="text-center">
-                    <div class="w-20 h-20 bg-gradient-to-r from-pink-600 to-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <span class="text-2xl font-bold text-white">3</span>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4" data-i18n="index:howItWorks.step3.title">Make Smart Decisions</h3>
-                    <p class="text-gray-600 leading-relaxed" data-i18n="index:howItWorks.step3.description">
+                    <div class="step-number">3</div>
+                    <h3 class="text-xl font-semibold mb-3" data-i18n="index:howItWorks.step3.title">Make Smart Decisions</h3>
+                    <p style="color: var(--text-muted); line-height: 1.6" data-i18n="index:howItWorks.step3.description">
                         Armed with real data from real tenants, confidently choose your next home.
                     </p>
                 </div>
@@ -350,44 +458,44 @@
     </section>
 
     <!-- CTA Section -->
-    <section id="about" class="py-20 gradient-bg">
+    <section id="about" class="py-20" style="background: var(--forest)">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-4xl md:text-5xl font-bold text-white mb-8">
-                <span data-i18n="index:cta.heading">Ready to Rent</span> <span class="text-yellow-300" data-i18n="index:cta.headingHighlight">Smarter</span>?
+            <h2 class="font-display font-semibold mb-6" style="font-size: clamp(2rem, 3.6vw, 2.9rem); color: var(--paper-raised)">
+                <span data-i18n="index:cta.heading">Ready to Rent</span> <span data-i18n="index:cta.headingHighlight">Smarter</span>?
             </h2>
-            <p class="text-xl text-indigo-100 mb-12 max-w-3xl mx-auto" data-i18n="index:cta.subtitle">
+            <p class="text-lg mb-10 max-w-2xl mx-auto" style="color: #dfeee2" data-i18n="index:cta.subtitle">
                 Join our platform and make your next rental decision with confidence. Get instant access to verified reviews from real tenants.
             </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onclick="window.location.href='./auth.html'" class="bg-white text-indigo-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-gray-50 transition-colors hover-scale" data-i18n="index:cta.getStartedFree">
-                    🚀 Get Started Free
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="window.location.href='./auth.html'" class="btn" style="background: var(--paper-raised); color: var(--forest-deep); border: 1px solid var(--paper-raised)" data-i18n="index:cta.getStartedFree">
+                    Get started free
                 </button>
-                <button onclick="window.location.href='./search.html'" class="bg-indigo-800 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-indigo-900 transition-colors border border-indigo-700" data-i18n="index:cta.browseProperties">
-                    🔍 Browse Properties
+                <button onclick="window.location.href='./search.html'" class="btn" style="background: transparent; color: var(--paper-raised); border: 1px solid #ffffff66" data-i18n="index:cta.browseProperties">
+                    Browse properties
                 </button>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-16">
+    <footer class="py-16" style="background: var(--ink); color: #d9d5c8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid md:grid-cols-4 gap-8">
                 <div>
                     <div class="flex items-center mb-6">
-                        <div class="w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
-                            <span class="text-white font-bold text-sm">⭐</span>
-                        </div>
-                        <span class="ml-3 text-xl font-bold" data-i18n="common:brand.name">RentReviews</span>
+                        <svg class="w-7 h-7" style="color: var(--brass)" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 1.5l2.6 6.3 6.8.55-5.2 4.5 1.6 6.65L12 15.9l-5.8 3.6 1.6-6.65-5.2-4.5 6.8-.55L12 1.5z"/>
+                        </svg>
+                        <span class="ml-3 text-xl font-display font-semibold" style="color: #f4f2e9" data-i18n="common:brand.name">RentReviews</span>
                     </div>
-                    <p class="text-gray-400 mb-6" data-i18n="index:footer.tagline">
+                    <p class="mb-6" data-i18n="index:footer.tagline">
                         Making renting transparent, one review at a time.
                     </p>
                 </div>
 
                 <div>
-                    <h3 class="text-lg font-semibold mb-4" data-i18n="index:footer.forRenters">For Renters</h3>
-                    <ul class="space-y-2 text-gray-400">
+                    <h3 class="text-sm font-semibold mb-4 tracking-wide" style="color: #f4f2e9" data-i18n="index:footer.forRenters">For Renters</h3>
+                    <ul class="space-y-2">
                         <li><a href="./search.html" class="hover:text-white transition-colors" data-i18n="index:footer.searchProperties">Search Properties</a></li>
                         <li><a href="./auth.html" class="hover:text-white transition-colors" data-i18n="index:footer.leaveReviews">Leave Reviews</a></li>
                         <li><a href="./search.html" class="hover:text-white transition-colors" data-i18n="index:footer.browseReviews">Browse Reviews</a></li>
@@ -395,8 +503,8 @@
                 </div>
 
                 <div>
-                    <h3 class="text-lg font-semibold mb-4" data-i18n="index:footer.forLandlords">For Landlords</h3>
-                    <ul class="space-y-2 text-gray-400">
+                    <h3 class="text-sm font-semibold mb-4 tracking-wide" style="color: #f4f2e9" data-i18n="index:footer.forLandlords">For Landlords</h3>
+                    <ul class="space-y-2">
                         <li><a href="./add-property.html" class="hover:text-white transition-colors" data-i18n="index:footer.addProperty">Add Property</a></li>
                         <li><a href="./auth.html" class="hover:text-white transition-colors" data-i18n="index:footer.claimProperties">Claim Properties</a></li>
                         <li><a href="./auth.html" class="hover:text-white transition-colors" data-i18n="index:footer.respondToReviews">Respond to Reviews</a></li>
@@ -405,8 +513,8 @@
                 </div>
 
                 <div>
-                    <h3 class="text-lg font-semibold mb-4" data-i18n="index:footer.support">Legal &amp; Support</h3>
-                    <ul class="space-y-2 text-gray-400">
+                    <h3 class="text-sm font-semibold mb-4 tracking-wide" style="color: #f4f2e9" data-i18n="index:footer.support">Legal &amp; Support</h3>
+                    <ul class="space-y-2">
                         <li><a href="./privacy.html" class="hover:text-white transition-colors" data-i18n="index:footer.privacyPolicy">Privacy Policy</a></li>
                         <li><a href="./terms.html" class="hover:text-white transition-colors" data-i18n="index:footer.termsOfService">Terms of Service</a></li>
                         <li><a href="./property-submission-guidelines.html" class="hover:text-white transition-colors">Submission Guidelines</a></li>
@@ -416,34 +524,13 @@
                 </div>
             </div>
 
-            <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
-                <p data-i18n="index:footer.copyright">&copy; 2025 RentReviews. All rights reserved.</p>
+            <div class="mt-12 pt-8 text-center" style="border-top: 1px solid #40473e">
+                <p data-i18n="index:footer.copyright">&copy; 2026 RentReviews. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Counter Animation
-        function animateCounters() {
-            const counters = document.querySelectorAll('.counter');
-            
-            counters.forEach(counter => {
-                const target = parseInt(counter.getAttribute('data-target'));
-                const duration = 2000;
-                const increment = target / (duration / 16);
-                let current = 0;
-                
-                const timer = setInterval(() => {
-                    current += increment;
-                    if (current >= target) {
-                        current = target;
-                        clearInterval(timer);
-                    }
-                    counter.textContent = Math.floor(current);
-                }, 16);
-            });
-        }
-
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -458,22 +545,81 @@
             });
         });
 
-        // Trigger counter animation when page loads
-        window.addEventListener('load', () => {
-            setTimeout(animateCounters, 500);
-        });
-
-        // Add scroll effect to navbar
+        // Nav becomes fully opaque on scroll (functional -- keeps link text
+        // readable over whatever content is behind it -- not decorative).
         window.addEventListener('scroll', () => {
             const nav = document.querySelector('nav');
-            if (window.scrollY > 50) {
-                nav.classList.add('bg-white/98');
-                nav.classList.remove('bg-white/95');
-            } else {
-                nav.classList.add('bg-white/95');
-                nav.classList.remove('bg-white/98');
-            }
+            nav.classList.toggle('nav-scrolled', window.scrollY > 50);
         });
+
+        // ---------- Real content for the hero: live review + live stats ----------
+        // No lorem, no invented numbers -- this app has real users and real
+        // reviews now, so the homepage should show them instead of the
+        // hardcoded "2 Properties / 19 Active Users" placeholders it used to.
+        const PROPERTY_API_BASE_URL = (window.APP_CONFIG && window.APP_CONFIG.PROPERTY_API_BASE_URL) || 'http://localhost:3002';
+        const REVIEW_API_BASE_URL = (window.APP_CONFIG && window.APP_CONFIG.REVIEW_API_BASE_URL) || 'http://localhost:3003';
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        async function loadHeroReview() {
+            const quoteEl = document.getElementById('heroReviewQuote');
+            const whoEl = document.getElementById('heroReviewWho');
+            const starsEl = document.getElementById('heroReviewStars');
+
+            try {
+                const res = await fetch(`${REVIEW_API_BASE_URL}/reviews?sort_by=rating_high&limit=3`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const review = (data.reviews || []).find(r => r.review_text && r.review_text.length > 0);
+                if (!review) throw new Error('no reviews yet');
+
+                const text = review.review_text.length > 220
+                    ? review.review_text.slice(0, 217).trim() + '…'
+                    : review.review_text;
+                const who = review.anonymous || !review.reviewer
+                    ? t('index:hero.fallbackReviewer')
+                    : `${review.reviewer.first_name || ''} ${(review.reviewer.last_name || '')[0] || ''}.`.trim();
+                const location = [review.property?.city, review.property?.state].filter(Boolean).join(', ');
+                const rating = review.ratings?.overall || 0;
+
+                quoteEl.textContent = `“${text}”`;
+                whoEl.textContent = location ? `${who} · ${location}` : who;
+                starsEl.textContent = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+            } catch (error) {
+                console.warn('Falling back to representative review text:', error);
+                quoteEl.textContent = `“${t('index:hero.fallbackQuote')}”`;
+                whoEl.textContent = t('index:hero.fallbackReviewer');
+                starsEl.textContent = '★★★★★';
+            }
+        }
+
+        async function loadHeroStats() {
+            const wrap = document.getElementById('heroStats');
+            try {
+                const [reviewStatsRes, propertyStatsRes] = await Promise.all([
+                    fetch(`${REVIEW_API_BASE_URL}/reviews/stats`),
+                    fetch(`${PROPERTY_API_BASE_URL}/properties/stats`)
+                ]);
+                if (!reviewStatsRes.ok || !propertyStatsRes.ok) throw new Error('stats request failed');
+
+                const reviewStats = (await reviewStatsRes.json()).statistics;
+                const propertyStats = (await propertyStatsRes.json()).statistics;
+
+                if (!reviewStats?.total_reviews) return; // nothing meaningful to show yet -- leave stats hidden rather than show zeros
+
+                document.getElementById('statReviews').textContent = String(reviewStats.total_reviews);
+                document.getElementById('statCities').textContent = String(propertyStats?.cities_count ?? '—');
+                document.getElementById('statVerified').textContent = String(reviewStats.verification_rate ?? 0);
+                wrap.classList.remove('hidden');
+                wrap.style.display = 'flex';
+            } catch (error) {
+                console.warn('Hero stats unavailable, leaving them hidden:', error);
+            }
+        }
     </script>
 
     <!-- i18n Initialization -->
@@ -492,6 +638,11 @@
                 console.error('❌ i18n initialization failed:', error);
                 // Fallback to English (existing hardcoded content)
             }
+
+            // Independent of i18n -- real content should load either way,
+            // using the fallback strings' English text if i18n itself failed.
+            loadHeroReview();
+            loadHeroStats();
         });
     </script>
 </body>

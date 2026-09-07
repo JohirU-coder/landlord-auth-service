@@ -1,16 +1,22 @@
 {
+  "nav": {
+    "features": "Features",
+    "howItWorks": "How It Works",
+    "about": "About"
+  },
   "hero": {
-    "title": "Smart Rental",
-    "titleHighlight": "Decisions",
-    "subtitle": "Read verified reviews from real tenants before you sign. Make informed decisions and avoid problem landlords.",
-    "searchProperties": "🔍 Search Properties",
-    "signUpFree": "📝 Sign Up Free",
-    "addProperty": "🏠 Add Property"
+    "title": "Ask the neighbors first.",
+    "subtitle": "Real reviews from renters who've actually lived there. Search any address in Northern New Jersey before you sign.",
+    "searchProperties": "Search properties",
+    "signUpFree": "Create a free account",
+    "addProperty": "List a property",
+    "fallbackQuote": "The landlord fixed our heat within a day, every time we called. Wish I'd known that before signing our last lease.",
+    "fallbackReviewer": "A verified renter"
   },
   "stats": {
-    "propertiesListed": "Properties Listed",
-    "activeUsers": "Active Users",
-    "verifiedReviews": "% Verified Reviews"
+    "reviewsCount": "Reviews from real renters",
+    "citiesCount": "Cities covered",
+    "verifiedRate": "% of reviews verified"
   },
   "problem": {
     "heading": "The Problem with",
@@ -79,8 +85,8 @@
     "heading": "Ready to Rent",
     "headingHighlight": "Smarter",
     "subtitle": "Join our platform and make your next rental decision with confidence. Get instant access to verified reviews from real tenants.",
-    "getStartedFree": "🚀 Get Started Free",
-    "browseProperties": "🔍 Browse Properties"
+    "getStartedFree": "Get started free",
+    "browseProperties": "Browse properties"
   },
   "footer": {
     "tagline": "Making renting transparent, one review at a time.",
