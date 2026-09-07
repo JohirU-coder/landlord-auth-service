@@ -466,8 +466,8 @@
         });
 
         function checkAuthentication() {
-            const token = sessionStorage.getItem('rentreviews_token');
-            const user = JSON.parse(sessionStorage.getItem('rentreviews_user') || '{}');
+            const token = localStorage.getItem('rentreviews_token');
+            const user = JSON.parse(localStorage.getItem('rentreviews_user') || '{}');
 
             if (!token) {
                 alert(t('verifyLandlord:validation.loginRequired'));
@@ -770,8 +770,8 @@
         }
 
         function logout() {
-            sessionStorage.removeItem('rentreviews_token');
-            sessionStorage.removeItem('rentreviews_user');
+            localStorage.removeItem('rentreviews_token');
+            localStorage.removeItem('rentreviews_user');
             window.location.href = './auth.html';
         }
 

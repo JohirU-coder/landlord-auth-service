@@ -513,25 +513,25 @@
             static USER_KEY = 'rentreviews_user';
             
             static setToken(token) {
-                sessionStorage.setItem(this.TOKEN_KEY, token);
+                localStorage.setItem(this.TOKEN_KEY, token);
             }
 
             static getToken() {
-                return sessionStorage.getItem(this.TOKEN_KEY);
+                return localStorage.getItem(this.TOKEN_KEY);
             }
 
             static setUser(user) {
-                sessionStorage.setItem(this.USER_KEY, JSON.stringify(user));
+                localStorage.setItem(this.USER_KEY, JSON.stringify(user));
             }
 
             static getUser() {
-                const user = sessionStorage.getItem(this.USER_KEY);
+                const user = localStorage.getItem(this.USER_KEY);
                 return user ? JSON.parse(user) : null;
             }
 
             static clearAuth() {
-                sessionStorage.removeItem(this.TOKEN_KEY);
-                sessionStorage.removeItem(this.USER_KEY);
+                localStorage.removeItem(this.TOKEN_KEY);
+                localStorage.removeItem(this.USER_KEY);
             }
             
             static isAuthenticated() {

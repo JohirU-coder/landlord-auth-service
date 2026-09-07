@@ -398,7 +398,12 @@
 
             async init() {
                 console.log('🏠 Dashboard initializing...');
-                await this.loadUserData();
+                const sessionValid = await this.loadUserData();
+                // A redirect to auth.html is already underway -- stop here
+                // rather than revealing the dashboard shell (0 reviews, empty
+                // Recent Activity) for the moment before navigation actually
+                // completes, which reads exactly like "my review is missing".
+                if (!sessionValid) return;
                 this.setupEventListeners();
                 this.hideLoadingOverlay();
                 // Independent of profile loading -- reviews are their own
@@ -410,25 +415,25 @@
             async loadUserData() {
                 try {
                     // Get token from localStorage
-                    this.token = sessionStorage.getItem('rentreviews_token');
-                    
+                    this.token = localStorage.getItem('rentreviews_token');
+
                     if (!this.token) {
                         console.warn('⚠️ No authentication token found');
                         this.redirectToAuth();
-                        return;
+                        return false;
                     }
 
                     // Check if token is still valid
                     if (!this.isTokenValid(this.token)) {
                         console.warn('⚠️ Token expired');
                         this.redirectToAuth();
-                        return;
+                        return false;
                     }
 
                     console.log('✅ Valid token found, fetching profile...');
 
                     // Try to get cached user data first
-                    const cachedUser = sessionStorage.getItem('rentreviews_user');
+                    const cachedUser = localStorage.getItem('rentreviews_user');
                     if (cachedUser) {
                         this.user = JSON.parse(cachedUser);
                         console.log('📱 Using cached user data:', this.user);
@@ -437,10 +442,12 @@
 
                     // Always fetch fresh profile data from API
                     await this.fetchProfileData();
+                    return true;
 
                 } catch (error) {
                     console.error('⚠️ Error loading user data:', error);
                     this.redirectToAuth();
+                    return false;
                 }
             }
 
@@ -475,7 +482,7 @@
                             
                             // Update stored user data
                             this.user = userData;
-                            sessionStorage.setItem('rentreviews_user', JSON.stringify(userData));
+                            localStorage.setItem('rentreviews_user', JSON.stringify(userData));
                             
                             // Update UI with fresh data
                             this.updateUI();
@@ -518,7 +525,7 @@
                 const countEl = document.getElementById('reviewsWrittenCount');
 
                 try {
-                    const token = sessionStorage.getItem('rentreviews_token');
+                    const token = localStorage.getItem('rentreviews_token');
                     if (!token) return; // loadUserData() already handles the no-token/redirect case
 
                     const response = await fetch(`${this.REVIEW_API_BASE_URL}/reviews/my-reviews?limit=10`, {
@@ -771,8 +778,8 @@
                     console.log('👋 Logging out...');
                     
                     // Clear all authentication data
-                    sessionStorage.removeItem('rentreviews_token');
-                    sessionStorage.removeItem('rentreviews_user');
+                    localStorage.removeItem('rentreviews_token');
+                    localStorage.removeItem('rentreviews_user');
                     localStorage.removeItem('token'); // Clear old format too
                     localStorage.removeItem('user'); // Clear old format too
                     
@@ -792,15 +799,15 @@
                 // not whether the account still exists, so leaving a stale
                 // token behind sends the user straight back here, straight
                 // back to auth.html, forever.
-                sessionStorage.removeItem('rentreviews_token');
-                sessionStorage.removeItem('rentreviews_user');
+                localStorage.removeItem('rentreviews_token');
+                localStorage.removeItem('rentreviews_user');
                 window.location.href = './auth.html';
             }
         }
 
         // Email verification banner
         document.addEventListener('DOMContentLoaded', () => {
-            const token = sessionStorage.getItem('rentreviews_token');
+            const token = localStorage.getItem('rentreviews_token');
             if (token) {
                 try {
                     const payload = JSON.parse(atob(token.split('.')[1]));
@@ -823,7 +830,7 @@
                     // token) -- an unverified account can no longer obtain a
                     // session token in the first place, since login is
                     // blocked until verified.
-                    const user = JSON.parse(sessionStorage.getItem('rentreviews_user') || '{}');
+                    const user = JSON.parse(localStorage.getItem('rentreviews_user') || '{}');
                     const res = await fetch(`${API_BASE_URL}/resend-verification`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },

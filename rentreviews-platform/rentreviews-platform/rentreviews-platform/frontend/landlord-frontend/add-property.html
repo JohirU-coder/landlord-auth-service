@@ -658,8 +658,8 @@
         }
 
         function checkAuthentication() {
-            const token = sessionStorage.getItem('rentreviews_token');
-            const user = JSON.parse(sessionStorage.getItem('rentreviews_user') || '{}');
+            const token = localStorage.getItem('rentreviews_token');
+            const user = JSON.parse(localStorage.getItem('rentreviews_user') || '{}');
 
             if (!token) {
                 alert(t('addProperty:validation.authRequired'));
@@ -948,7 +948,7 @@
             submitBtn.disabled = true;
 
             try {
-                const token = sessionStorage.getItem('rentreviews_token');
+                const token = localStorage.getItem('rentreviews_token');
 
                 if (!token) {
                     alert(t('addProperty:validation.authenticationFailed'));
@@ -996,8 +996,8 @@
                         // anymore, so leaving it in localStorage would send
                         // auth.html's "already logged in" check straight
                         // back here.
-                        sessionStorage.removeItem('rentreviews_token');
-                        sessionStorage.removeItem('rentreviews_user');
+                        localStorage.removeItem('rentreviews_token');
+                        localStorage.removeItem('rentreviews_user');
                         setTimeout(() => {
                             window.location.href = './auth.html';
                         }, 2000);
@@ -1081,8 +1081,8 @@
         }
 
         function logout() {
-            sessionStorage.removeItem('rentreviews_token');
-            sessionStorage.removeItem('rentreviews_user');
+            localStorage.removeItem('rentreviews_token');
+            localStorage.removeItem('rentreviews_user');
             window.location.href = './auth.html';
         }
 
