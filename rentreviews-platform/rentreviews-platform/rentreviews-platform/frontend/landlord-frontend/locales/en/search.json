@@ -29,7 +29,7 @@
     "twoBr": "2 BR",
     "threeBr": "3 BR",
     "fourPlusBr": "4+ BR",
-    "searchButton": "🔍 Search Properties",
+    "searchButton": "Search properties",
     "nearMe": "Near Me",
     "locating": "Locating…",
     "nearYou": "Near you",
@@ -50,8 +50,8 @@
     "sortPriceHigh": "Price: High to Low",
     "sortRating": "Highest Rated",
     "loadMore": "Load More Properties",
-    "listView": "📋 List",
-    "mapView": "🗺️ Map",
+    "listView": "List",
+    "mapView": "Map",
     "mapCoverageNote": "{{count}} properties don't have a map location yet and aren't shown as pins."
   },
   "propertyCard": {

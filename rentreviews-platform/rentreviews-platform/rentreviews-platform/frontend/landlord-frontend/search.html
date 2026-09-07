@@ -6,7 +6,7 @@
     <title>Search Properties - RentReviews</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Multi-language font support -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -32,54 +32,134 @@
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
     <style>
-        body { font-family: 'Inter', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif; }
-        
-        .property-card {
-            transition: all 0.3s ease;
-            border: 1px solid #e5e7eb;
+        /* -- Design tokens -- same palette approved for the homepage.
+           Light-mode only, matching the rest of this (currently light-only) site. */
+        :root {
+            --ink: #2b362f;
+            --paper: #f7f7f0;
+            --paper-raised: #ffffff;
+            --forest: #4f8a5b;
+            --forest-deep: #3d6e48;
+            --brass: #d1a13e;
+            --brick: #c15b3f;
+            --brick-deep: #a84832;
+            --stone: #9c9684;
+            --stone-line: #e3e0d3;
+            --text-muted: #5c6259;
         }
-        
+
+        body { font-family: 'Public Sans', 'Noto Sans', 'Noto Sans SC', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif; }
+
+        h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.01em; }
+
+        /* ===== Palette repaint =====
+           This file has hundreds of Tailwind utility-class usages built up
+           over the whole project. Rather than rewrite every element's class
+           list (risking the ones JS actually queries by class --
+           .property-card, .rating-stars, .review-count, .price-badge,
+           .card-360-btn, .suggestion-item, etc. -- all of which stay exactly
+           as they are), the existing indigo/purple/gray Tailwind classes are
+           retargeted here to the approved palette. !important is required:
+           Tailwind's CDN build injects its own generated utility CSS, and
+           without it the cascade order between that injected stylesheet and
+           this one isn't guaranteed. */
+        body.bg-gradient-to-br.from-gray-50.via-blue-50.to-indigo-50 {
+            background-image: none !important;
+            background-color: var(--paper) !important;
+        }
+        .from-indigo-600.to-purple-600,
+        .from-indigo-600.via-purple-600.to-pink-600 {
+            background-image: none !important;
+            background-color: var(--forest) !important;
+        }
+        .hover\:from-indigo-700:hover,
+        .hover\:to-purple-700:hover {
+            background-image: none !important;
+            background-color: var(--forest-deep) !important;
+        }
+        /* "No photo yet" placeholders (property card image, address-preview
+           card) -- a distinct muted sage rather than the brand's primary
+           forest, so it reads as a neutral empty state, not a branded button */
+        .from-blue-500.to-purple-600 {
+            background-image: none !important;
+            background-color: #adb99f !important;
+        }
+
+        .bg-indigo-600, .bg-indigo-500 { background-color: var(--forest) !important; }
+        .hover\:bg-indigo-700:hover, .hover\:bg-indigo-600:hover { background-color: var(--forest-deep) !important; }
+        .text-indigo-600, .text-indigo-700, .text-indigo-500 { color: var(--forest) !important; }
+        .hover\:text-indigo-600:hover, .hover\:text-indigo-800:hover { color: var(--forest-deep) !important; }
+        .border-indigo-600, .border-indigo-300 { border-color: var(--forest) !important; }
+        .bg-indigo-50 { background-color: #eaf1ea !important; }
+        .hover\:bg-indigo-50:hover { background-color: #eaf1ea !important; }
+        .text-indigo-100, .text-indigo-200 { color: #dcece0 !important; }
+        .focus\:ring-indigo-500:focus { --tw-ring-color: var(--forest) !important; }
+
+        .text-gray-900, .text-gray-800, .text-gray-700 { color: var(--ink) !important; }
+        .text-gray-600, .text-gray-500 { color: var(--text-muted) !important; }
+        .text-gray-400, .text-gray-300 { color: var(--stone) !important; }
+        .border-gray-300, .border-gray-200, .border-gray-100 { border-color: var(--stone-line) !important; }
+        .bg-gray-50, .bg-gray-100 { background-color: var(--paper) !important; }
+        .bg-gray-200 { background-color: var(--stone-line) !important; }
+        .hover\:bg-gray-50:hover { background-color: var(--paper) !important; }
+        .hover\:bg-gray-200:hover, .hover\:bg-gray-300:hover { background-color: var(--stone-line) !important; }
+        .hover\:text-gray-700:hover { color: var(--ink) !important; }
+        .bg-gray-900 { background-color: var(--ink) !important; }
+        .border-gray-800 { border-color: #40473e !important; }
+
+        /* Flatten the rounded-card kit toward the hairline-border aesthetic.
+           rounded-full is left alone on purpose -- avatars, pills, and
+           toggle-group ends are a different shape language than "soft card
+           corners" and reads as more considered, not less, when the two
+           don't match. */
+        .rounded-2xl, .rounded-xl, .rounded-lg, .rounded-md, .rounded-t-2xl { border-radius: 3px !important; }
+        .shadow-sm, .shadow-lg, .shadow-xl, .shadow-2xl { box-shadow: none !important; }
+
+        .property-card {
+            transition: border-color 0.2s ease, transform 0.2s ease;
+            border: 1px solid var(--stone-line) !important;
+        }
+
         .property-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border-color: #6366f1;
+            border-color: var(--forest) !important;
         }
-        
+
         .filter-section {
             backdrop-filter: blur(10px);
             background: rgba(255, 255, 255, 0.95);
         }
-        
+
         .search-input:focus {
             outline: none;
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            border-color: var(--forest) !important;
+            box-shadow: 0 0 0 3px rgba(79, 138, 91, 0.15);
         }
-        
+
         .price-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--brick);
         }
-        
+
         .rating-stars {
-            color: #fbbf24;
+            color: var(--brass) !important;
         }
-        
+
         .loading-skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background: linear-gradient(90deg, var(--paper) 25%, var(--stone-line) 50%, var(--paper) 75%);
             background-size: 200% 100%;
             animation: loading 1.5s infinite;
         }
-        
+
         @keyframes loading {
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
-        
+
         .filter-tag {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: all 0.2s ease;
+            background: var(--forest);
+            transition: transform 0.2s ease;
         }
-        
+
         .filter-tag:hover {
             transform: scale(1.05);
         }
@@ -87,7 +167,7 @@
         #propertyMap {
             height: 400px;
             width: 100%;
-            border-radius: 1rem;
+            border-radius: 3px;
             z-index: 0;
         }
 
@@ -98,17 +178,17 @@
         }
 
         .view-toggle-btn {
-            transition: all 0.2s ease;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
 
         .view-toggle-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--forest);
             color: white;
         }
 
         .map-popup .price-line {
             font-weight: 700;
-            color: #4f46e5;
+            color: var(--forest-deep);
         }
 
         .map-popup button {
@@ -116,7 +196,7 @@
         }
 
         .leaflet-popup-content-wrapper {
-            border-radius: 0.75rem;
+            border-radius: 3px;
         }
     </style>
 </head>
@@ -131,7 +211,7 @@
                         <div class="bg-gradient-to-r from-indigo-600 to-purple-600 w-8 h-8 rounded-lg flex items-center justify-center">
                             <span class="text-white font-bold text-sm">⭐</span>
                         </div>
-                        <span class="ml-3 text-xl font-bold text-gray-900">RentReviews</span>
+                        <span class="ml-3 text-xl font-bold text-gray-900" style="font-family: 'Fraunces', serif">RentReviews</span>
                     </a>
                 </div>
                 <div class="flex items-center space-x-2">
@@ -265,14 +345,14 @@
                                 class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg"
                                 data-i18n="search:searchForm.searchButton"
                             >
-                                🔍 Search Properties
+                                Search Properties
                             </button>
                             <button
                                 id="nearMeBtn"
                                 type="button"
                                 class="bg-white border-2 border-indigo-600 text-indigo-600 px-6 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition-all shadow-lg"
                             >
-                                📍 <span id="nearMeBtnLabel" data-i18n="search:searchForm.nearMe">Near Me</span>
+                                <span id="nearMeBtnLabel" data-i18n="search:searchForm.nearMe">Near Me</span>
                             </button>
                         </div>
                     </div>
@@ -305,10 +385,10 @@
                 <!-- List / Map toggle -->
                 <div class="flex rounded-lg border border-gray-300 overflow-hidden">
                     <button id="listViewBtn" class="view-toggle-btn active px-4 py-2 text-sm font-medium" data-i18n="search:results.listView">
-                        📋 List
+                        List
                     </button>
                     <button id="mapViewBtn" class="view-toggle-btn px-4 py-2 text-sm font-medium bg-white text-gray-700" data-i18n="search:results.mapView">
-                        🗺️ Map
+                        Map
                     </button>
                 </div>
                 <div class="flex items-center gap-2">
