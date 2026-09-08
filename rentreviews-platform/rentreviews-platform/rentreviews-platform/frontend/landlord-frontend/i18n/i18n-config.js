@@ -186,6 +186,15 @@ function updateLanguageSelectorUI(lang) {
         currentLanguageName.textContent = I18N_CONFIG.languageNames[lang];
     }
 
+    // The trigger button's aria-label ("Select language") didn't include its
+    // own visible text (the language name), which Lighthouse/axe flag as a
+    // label/name mismatch -- screen readers and voice control need the
+    // accessible name to contain what's visibly printed on the control.
+    const languageSelectorBtn = document.getElementById('languageSelectorBtn');
+    if (languageSelectorBtn) {
+        languageSelectorBtn.setAttribute('aria-label', `Select language, current: ${I18N_CONFIG.languageNames[lang]}`);
+    }
+
     // Update checkmarks (if implemented)
     document.querySelectorAll('.language-check').forEach(check => {
         check.classList.add('hidden');

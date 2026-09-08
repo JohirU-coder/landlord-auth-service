@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RentReviews - Ask The Neighbors First</title>
+    <meta name="description" content="Real reviews from renters who've actually lived there. Search any address in Northern New Jersey and see what tenants say about the landlord, maintenance, and property condition before you sign.">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -37,6 +38,7 @@
             --paper-raised: #ffffff;
             --forest: #4f8a5b;
             --forest-deep: #3d6e48;
+            --forest-deeper: #305839;
             --brass: #d1a13e;
             --brick: #c15b3f;
             --brick-deep: #a84832;
@@ -71,12 +73,15 @@
             transition: background-color .15s ease, color .15s ease, border-color .15s ease;
             white-space: nowrap;
         }
+        /* forest-deep, not forest, as the fill: white text on plain --forest
+           measures 4.1:1, just under WCAG AA's 4.5:1 for normal-weight text
+           (confirmed with Lighthouse) -- forest-deep clears it at 5.96:1. */
         .btn-primary {
-            background: var(--forest);
+            background: var(--forest-deep);
             color: var(--paper-raised);
-            border: 1px solid var(--forest);
+            border: 1px solid var(--forest-deep);
         }
-        .btn-primary:hover { background: var(--forest-deep); border-color: var(--forest-deep); }
+        .btn-primary:hover { background: var(--forest-deeper); border-color: var(--forest-deeper); }
         .btn-outline {
             background: transparent;
             color: var(--ink);
@@ -167,17 +172,63 @@
             .hero-review-viewport { transition: none; }
             .hero-slide--anim { transition: none; }
         }
+        /* The dot itself stays a small 6px mark visually -- the button's own
+           box is the real 24x24 touch target (Lighthouse flagged the old
+           6-8px clickable area directly), with the dot centered inside via
+           a pseudo-element so hit area and visual size are independent. */
         .hero-dot {
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            background: var(--stone-line);
+            width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
+            background: transparent;
             border: none;
             padding: 0;
             cursor: pointer;
+        }
+        .hero-dot::after {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--stone-line);
             transition: background-color .2s ease, transform .2s ease;
         }
-        .hero-dot:hover { background: var(--stone); }
-        .hero-dot.active { background: var(--forest); transform: scale(1.3); }
+        .hero-dot:hover::after { background: var(--stone); }
+        .hero-dot.active::after { background: var(--forest); transform: scale(1.3); }
+
+        /* Applied when the verification stat is hidden (rate is 0) so the
+           remaining two stats don't leave a blank third grid column. */
+        #heroStats.stats-two-up { grid-template-columns: repeat(2, 1fr); }
+
+        /* ---------- Scroll reveal -- one restrained system, used everywhere
+           below the fold, rather than a different flourish per section. Each
+           section heading/paragraph block gets .reveal; each card grid gets
+           .reveal-group so its children stagger in together. Everything
+           above the fold (the hero) is excluded on purpose -- content
+           visible on load should never wait on JS to become visible. ---------- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity .5s cubic-bezier(.2,.6,.2,1), transform .5s cubic-bezier(.2,.6,.2,1);
+        }
+        .reveal.is-visible { opacity: 1; transform: none; }
+        .reveal-group > * {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity .5s cubic-bezier(.2,.6,.2,1), transform .5s cubic-bezier(.2,.6,.2,1);
+        }
+        .reveal-group.is-visible > * { opacity: 1; transform: none; }
+        .reveal-group > *:nth-child(1) { transition-delay: 0ms; }
+        .reveal-group > *:nth-child(2) { transition-delay: 70ms; }
+        .reveal-group > *:nth-child(3) { transition-delay: 140ms; }
+        .reveal-group > *:nth-child(4) { transition-delay: 210ms; }
+        .reveal-group > *:nth-child(5) { transition-delay: 280ms; }
+        .reveal-group > *:nth-child(6) { transition-delay: 350ms; }
+        @media (prefers-reduced-motion: reduce) {
+            .reveal, .reveal-group > * {
+                opacity: 1 !important;
+                transform: none !important;
+                transition: none !important;
+            }
+        }
 
         /* width:100% (not just max-width) is load-bearing: this is a CSS
            Grid item, and once both slides go position:absolute mid-transition
@@ -303,8 +354,29 @@
                 link.addEventListener('click', () => menu.classList.add('hidden'));
             });
         })();
+
+        // Scroll reveal -- reveals each .reveal/.reveal-group once as it
+        // enters the viewport, then stops watching it (a section shouldn't
+        // re-hide and replay every time someone scrolls past it again).
+        // Skipped entirely under reduced-motion: the CSS media query above
+        // already shows everything at full opacity with no transition, so
+        // there's nothing for an observer to do.
+        (() => {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const targets = document.querySelectorAll('.reveal, .reveal-group');
+            if (!('IntersectionObserver' in window) || targets.length === 0) return;
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    entry.target.classList.add('is-visible');
+                    io.unobserve(entry.target);
+                });
+            }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+            targets.forEach(t => io.observe(t));
+        })();
     </script>
 
+    <main>
     <!-- Hero -->
     <section class="pt-40 pb-20" style="border-bottom: 1px solid var(--stone-line)">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -328,8 +400,12 @@
                         </button>
                     </div>
 
-                    <!-- Real stats, fetched live -- see loadHeroStats() below -->
-                    <div id="heroStats" class="hidden flex flex-wrap gap-x-10 gap-y-3 pt-8" style="border-top: 1px solid var(--stone-line)">
+                    <!-- Real stats, fetched live -- see loadHeroStats() below.
+                         grid, not flex-wrap: a wrapping flex row put "Cities"
+                         and "Verified" on an orphaned line by themselves at
+                         narrow widths -- three even columns hold their
+                         position at every width instead. -->
+                    <div id="heroStats" class="hidden grid grid-cols-3 gap-x-4 gap-y-3 pt-8" style="border-top: 1px solid var(--stone-line)">
                         <div>
                             <div class="text-2xl font-display font-semibold" id="statReviews" style="color: var(--ink)">—</div>
                             <div class="text-sm" style="color: var(--text-muted)" data-i18n="index:stats.reviewsCount">Reviews from real renters</div>
@@ -338,7 +414,7 @@
                             <div class="text-2xl font-display font-semibold" id="statCities" style="color: var(--ink)">—</div>
                             <div class="text-sm" style="color: var(--text-muted)" data-i18n="index:stats.citiesCount">Cities covered</div>
                         </div>
-                        <div>
+                        <div id="statVerifiedWrap">
                             <div class="text-2xl font-display font-semibold" id="statVerified" style="color: var(--ink)">—</div>
                             <div class="text-sm" style="color: var(--text-muted)" data-i18n="index:stats.verifiedRate">% of reviews verified</div>
                         </div>
@@ -391,7 +467,7 @@
     <!-- Problem Statement -->
     <section class="py-20" style="background: var(--paper-raised); border-bottom: 1px solid var(--stone-line)">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="max-w-2xl mb-16">
+            <div class="max-w-2xl mb-16 reveal">
                 <h2 class="font-display font-semibold mb-5" style="font-size: clamp(1.9rem, 3.4vw, 2.6rem)">
                     <span data-i18n="index:problem.heading">The Problem with</span> <span data-i18n="index:problem.headingHighlight">Renting Today</span>
                 </h2>
@@ -401,7 +477,7 @@
                 </p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-6">
+            <div class="grid md:grid-cols-3 gap-6 reveal-group">
                 <div class="card card--brick">
                     <div class="icon-mark icon-mark--brick">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -443,7 +519,7 @@
     <!-- Features -->
     <section id="features" class="py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="max-w-2xl mb-16">
+            <div class="max-w-2xl mb-16 reveal">
                 <h2 class="font-display font-semibold mb-5" style="font-size: clamp(1.9rem, 3.4vw, 2.6rem)">
                     <span data-i18n="index:features.heading">Our</span> <span data-i18n="index:features.headingHighlight">Solution</span>
                 </h2>
@@ -452,7 +528,7 @@
                 </p>
             </div>
 
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 reveal-group">
                 <div class="card card--forest">
                     <div class="icon-mark icon-mark--forest">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -519,7 +595,7 @@
     <!-- How It Works -->
     <section id="how-it-works" class="py-20" style="background: var(--paper-raised); border-top: 1px solid var(--stone-line); border-bottom: 1px solid var(--stone-line)">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="max-w-2xl mb-16">
+            <div class="max-w-2xl mb-16 reveal">
                 <h2 class="font-display font-semibold mb-5" style="font-size: clamp(1.9rem, 3.4vw, 2.6rem)">
                     <span data-i18n="index:howItWorks.heading">How It</span> <span data-i18n="index:howItWorks.headingHighlight">Works</span>
                 </h2>
@@ -528,7 +604,7 @@
                 </p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-10">
+            <div class="grid md:grid-cols-3 gap-10 reveal-group">
                 <div class="text-center">
                     <div class="step-number">1</div>
                     <h3 class="text-xl font-semibold mb-3" data-i18n="index:howItWorks.step1.title">Search Properties</h3>
@@ -557,8 +633,8 @@
     </section>
 
     <!-- CTA Section -->
-    <section id="about" class="py-20" style="background: var(--forest)">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <section id="about" class="py-20" style="background: var(--forest-deep)">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center reveal">
             <h2 class="font-display font-semibold mb-6" style="font-size: clamp(2rem, 3.6vw, 2.9rem); color: var(--paper-raised)">
                 <span data-i18n="index:cta.heading">Ready to Rent</span> <span data-i18n="index:cta.headingHighlight">Smarter</span>?
             </h2>
@@ -575,6 +651,7 @@
             </div>
         </div>
     </section>
+    </main>
 
     <!-- Footer -->
     <footer class="py-16" style="background: var(--ink); color: #d9d5c8">
@@ -875,9 +952,23 @@
 
                 document.getElementById('statReviews').textContent = String(reviewStats.total_reviews);
                 document.getElementById('statCities').textContent = String(propertyStats?.geographic_coverage?.cities ?? '—');
-                document.getElementById('statVerified').textContent = String(reviewStats.verification_rate ?? 0);
+
+                // A live "0% of reviews verified" actively undercuts the
+                // "Verified Reviews" pledge made two sections down, rather
+                // than just being an unimpressive number -- drop the stat
+                // entirely until it's real, instead of touting a zero.
+                const verifiedWrap = document.getElementById('statVerifiedWrap');
+                if (reviewStats.verification_rate) {
+                    document.getElementById('statVerified').textContent = String(reviewStats.verification_rate);
+                    verifiedWrap.classList.remove('hidden');
+                    wrap.classList.remove('stats-two-up');
+                } else {
+                    verifiedWrap.classList.add('hidden');
+                    wrap.classList.add('stats-two-up');
+                }
+
                 wrap.classList.remove('hidden');
-                wrap.style.display = 'flex';
+                wrap.style.display = 'grid';
             } catch (error) {
                 console.warn('Hero stats unavailable, leaving them hidden:', error);
             }
