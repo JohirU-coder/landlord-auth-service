@@ -9,6 +9,11 @@
     "greeting": "Welcome back, {{name}}!",
     "subtitle": "Here's what's happening with your rental search"
   },
+  "hero": {
+    "fallbackQuote": "The landlord fixed our heat within a day, every time we called. Wish I'd known that before signing our last lease.",
+    "fallbackReviewer": "A verified renter",
+    "reviewNumber": "Review {{number}}"
+  },
   "stats": {
     "reviewsWritten": "Reviews Written",
     "reviewsHint": "Help other renters by sharing your experience",
