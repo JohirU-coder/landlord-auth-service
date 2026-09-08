@@ -90,6 +90,75 @@
         .btn-outline:hover { border-color: var(--ink); }
         .btn:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
 
+        /* The hero's actual primary action -- a real search bar, not a
+           button that leads to one. Sharp corners, no pill shape, matching
+           every other surface on the page. */
+        .hero-search-bar {
+            display: flex;
+            align-items: stretch;
+            background: var(--paper-raised);
+            border: 1.5px solid var(--stone-line);
+            transition: border-color .15s ease, box-shadow .15s ease;
+        }
+        .hero-search-bar:focus-within {
+            border-color: var(--forest);
+            box-shadow: 0 0 0 3px rgba(79, 138, 91, .15);
+        }
+        .hero-search-icon {
+            display: flex; align-items: center; justify-content: center;
+            padding-left: 16px;
+            color: var(--stone);
+            flex-shrink: 0;
+        }
+        .hero-search-input {
+            flex: 1; min-width: 0;
+            border: none;
+            background: transparent;
+            padding: 17px 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            color: var(--ink);
+        }
+        .hero-search-input:focus { outline: none; }
+        .hero-search-input::placeholder { color: var(--stone); }
+        .hero-search-submit {
+            flex-shrink: 0;
+            padding: 0 24px;
+            background: var(--forest-deep);
+            color: var(--paper-raised);
+            border: none;
+            font-weight: 600;
+            font-size: .95rem;
+            cursor: pointer;
+            transition: background-color .15s ease, opacity .15s ease;
+            white-space: nowrap;
+        }
+        .hero-search-submit:hover { background: var(--forest-deeper); }
+        .hero-search-submit:disabled { opacity: .65; cursor: default; }
+        .hero-search-submit:focus-visible { outline: 2px solid var(--brass); outline-offset: -2px; }
+        @media (max-width: 480px) {
+            .hero-search-bar { flex-wrap: wrap; }
+            .hero-search-input { flex-basis: 100%; padding-left: 10px; }
+            .hero-search-submit { flex: 1 0 100%; padding: 14px; }
+        }
+
+        /* Secondary hero actions -- deliberately lighter than the search bar
+           (plain underlined links, not buttons) so there's exactly one
+           dominant action instead of three competing ones. */
+        .hero-secondary-link {
+            background: none; border: none; padding: 0; cursor: pointer;
+            font-family: inherit;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: .9rem;
+            text-decoration: underline;
+            text-decoration-color: var(--stone-line);
+            text-underline-offset: 3px;
+            transition: color .15s ease, text-decoration-color .15s ease;
+        }
+        .hero-secondary-link:hover { color: var(--forest-deep); text-decoration-color: var(--forest-deep); }
+        .hero-secondary-link:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+
         /* Cards -- hairline border, no radius, no soft drop-shadow kit. A
            3px top accent (set per-card via the color modifiers below) ties
            the card to its icon instead of every card being an identical
@@ -374,6 +443,35 @@
             }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
             targets.forEach(t => io.observe(t));
         })();
+
+        // Hero search -- a real search, handed straight to search.html
+        // (which reads ?location= on load, see below), not just a button
+        // that opens a blank search page.
+        (() => {
+            const form = document.getElementById('heroSearchForm');
+            if (!form) return;
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const input = document.getElementById('heroSearchInput');
+                const btn = document.getElementById('heroSearchSubmit');
+                const label = document.getElementById('heroSearchSubmitLabel');
+                const value = input.value.trim();
+
+                input.disabled = true;
+                btn.disabled = true;
+                label.textContent = (window.i18next && i18next.isInitialized) ? t('index:hero.searching') : 'Searching…';
+
+                // A brief, deliberate pause before navigating -- an instant
+                // redirect would make the disabled/loading state above
+                // invisible, and the real search page does its own
+                // (slower) network fetch right after this anyway.
+                setTimeout(() => {
+                    window.location.href = value
+                        ? `./search.html?location=${encodeURIComponent(value)}`
+                        : './search.html';
+                }, 150);
+            });
+        })();
     </script>
 
     <main>
@@ -388,14 +486,29 @@
                     <p class="text-lg mb-10 max-w-lg" style="color: var(--text-muted); line-height: 1.6" data-i18n="index:hero.subtitle">
                         Real reviews from renters who've actually lived there. Search any address in Northern New Jersey before you sign.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-3 mb-10">
-                        <button onclick="window.location.href='./search.html'" class="btn btn-primary" data-i18n="index:hero.searchProperties">
-                            Search properties
+                    <!-- The primary action is a real search, not a button that
+                         leads to one -- typing here and hitting enter goes
+                         straight to real results on search.html, the same
+                         way it would from the search page itself. -->
+                    <form id="heroSearchForm" class="hero-search-bar mb-4" role="search" aria-label="Search properties by address or city">
+                        <span class="hero-search-icon" aria-hidden="true">
+                            <svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <circle cx="11" cy="11" r="7"/>
+                                <path stroke-linecap="round" d="M21 21l-4.3-4.3"/>
+                            </svg>
+                        </span>
+                        <input type="text" id="heroSearchInput" class="hero-search-input"
+                               data-i18n-placeholder="index:hero.searchPlaceholder" placeholder="Enter an address, city, or ZIP…"
+                               autocomplete="off" aria-label="Address, city, or ZIP code">
+                        <button type="submit" class="hero-search-submit" id="heroSearchSubmit">
+                            <span id="heroSearchSubmitLabel" data-i18n="index:hero.searchAction">Search</span>
                         </button>
-                        <button onclick="window.location.href='./auth.html'" class="btn btn-outline" data-i18n="index:hero.signUpFree">
+                    </form>
+                    <div class="flex flex-wrap gap-x-6 gap-y-1 mb-10">
+                        <button onclick="window.location.href='./auth.html'" class="hero-secondary-link" data-i18n="index:hero.signUpFree">
                             Create a free account
                         </button>
-                        <button onclick="window.location.href='./add-property.html'" class="btn btn-outline" data-i18n="index:hero.addProperty">
+                        <button onclick="window.location.href='./add-property.html'" class="hero-secondary-link" data-i18n="index:hero.addProperty">
                             List a property
                         </button>
                     </div>

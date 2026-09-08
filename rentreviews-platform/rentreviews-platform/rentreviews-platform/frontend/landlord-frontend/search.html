@@ -2469,8 +2469,18 @@
                 // Update HTML lang attribute
                 updateHtmlLangAttribute(i18next.language);
 
-                // Now that t() actually works, show the initial search prompt
-                showSearchPrompt();
+                // The homepage hero's search bar hands off here as
+                // ?location=... instead of opening a blank search page --
+                // run that search immediately if present, same as if the
+                // user had typed it and hit enter on this page directly.
+                const heroLocation = new URLSearchParams(window.location.search).get('location');
+                if (heroLocation) {
+                    document.getElementById('locationSearch').value = heroLocation;
+                    handleSearch();
+                } else {
+                    // Now that t() actually works, show the initial search prompt
+                    showSearchPrompt();
+                }
 
                 console.log('i18n initialized successfully for search page');
             } catch (error) {
