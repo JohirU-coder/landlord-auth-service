@@ -365,29 +365,54 @@
            actual width, which sent review text down to a couple of pixels
            wide and ballooned its height into a wall of wrapped text. */
         .hero-review-wrap { position: relative; width: 100%; }
+        /* Glassy/frosted, not a solid paper-colored disc -- a translucent
+           fill plus backdrop-blur so whatever's behind the button (the page
+           background, the card edge) softly shows through, with a bright
+           hairline border standing in for the usual "glass" highlight edge.
+           Pushed further out from the card than before per request ("more
+           spaced out"), with its own narrower-viewport step so it still
+           can't cause the same edge-of-viewport overflow the stamp badge
+           did (see .stamp above). */
         .hero-nav-btn {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 34px; height: 34px;
+            width: 40px; height: 40px;
             border-radius: 50%;
-            background: var(--paper-raised);
-            border: 1px solid var(--stone-line);
+            background: rgba(255, 255, 255, .35);
+            backdrop-filter: blur(10px) saturate(160%);
+            -webkit-backdrop-filter: blur(10px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, .6);
             color: var(--ink);
-            font-size: 1rem;
+            font-size: 1.15rem;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
             z-index: 2;
-            box-shadow: 0 2px 8px rgba(43,54,47,.15);
-            transition: background-color .15s ease, color .15s ease, transform .15s ease;
+            box-shadow: 0 6px 20px rgba(43, 54, 47, .14);
+            transition: background-color .15s ease, box-shadow .15s ease, transform .15s ease;
         }
-        .hero-nav-btn:hover { background: var(--forest); color: var(--paper-raised); border-color: var(--forest); }
-        .hero-nav-btn:active { transform: translateY(-50%) scale(.9); }
-        .hero-nav-btn--prev { left: -17px; }
-        .hero-nav-btn--next { right: -17px; }
-        @media (max-width: 560px) {
-            .hero-nav-btn--prev { left: -6px; }
-            .hero-nav-btn--next { right: -6px; }
+        .hero-nav-btn:hover {
+            background: rgba(255, 255, 255, .55);
+            box-shadow: 0 8px 24px rgba(43, 54, 47, .2);
+        }
+        .hero-nav-btn:active { transform: translateY(-50%) scale(.92); }
+        .hero-nav-btn--prev { left: -52px; }
+        .hero-nav-btn--next { right: -52px; }
+        @media (max-width: 700px) {
+            .hero-nav-btn--prev { left: -20px; }
+            .hero-nav-btn--next { right: -20px; }
+        }
+        @media (max-width: 460px) {
+            .hero-nav-btn { width: 34px; height: 34px; font-size: 1rem; }
+            .hero-nav-btn--prev { left: -8px; }
+            .hero-nav-btn--next { right: -8px; }
+        }
+        @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+            /* Firefox <103 and any other browser without backdrop-filter
+               support -- fall back to a plain translucent chip rather than
+               an oddly see-through, unblurred button. */
+            .hero-nav-btn { background: rgba(255, 255, 255, .85); }
+            .hero-nav-btn:hover { background: rgba(255, 255, 255, .95); }
         }
 
         .nav-scrolled { background: var(--paper-raised) !important; }
@@ -1126,12 +1151,28 @@
             heroReviewTimer = null;
         }
 
+        // A single transient network blip (slow connection, a momentary DNS
+        // hiccup, a dropped request) would otherwise drop straight to the
+        // static fallback quote with no second chance -- one retry after a
+        // short pause covers exactly that case without meaningfully
+        // delaying the common case where the first request just succeeds.
+        async function fetchWithRetry(url, retries = 1, delayMs = 800) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res;
+            } catch (error) {
+                if (retries <= 0) throw error;
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+                return fetchWithRetry(url, retries - 1, delayMs);
+            }
+        }
+
         async function loadHeroReview() {
             heroSlideEl = document.getElementById('heroReviewSlide');
 
             try {
-                const res = await fetch(`${REVIEW_API_BASE_URL}/reviews?sort_by=newest&limit=20`);
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const res = await fetchWithRetry(`${REVIEW_API_BASE_URL}/reviews?sort_by=newest&limit=20`);
                 const data = await res.json();
                 heroReviews = (data.reviews || []).filter(r => r.review_text && r.review_text.length > 0);
                 if (heroReviews.length === 0) throw new Error('no reviews yet');

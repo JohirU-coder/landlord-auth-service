@@ -191,29 +191,45 @@
            actual width, which sent review text down to a couple of pixels
            wide and ballooned its height into a wall of wrapped text. */
         .hero-review-wrap { position: relative; width: 100%; }
+        /* Glassy/frosted, not a solid paper-colored disc -- see index.html
+           for the full rationale (kept identical between the two). */
         .hero-nav-btn {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 34px; height: 34px;
+            width: 40px; height: 40px;
             border-radius: 50%;
-            background: var(--paper-raised);
-            border: 1px solid var(--stone-line);
+            background: rgba(255, 255, 255, .35);
+            backdrop-filter: blur(10px) saturate(160%);
+            -webkit-backdrop-filter: blur(10px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, .6);
             color: var(--ink);
-            font-size: 1rem;
+            font-size: 1.15rem;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer;
             z-index: 2;
-            box-shadow: 0 2px 8px rgba(43,54,47,.15);
-            transition: background-color .15s ease, color .15s ease, transform .15s ease;
+            box-shadow: 0 6px 20px rgba(43, 54, 47, .14);
+            transition: background-color .15s ease, box-shadow .15s ease, transform .15s ease;
         }
-        .hero-nav-btn:hover { background: var(--forest); color: var(--paper-raised); border-color: var(--forest); }
-        .hero-nav-btn:active { transform: translateY(-50%) scale(.9); }
-        .hero-nav-btn--prev { left: -17px; }
-        .hero-nav-btn--next { right: -17px; }
-        @media (max-width: 560px) {
-            .hero-nav-btn--prev { left: -6px; }
-            .hero-nav-btn--next { right: -6px; }
+        .hero-nav-btn:hover {
+            background: rgba(255, 255, 255, .55);
+            box-shadow: 0 8px 24px rgba(43, 54, 47, .2);
+        }
+        .hero-nav-btn:active { transform: translateY(-50%) scale(.92); }
+        .hero-nav-btn--prev { left: -52px; }
+        .hero-nav-btn--next { right: -52px; }
+        @media (max-width: 700px) {
+            .hero-nav-btn--prev { left: -20px; }
+            .hero-nav-btn--next { right: -20px; }
+        }
+        @media (max-width: 460px) {
+            .hero-nav-btn { width: 34px; height: 34px; font-size: 1rem; }
+            .hero-nav-btn--prev { left: -8px; }
+            .hero-nav-btn--next { right: -8px; }
+        }
+        @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+            .hero-nav-btn { background: rgba(255, 255, 255, .85); }
+            .hero-nav-btn:hover { background: rgba(255, 255, 255, .95); }
         }
     </style>
 </head>
@@ -940,6 +956,24 @@
         let heroSlideEl = null; // the DOM node currently showing content
         let heroTransitioning = false;
 
+        // "3 days ago" / "2 weeks ago" -- matches the homepage hero exactly
+        // (see index.html); this component was previously only kept in sync
+        // structurally, not content-wise, which is exactly the kind of drift
+        // that makes two copies of "the same" component quietly diverge.
+        function timeAgo(dateString) {
+            if (!dateString) return '';
+            const seconds = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
+            const units = [
+                ['year', 31536000], ['month', 2592000], ['week', 604800],
+                ['day', 86400], ['hour', 3600], ['minute', 60]
+            ];
+            for (const [name, secs] of units) {
+                const count = Math.floor(seconds / secs);
+                if (count >= 1) return `${count} ${name}${count > 1 ? 's' : ''} ago`;
+            }
+            return 'today';
+        }
+
         function buildHeroSlideHtml(review) {
             const text = review.review_text.length > 220
                 ? review.review_text.slice(0, 217).trim() + '…'
@@ -951,12 +985,17 @@
             const rating = review.ratings?.overall || 0;
             const whoText = location ? `${who} · ${location}` : who;
             const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+            const addressLine = [review.property?.address, timeAgo(review.created_at)]
+                .filter(Boolean).join(' · ');
 
             return `
                 <p class="font-display font-medium mb-5" style="font-size: 1.15rem; line-height: 1.42; color: var(--ink); padding-right: 64px">“${escapeHtml(text)}”</p>
-                <div class="flex items-center justify-between pt-4" style="border-top: 1px solid var(--stone-line)">
-                    <span class="text-sm" style="color: var(--text-muted)">${escapeHtml(whoText)}</span>
-                    <span style="color: var(--brass); letter-spacing: 1px;">${stars}</span>
+                <div class="pt-4" style="border-top: 1px solid var(--stone-line)">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium" style="color: var(--ink)">${escapeHtml(whoText)}</span>
+                        <span style="color: var(--brass); letter-spacing: 1px;">${stars}</span>
+                    </div>
+                    ${addressLine ? `<p class="text-xs mt-1" style="color: var(--text-muted)">${escapeHtml(addressLine)}</p>` : ''}
                 </div>
             `;
         }
@@ -1073,12 +1112,28 @@
             heroReviewTimer = null;
         }
 
+        // A single transient network blip (slow connection, a momentary DNS
+        // hiccup, a dropped request) would otherwise drop straight to the
+        // static fallback quote with no second chance -- one retry after a
+        // short pause covers exactly that case without meaningfully
+        // delaying the common case where the first request just succeeds.
+        async function fetchWithRetry(url, retries = 1, delayMs = 800) {
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res;
+            } catch (error) {
+                if (retries <= 0) throw error;
+                await new Promise(resolve => setTimeout(resolve, delayMs));
+                return fetchWithRetry(url, retries - 1, delayMs);
+            }
+        }
+
         async function loadHeroReview() {
             heroSlideEl = document.getElementById('heroReviewSlide');
 
             try {
-                const res = await fetch(`${REVIEW_API_BASE_URL}/reviews?sort_by=newest&limit=20`);
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const res = await fetchWithRetry(`${REVIEW_API_BASE_URL}/reviews?sort_by=newest&limit=20`);
                 const data = await res.json();
                 heroReviews = (data.reviews || []).filter(r => r.review_text && r.review_text.length > 0);
                 if (heroReviews.length === 0) throw new Error('no reviews yet');
