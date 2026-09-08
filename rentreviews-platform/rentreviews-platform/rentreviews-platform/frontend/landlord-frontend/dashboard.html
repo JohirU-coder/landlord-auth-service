@@ -219,16 +219,19 @@
             box-shadow: 0 8px 24px rgba(43, 54, 47, .2);
         }
         .hero-nav-btn:active { transform: translateY(-50%) scale(.92); }
-        .hero-nav-btn--prev { left: -52px; }
-        .hero-nav-btn--next { right: -52px; }
-        @media (max-width: 700px) {
-            .hero-nav-btn--prev { left: -20px; }
-            .hero-nav-btn--next { right: -20px; }
-        }
+        /* Same simplified system as index.html -- see there for the full
+           rationale (a Playwright sweep across 320-1920px found real
+           overflow from the old two-breakpoint version on that page's
+           different grid breakpoint). Kept identical here for consistency
+           even though this page's md:-based grid didn't reproduce it. */
+        .hero-nav-btn--prev { left: -8px; }
+        .hero-nav-btn--next { right: -8px; }
         @media (max-width: 460px) {
             .hero-nav-btn { width: 34px; height: 34px; font-size: 1rem; }
-            .hero-nav-btn--prev { left: -8px; }
-            .hero-nav-btn--next { right: -8px; }
+        }
+        @media (min-width: 1281px) {
+            .hero-nav-btn--prev { left: -52px; }
+            .hero-nav-btn--next { right: -52px; }
         }
         @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
             .hero-nav-btn { background: rgba(255, 255, 255, .85); }

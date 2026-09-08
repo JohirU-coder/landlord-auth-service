@@ -402,16 +402,27 @@
             box-shadow: 0 8px 24px rgba(43, 54, 47, .2);
         }
         .hero-nav-btn:active { transform: translateY(-50%) scale(.92); }
-        .hero-nav-btn--prev { left: -52px; }
-        .hero-nav-btn--next { right: -52px; }
-        @media (max-width: 700px) {
-            .hero-nav-btn--prev { left: -20px; }
-            .hero-nav-btn--next { right: -20px; }
-        }
+        /* A safe, modest overhang by default, everywhere -- the wide
+           "spaced out" -52px only above 1280px, where the page's own
+           max-w-7xl container has hit its hard cap and there's guaranteed
+           slack outside it regardless of grid state. Below that, this hero
+           switches between a single- and two-column grid at exactly 1024px
+           (lg:), and the container's own gutter also steps between 16/24/32px
+           at 640/1024px -- a sweep across 320-1920px (Playwright, not just
+           eyeballing a resize) found real overflow at 500px, 1024px, and
+           1100px with the previous two-breakpoint version, all from the
+           arrows themselves outrunning whatever margin actually existed at
+           that specific combination of grid mode and gutter. Rather than
+           keep chasing each interaction with another breakpoint, one
+           conservative value covers the entire variable range safely. */
+        .hero-nav-btn--prev { left: -8px; }
+        .hero-nav-btn--next { right: -8px; }
         @media (max-width: 460px) {
             .hero-nav-btn { width: 34px; height: 34px; font-size: 1rem; }
-            .hero-nav-btn--prev { left: -8px; }
-            .hero-nav-btn--next { right: -8px; }
+        }
+        @media (min-width: 1281px) {
+            .hero-nav-btn--prev { left: -52px; }
+            .hero-nav-btn--next { right: -52px; }
         }
         @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
             /* Firefox <103 and any other browser without backdrop-filter
