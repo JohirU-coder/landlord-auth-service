@@ -287,9 +287,11 @@
             .stamp { width: 58px; height: 58px; top: -12px; right: -4px; }
         }
 
-        /* Hero review slideshow -- "push" transition: the incoming review
-           slides in from the left and physically pushes the outgoing one
-           off to the right, rather than a crossfade. */
+        /* Hero review slideshow -- "zoom" transition: the outgoing review
+           grows slightly and fades out while the incoming one grows in from
+           slightly smaller than full size, both at once in the same spot
+           (as opposed to a push, which slides the two past each other
+           sideways). */
         .hero-review-viewport {
             position: relative;
             overflow: hidden;
@@ -299,7 +301,7 @@
             position: absolute;
             top: 0; left: 0;
             width: 100%;
-            transition: transform .4s cubic-bezier(.4,0,.2,1);
+            transition: opacity .45s ease, transform .45s ease;
         }
         @media (prefers-reduced-motion: reduce) {
             .hero-review-viewport { transition: none; }
@@ -1081,10 +1083,10 @@
             nextBtn.classList.remove('hidden');
         }
 
-        // "Push" transition: the incoming slide starts off-screen to the left
-        // and slides to center while the outgoing slide slides out to the
-        // right at the same time -- both physically travel left-to-right
-        // together, rather than a crossfade in place.
+        // "Zoom" transition: the outgoing review grows slightly and fades
+        // out while the incoming one grows in from slightly smaller than
+        // full size, both in the same spot -- not a push, which slid the
+        // two sideways past each other.
         function showHeroReview(index) {
             if (heroTransitioning || index === heroReviewIndex) return;
             heroTransitioning = true;
@@ -1105,7 +1107,8 @@
 
             oldSlide.classList.add('hero-slide--anim');
             newSlide.classList.add('hero-slide--anim');
-            newSlide.style.transform = 'translateX(-100%)';
+            newSlide.style.opacity = '0';
+            newSlide.style.transform = 'scale(.92)';
 
             // transform doesn't affect layout, so this is safe to read before
             // the target transforms below are set.
@@ -1118,14 +1121,17 @@
             void newSlide.offsetHeight;
 
             viewport.style.height = newHeight + 'px';
-            oldSlide.style.transform = 'translateX(100%)';
-            newSlide.style.transform = 'translateX(0)';
+            oldSlide.style.opacity = '0';
+            oldSlide.style.transform = 'scale(1.08)';
+            newSlide.style.opacity = '1';
+            newSlide.style.transform = 'scale(1)';
 
             renderHeroDots();
 
             const finish = () => {
                 oldSlide.remove();
                 newSlide.classList.remove('hero-slide--anim');
+                newSlide.style.opacity = '';
                 newSlide.style.transform = '';
                 heroSlideEl = newSlide;
                 heroTransitioning = false;
@@ -1173,15 +1179,29 @@
         // static fallback quote with no second chance -- one retry after a
         // short pause covers exactly that case without meaningfully
         // delaying the common case where the first request just succeeds.
-        async function fetchWithRetry(url, retries = 1, delayMs = 800) {
+        //
+        // Explicit timeout, not just a retry: plain fetch() has no timeout
+        // of its own, so anything that hangs instead of cleanly failing
+        // (blocked by a browser extension that silently drops the request
+        // rather than rejecting it, a slow/cold-starting backend, a stalled
+        // connection) could sit there for the browser's own very long
+        // default before ever reaching the fallback -- reported live as "it
+        // takes forever" before the static quote finally appears. Aborting
+        // each attempt at 4s bounds the worst case to ~8.5s total instead of
+        // an effectively unbounded hang.
+        async function fetchWithRetry(url, retries = 1, delayMs = 500, timeoutMs = 4000) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
             try {
-                const res = await fetch(url);
+                const res = await fetch(url, { signal: controller.signal });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 return res;
             } catch (error) {
                 if (retries <= 0) throw error;
                 await new Promise(resolve => setTimeout(resolve, delayMs));
-                return fetchWithRetry(url, retries - 1, delayMs);
+                return fetchWithRetry(url, retries - 1, delayMs, timeoutMs);
+            } finally {
+                clearTimeout(timer);
             }
         }
 
