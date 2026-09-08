@@ -179,7 +179,14 @@
         .hero-dot:hover { background: var(--stone); }
         .hero-dot.active { background: var(--forest); transform: scale(1.3); }
 
-        .hero-review-wrap { position: relative; }
+        /* width:100% (not just max-width) is load-bearing: this is a CSS
+           Grid item, and once both slides go position:absolute mid-transition
+           its normal-flow content is briefly empty. Without a definite width,
+           the grid's default stretch sizing collapses the item down to a
+           fit-content size (near zero) instead of holding the grid track's
+           actual width, which sent review text down to a couple of pixels
+           wide and ballooned its height into a wall of wrapped text. */
+        .hero-review-wrap { position: relative; width: 100%; }
         .hero-nav-btn {
             position: absolute;
             top: 50%;
