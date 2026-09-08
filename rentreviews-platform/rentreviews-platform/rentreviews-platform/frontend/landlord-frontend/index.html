@@ -999,7 +999,13 @@
                         <span class="text-sm font-medium" style="color: var(--ink)">${escapeHtml(whoText)}</span>
                         <span style="color: var(--brass); letter-spacing: 1px;">${stars}</span>
                     </div>
-                    ${addressLine ? `<p class="text-xs mt-1" style="color: var(--stone)">${escapeHtml(addressLine)}</p>` : ''}
+                    <!-- text-muted, not --stone: --stone measured 2.95:1 on
+                         white, under WCAG AA's 4.5:1 for this 12px text
+                         (confirmed via Lighthouse after shipping this line
+                         in the previous pass) -- text-muted clears it at
+                         6.28:1 and is what every other secondary line on
+                         this page already uses. -->
+                    ${addressLine ? `<p class="text-xs mt-1" style="color: var(--text-muted)">${escapeHtml(addressLine)}</p>` : ''}
                 </div>
             `;
         }
