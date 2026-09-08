@@ -186,6 +186,56 @@
         .icon-mark--brass { background: #f7eed9; color: var(--brass); }
         .icon-mark--brick { background: #f7e9e4; color: var(--brick); }
 
+        /* Problem items -- deliberately NOT a boxed card: a bare colored
+           icon and a top rule, sitting straight on the section background.
+           Three identical bordered tiles in a row is the generic-SaaS
+           pattern this is meant to avoid; a thin rule + editorial spacing
+           reads as considered rather than templated, and keeps this section
+           visually distinct from Solution's actual card treatment below. */
+        .problem-item {
+            padding-top: 22px;
+            border-top: 3px solid var(--brick);
+        }
+        .problem-item .icon-bare {
+            width: 30px; height: 30px;
+            color: var(--brick);
+            margin-bottom: 18px;
+        }
+
+        /* Solution cards -- a real bordered card (six concrete capabilities
+           genuinely benefit from that containment for scanning), but the
+           accent runs down the LEFT edge with the icon set inline beside the
+           heading rather than stacked above it, and the whole card lifts
+           slightly on hover -- a different silhouette from Problem's rule­-
+           and-icon treatment, not the same tile recolored. */
+        .solution-card {
+            background: var(--paper-raised);
+            border: 1px solid var(--stone-line);
+            border-left: 3px solid var(--stone-line);
+            padding: 28px 26px;
+            transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+        }
+        .solution-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 24px rgba(43, 54, 47, .08);
+        }
+        .solution-card--forest { border-left-color: var(--forest); }
+        .solution-card--forest:hover { border-color: var(--forest); border-left-color: var(--forest); }
+        .solution-card--brass { border-left-color: var(--brass); }
+        .solution-card--brass:hover { border-color: var(--brass); border-left-color: var(--brass); }
+        .solution-card--brick { border-left-color: var(--brick); }
+        .solution-card--brick:hover { border-color: var(--brick); border-left-color: var(--brick); }
+        .solution-card-head {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 12px;
+        }
+        .solution-card .icon-mark { width: 38px; height: 38px; margin-bottom: 0; flex-shrink: 0; }
+        .solution-card .icon-mark svg { width: 18px; height: 18px; }
+        @media (prefers-reduced-motion: reduce) {
+            .solution-card { transition: border-color .18s ease; }
+            .solution-card:hover { transform: none; }
+        }
+
         .step-number {
             font-family: 'Fraunces', serif;
             font-weight: 600;
@@ -430,7 +480,17 @@
         // Skipped entirely under reduced-motion: the CSS media query above
         // already shows everything at full opacity with no transition, so
         // there's nothing for an observer to do.
-        (() => {
+        //
+        // Deferred to DOMContentLoaded for the same reason as the hero
+        // search handler below: every .reveal/.reveal-group target lives
+        // inside <main>, which comes after this script block in the
+        // document, so querySelectorAll would find zero elements if run
+        // inline here -- confirmed live: the observer never attached, and
+        // every section below the hero was permanently stuck invisible for
+        // anyone without reduced-motion enabled (a headless/automated
+        // browser reporting reduced-motion by default is exactly what let
+        // this slip past an earlier screenshot check).
+        document.addEventListener('DOMContentLoaded', () => {
             if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
             const targets = document.querySelectorAll('.reveal, .reveal-group');
             if (!('IntersectionObserver' in window) || targets.length === 0) return;
@@ -442,12 +502,20 @@
                 });
             }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
             targets.forEach(t => io.observe(t));
-        })();
+        });
 
         // Hero search -- a real search, handed straight to search.html
         // (which reads ?location= on load, see below), not just a button
         // that opens a blank search page.
-        (() => {
+        //
+        // Deferred to DOMContentLoaded rather than running inline here: this
+        // script block sits before <main> in the document, so the form
+        // doesn't exist in the DOM yet at this point in parsing --
+        // getElementById would return null and silently never attach the
+        // listener, leaving the browser to fall back to a native GET
+        // submission to the current page (confirmed live: submitting sent
+        // the visitor to "/?" instead of to search results).
+        document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('heroSearchForm');
             if (!form) return;
             form.addEventListener('submit', (e) => {
@@ -471,7 +539,7 @@
                         : './search.html';
                 }, 150);
             });
-        })();
+        });
     </script>
 
     <main>
@@ -590,38 +658,32 @@
                 </p>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-6 reveal-group">
-                <div class="card card--brick">
-                    <div class="icon-mark icon-mark--brick">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="9"/>
-                            <path stroke-linecap="round" d="M9.5 9a2.5 2.5 0 013.87-2.1c.86.58 1.13 1.77.6 2.65-.4.66-1.06.98-1.6 1.4-.5.4-.87.9-.87 1.55v.3"/>
-                            <circle cx="12" cy="16.2" r=".6" fill="currentColor" stroke="none"/>
-                        </svg>
-                    </div>
+            <div class="grid md:grid-cols-3 gap-10 reveal-group">
+                <div class="problem-item">
+                    <svg class="icon-bare" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path stroke-linecap="round" d="M9.5 9a2.5 2.5 0 013.87-2.1c.86.58 1.13 1.77.6 2.65-.4.66-1.06.98-1.6 1.4-.5.4-.87.9-.87 1.55v.3"/>
+                        <circle cx="12" cy="16.2" r=".6" fill="currentColor" stroke="none"/>
+                    </svg>
                     <h3 class="text-lg font-semibold mb-3" data-i18n="index:problem.noInfo.title">No Information</h3>
                     <p style="color: var(--text-muted)" data-i18n="index:problem.noInfo.description">Renters have no way to research landlords or property management companies before signing.</p>
                 </div>
 
-                <div class="card card--brick">
-                    <div class="icon-mark icon-mark--brick">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <rect x="3" y="6" width="18" height="12" rx="1"/>
-                            <circle cx="12" cy="12" r="2.5"/>
-                            <path stroke-linecap="round" d="M3 9h1m16 0h1M3 15h1m16 0h1"/>
-                        </svg>
-                    </div>
+                <div class="problem-item">
+                    <svg class="icon-bare" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                        <rect x="3" y="6" width="18" height="12" rx="1"/>
+                        <circle cx="12" cy="12" r="2.5"/>
+                        <path stroke-linecap="round" d="M3 9h1m16 0h1M3 15h1m16 0h1"/>
+                    </svg>
                     <h3 class="text-lg font-semibold mb-3" data-i18n="index:problem.expensiveMistakes.title">Expensive Mistakes</h3>
                     <p style="color: var(--text-muted)" data-i18n="index:problem.expensiveMistakes.description">Bad landlords cost tenants thousands in deposits, repairs, and legal fees.</p>
                 </div>
 
-                <div class="card card--brick">
-                    <div class="icon-mark icon-mark--brick">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/>
-                            <path stroke-linecap="round" d="M12 8v4m0 3h.01"/>
-                        </svg>
-                    </div>
+                <div class="problem-item">
+                    <svg class="icon-bare" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/>
+                        <path stroke-linecap="round" d="M12 8v4m0 3h.01"/>
+                    </svg>
                     <h3 class="text-lg font-semibold mb-3" data-i18n="index:problem.noAccountability.title">No Accountability</h3>
                     <p style="color: var(--text-muted)" data-i18n="index:problem.noAccountability.description">Landlords face no public consequences for poor service or unethical behavior.</p>
                 </div>
@@ -642,63 +704,75 @@
             </div>
 
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 reveal-group">
-                <div class="card card--forest">
-                    <div class="icon-mark icon-mark--forest">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
+                <div class="solution-card solution-card--forest">
+                    <div class="solution-card-head">
+                        <div class="icon-mark icon-mark--forest">
+                            <svg fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold" data-i18n="index:features.verifiedReviews.title">Verified Reviews</h3>
                     </div>
-                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:features.verifiedReviews.title">Verified Reviews</h3>
                     <p style="color: var(--text-muted)" data-i18n="index:features.verifiedReviews.description">Only real tenants can leave reviews. We verify authenticity to ensure trustworthy feedback.</p>
                 </div>
 
-                <div class="card card--brass">
-                    <div class="icon-mark icon-mark--brass">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
-                        </svg>
+                <div class="solution-card solution-card--brass">
+                    <div class="solution-card-head">
+                        <div class="icon-mark icon-mark--brass">
+                            <svg fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold" data-i18n="index:features.smartSearch.title">Smart Search</h3>
                     </div>
-                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:features.smartSearch.title">Smart Search</h3>
                     <p style="color: var(--text-muted)" data-i18n="index:features.smartSearch.description">Find properties by location, price, and ratings. Filter by specific landlord criteria.</p>
                 </div>
 
-                <div class="card card--brick">
-                    <div class="icon-mark icon-mark--brick">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
+                <div class="solution-card solution-card--brick">
+                    <div class="solution-card-head">
+                        <div class="icon-mark icon-mark--brick">
+                            <svg fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold" data-i18n="index:features.detailedRatings.title">Detailed Ratings</h3>
                     </div>
-                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:features.detailedRatings.title">Detailed Ratings</h3>
                     <p style="color: var(--text-muted)" data-i18n="index:features.detailedRatings.description">Communication, maintenance, property condition, and value - get the complete picture.</p>
                 </div>
 
-                <div class="card card--forest">
-                    <div class="icon-mark icon-mark--forest">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
+                <div class="solution-card solution-card--forest">
+                    <div class="solution-card-head">
+                        <div class="icon-mark icon-mark--forest">
+                            <svg fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold" data-i18n="index:features.anonymousReviews.title">Anonymous Reviews</h3>
                     </div>
-                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:features.anonymousReviews.title">Anonymous Reviews</h3>
                     <p style="color: var(--text-muted)" data-i18n="index:features.anonymousReviews.description">Leave honest feedback without fear of retaliation. Your identity stays protected.</p>
                 </div>
 
-                <div class="card card--brass">
-                    <div class="icon-mark icon-mark--brass">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                        </svg>
+                <div class="solution-card solution-card--brass">
+                    <div class="solution-card-head">
+                        <div class="icon-mark icon-mark--brass">
+                            <svg fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold" data-i18n="index:features.landlordInsights.title">Landlord Insights</h3>
                     </div>
-                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:features.landlordInsights.title">Landlord Insights</h3>
                     <p style="color: var(--text-muted)" data-i18n="index:features.landlordInsights.description">See a landlord's complete track record across all their properties and tenants.</p>
                 </div>
 
-                <div class="card card--brick">
-                    <div class="icon-mark icon-mark--brick">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                        </svg>
+                <div class="solution-card solution-card--brick">
+                    <div class="solution-card-head">
+                        <div class="icon-mark icon-mark--brick">
+                            <svg fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-semibold" data-i18n="index:features.propertyHistory.title">Property History</h3>
                     </div>
-                    <h3 class="text-lg font-semibold mb-3" data-i18n="index:features.propertyHistory.title">Property History</h3>
                     <p style="color: var(--text-muted)" data-i18n="index:features.propertyHistory.description">Access historical data and trends for any property or landlord.</p>
                 </div>
             </div>
