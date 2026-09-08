@@ -935,6 +935,24 @@
         let heroSlideEl = null; // the DOM node currently showing content
         let heroTransitioning = false;
 
+        // "3 days ago" / "2 weeks ago" -- a relative date reads as more alive
+        // than an absolute one, and doubles as a quiet freshness signal
+        // (Phase 9: the page should feel like an active platform, not a
+        // brochure with a few reviews frozen in place).
+        function timeAgo(dateString) {
+            if (!dateString) return '';
+            const seconds = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
+            const units = [
+                ['year', 31536000], ['month', 2592000], ['week', 604800],
+                ['day', 86400], ['hour', 3600], ['minute', 60]
+            ];
+            for (const [name, secs] of units) {
+                const count = Math.floor(seconds / secs);
+                if (count >= 1) return `${count} ${name}${count > 1 ? 's' : ''} ago`;
+            }
+            return 'today';
+        }
+
         function buildHeroSlideHtml(review) {
             const text = review.review_text.length > 220
                 ? review.review_text.slice(0, 217).trim() + '…'
@@ -947,14 +965,26 @@
             const whoText = location ? `${who} · ${location}` : who;
             const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
 
-            // review_text and the reviewer's own name are user-supplied --
-            // escape them same as everywhere else user content gets rendered
-            // as HTML rather than set via textContent.
+            // A real street address (not just city/state) is the concrete
+            // detail that makes a review feel verifiable rather than
+            // decorative marketing copy -- paired with a relative date for
+            // the "still active" signal above. Both are optional: not every
+            // review has a resolvable address or timestamp.
+            const addressLine = [review.property?.address, timeAgo(review.created_at)]
+                .filter(Boolean).join(' · ');
+
+            // review_text, the reviewer's own name, and the property address
+            // are all user-supplied -- escape them same as everywhere else
+            // user content gets rendered as HTML rather than set via
+            // textContent.
             return `
                 <p class="font-display font-medium mb-5" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink); padding-right: 64px">“${escapeHtml(text)}”</p>
-                <div class="flex items-center justify-between pt-4" style="border-top: 1px solid var(--stone-line)">
-                    <span class="text-sm" style="color: var(--text-muted)">${escapeHtml(whoText)}</span>
-                    <span style="color: var(--brass); letter-spacing: 1px;">${stars}</span>
+                <div class="pt-4" style="border-top: 1px solid var(--stone-line)">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium" style="color: var(--ink)">${escapeHtml(whoText)}</span>
+                        <span style="color: var(--brass); letter-spacing: 1px;">${stars}</span>
+                    </div>
+                    ${addressLine ? `<p class="text-xs mt-1" style="color: var(--stone)">${escapeHtml(addressLine)}</p>` : ''}
                 </div>
             `;
         }
