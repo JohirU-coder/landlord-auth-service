@@ -274,10 +274,16 @@
         }
         /* The corner overhang above is meant to land inside the page's own
            gutter, but at narrow widths there isn't enough gutter left to
-           absorb it -- confirmed live (Chrome DevTools MCP) as a real 4px
-           horizontal-scroll bug at both 320px and 390px. Pulling the badge
-           in (smaller, less overhang) below 400px removes it. */
-        @media (max-width: 400px) {
+           absorb it -- confirmed live (Chrome DevTools MCP) as a real
+           horizontal-scroll bug. The page's own container padding
+           (px-4/sm:px-6/lg:px-8) stays at a flat 16px all the way up to
+           Tailwind's sm breakpoint (640px), not just below 400px as
+           originally fixed -- a follow-up check at 430px reproduced the
+           exact same overflow this was meant to close, since that width
+           still falls in the flat-16px-gutter range this query didn't
+           cover yet. Matching the real breakpoint (640px) instead of an
+           arbitrary guess closes the gap fully. */
+        @media (max-width: 640px) {
             .stamp { width: 58px; height: 58px; top: -12px; right: -4px; }
         }
 

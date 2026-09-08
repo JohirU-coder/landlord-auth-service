@@ -152,8 +152,11 @@
             .stamp { animation: none; opacity: 1; }
         }
         /* Same fix as index.html: the corner overhang causes real horizontal
-           scroll at narrow widths -- pull it in below 400px. */
-        @media (max-width: 400px) {
+           scroll anywhere the container padding is a flat 16px, which is
+           everything below Tailwind's sm breakpoint (640px), not just below
+           400px as originally fixed (a 430px check reproduced the same
+           overflow). */
+        @media (max-width: 640px) {
             .stamp { width: 58px; height: 58px; top: -12px; right: -4px; }
         }
         .hero-review-viewport {
