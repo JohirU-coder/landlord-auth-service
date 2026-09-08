@@ -149,17 +149,23 @@
             .stamp { animation: none; opacity: 1; }
         }
 
-        /* Hero review slideshow -- crossfades between all real reviews in the
-           same card slot rather than showing just one. A slight upward drift
-           alongside the fade reads as a smoother, more deliberate motion
-           than an opacity-only swap. */
-        #heroReviewSlide {
-            transition: opacity .25s cubic-bezier(.4,0,.2,1), transform .25s cubic-bezier(.4,0,.2,1);
+        /* Hero review slideshow -- "push" transition: the incoming review
+           slides in from the left and physically pushes the outgoing one
+           off to the right, rather than a crossfade. */
+        .hero-review-viewport {
+            position: relative;
+            overflow: hidden;
+            transition: height .4s cubic-bezier(.4,0,.2,1);
         }
-        #heroReviewSlide.is-fading { opacity: 0; transform: translateY(6px); }
+        .hero-slide--anim {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            transition: transform .4s cubic-bezier(.4,0,.2,1);
+        }
         @media (prefers-reduced-motion: reduce) {
-            #heroReviewSlide { transition: none; }
-            #heroReviewSlide.is-fading { transform: none; }
+            .hero-review-viewport { transition: none; }
+            .hero-slide--anim { transition: none; }
         }
         .hero-dot {
             width: 6px; height: 6px;
@@ -353,13 +359,15 @@
                                 <path d="M32 51.5l12.5 12.5L70 37" stroke="var(--paper-raised)" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </div>
-                        <div id="heroReviewSlide">
-                            <p class="font-display font-medium mb-5" id="heroReviewQuote" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink); padding-right: 64px">
-                                Loading a recent review…
-                            </p>
-                            <div class="flex items-center justify-between pt-4" style="border-top: 1px solid var(--stone-line)">
-                                <span class="text-sm" id="heroReviewWho" style="color: var(--text-muted)">&nbsp;</span>
-                                <span id="heroReviewStars" style="color: var(--brass); letter-spacing: 1px;">&nbsp;</span>
+                        <div class="hero-review-viewport" id="heroReviewViewport">
+                            <div id="heroReviewSlide">
+                                <p class="font-display font-medium mb-5" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink); padding-right: 64px">
+                                    Loading a recent review…
+                                </p>
+                                <div class="flex items-center justify-between pt-4" style="border-top: 1px solid var(--stone-line)">
+                                    <span class="text-sm" style="color: var(--text-muted)">&nbsp;</span>
+                                    <span style="color: var(--brass); letter-spacing: 1px;">&nbsp;</span>
+                                </div>
                             </div>
                         </div>
                         <!-- One dot per review, current one highlighted -- click to
@@ -653,12 +661,10 @@
         let heroReviews = [];
         let heroReviewIndex = 0;
         let heroReviewTimer = null;
+        let heroSlideEl = null; // the DOM node currently showing content
+        let heroTransitioning = false;
 
-        function renderHeroReview(review) {
-            const quoteEl = document.getElementById('heroReviewQuote');
-            const whoEl = document.getElementById('heroReviewWho');
-            const starsEl = document.getElementById('heroReviewStars');
-
+        function buildHeroSlideHtml(review) {
             const text = review.review_text.length > 220
                 ? review.review_text.slice(0, 217).trim() + '…'
                 : review.review_text;
@@ -667,10 +673,29 @@
                 : `${review.reviewer.first_name || ''} ${(review.reviewer.last_name || '')[0] || ''}.`.trim();
             const location = [review.property?.city, review.property?.state].filter(Boolean).join(', ');
             const rating = review.ratings?.overall || 0;
+            const whoText = location ? `${who} · ${location}` : who;
+            const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
 
-            quoteEl.textContent = `“${text}”`;
-            whoEl.textContent = location ? `${who} · ${location}` : who;
-            starsEl.textContent = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+            // review_text and the reviewer's own name are user-supplied --
+            // escape them same as everywhere else user content gets rendered
+            // as HTML rather than set via textContent.
+            return `
+                <p class="font-display font-medium mb-5" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink); padding-right: 64px">“${escapeHtml(text)}”</p>
+                <div class="flex items-center justify-between pt-4" style="border-top: 1px solid var(--stone-line)">
+                    <span class="text-sm" style="color: var(--text-muted)">${escapeHtml(whoText)}</span>
+                    <span style="color: var(--brass); letter-spacing: 1px;">${stars}</span>
+                </div>
+            `;
+        }
+
+        function renderHeroFallback() {
+            heroSlideEl.innerHTML = `
+                <p class="font-display font-medium mb-5" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink); padding-right: 64px">“${escapeHtml(t('index:hero.fallbackQuote'))}”</p>
+                <div class="flex items-center justify-between pt-4" style="border-top: 1px solid var(--stone-line)">
+                    <span class="text-sm" style="color: var(--text-muted)">${escapeHtml(t('index:hero.fallbackReviewer'))}</span>
+                    <span style="color: var(--brass); letter-spacing: 1px;">★★★★★</span>
+                </div>
+            `;
         }
 
         function renderHeroDots() {
@@ -692,18 +717,54 @@
             nextBtn.classList.remove('hidden');
         }
 
-        // Crossfades to a given review -- reduced-motion users get the same
-        // rotation with the opacity transition switched off via CSS (see
-        // #heroReviewSlide's media query), not a different code path here.
+        // "Push" transition: the incoming slide starts off-screen to the left
+        // and slides to center while the outgoing slide slides out to the
+        // right at the same time -- both physically travel left-to-right
+        // together, rather than a crossfade in place.
         function showHeroReview(index) {
+            if (heroTransitioning || index === heroReviewIndex) return;
+            heroTransitioning = true;
             heroReviewIndex = index;
-            const slide = document.getElementById('heroReviewSlide');
-            slide.classList.add('is-fading');
-            setTimeout(() => {
-                renderHeroReview(heroReviews[heroReviewIndex]);
-                renderHeroDots();
-                slide.classList.remove('is-fading');
-            }, 250);
+
+            const viewport = document.getElementById('heroReviewViewport');
+            const oldSlide = heroSlideEl;
+            const newSlide = document.createElement('div');
+            newSlide.innerHTML = buildHeroSlideHtml(heroReviews[index]);
+            viewport.appendChild(newSlide);
+
+            const oldHeight = oldSlide.offsetHeight;
+
+            oldSlide.classList.add('hero-slide--anim');
+            newSlide.classList.add('hero-slide--anim');
+            newSlide.style.transform = 'translateX(-100%)';
+            viewport.style.height = oldHeight + 'px';
+
+            // Force layout so the starting position above is actually
+            // committed before the target transform below is applied --
+            // otherwise the browser can coalesce both into one paint and the
+            // slide would just appear with no animation at all.
+            void newSlide.offsetHeight;
+
+            viewport.style.height = Math.max(oldHeight, newSlide.offsetHeight) + 'px';
+            oldSlide.style.transform = 'translateX(100%)';
+            newSlide.style.transform = 'translateX(0)';
+
+            renderHeroDots();
+
+            const finish = () => {
+                oldSlide.remove();
+                newSlide.classList.remove('hero-slide--anim');
+                newSlide.style.transform = '';
+                viewport.style.height = '';
+                heroSlideEl = newSlide;
+                heroTransitioning = false;
+            };
+            // transitionend is the real signal, but reduced-motion (or any
+            // ancestor with display:none) never fires it, so a timeout
+            // guarantees cleanup either way rather than leaving two slides
+            // stacked forever.
+            newSlide.addEventListener('transitionend', finish, { once: true });
+            setTimeout(finish, 450);
         }
 
         function advanceHeroReview() {
@@ -725,9 +786,7 @@
         }
 
         async function loadHeroReview() {
-            const quoteEl = document.getElementById('heroReviewQuote');
-            const whoEl = document.getElementById('heroReviewWho');
-            const starsEl = document.getElementById('heroReviewStars');
+            heroSlideEl = document.getElementById('heroReviewSlide');
 
             try {
                 const res = await fetch(`${REVIEW_API_BASE_URL}/reviews?sort_by=newest&limit=20`);
@@ -736,7 +795,7 @@
                 heroReviews = (data.reviews || []).filter(r => r.review_text && r.review_text.length > 0);
                 if (heroReviews.length === 0) throw new Error('no reviews yet');
 
-                renderHeroReview(heroReviews[0]);
+                heroSlideEl.innerHTML = buildHeroSlideHtml(heroReviews[0]);
                 renderHeroDots();
 
                 document.getElementById('heroReviewDots').addEventListener('click', (e) => {
@@ -770,9 +829,7 @@
                 startHeroReviewLoop();
             } catch (error) {
                 console.warn('Falling back to representative review text:', error);
-                quoteEl.textContent = `“${t('index:hero.fallbackQuote')}”`;
-                whoEl.textContent = t('index:hero.fallbackReviewer');
-                starsEl.textContent = '★★★★★';
+                renderHeroFallback();
             }
         }
 
