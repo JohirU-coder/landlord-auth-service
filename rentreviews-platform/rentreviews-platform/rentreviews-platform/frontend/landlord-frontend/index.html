@@ -732,20 +732,28 @@
             newSlide.innerHTML = buildHeroSlideHtml(heroReviews[index]);
             viewport.appendChild(newSlide);
 
-            const oldHeight = oldSlide.offsetHeight;
+            // Height is always pinned to an explicit pixel value, never reset
+            // to '' (auto) -- CSS can't animate to/from auto, so doing that
+            // after the transition made the card visibly snap to the wrong
+            // height for an instant on every slide whose review text was a
+            // different length than the one before it.
+            viewport.style.height = oldSlide.offsetHeight + 'px';
 
             oldSlide.classList.add('hero-slide--anim');
             newSlide.classList.add('hero-slide--anim');
             newSlide.style.transform = 'translateX(-100%)';
-            viewport.style.height = oldHeight + 'px';
 
-            // Force layout so the starting position above is actually
-            // committed before the target transform below is applied --
-            // otherwise the browser can coalesce both into one paint and the
-            // slide would just appear with no animation at all.
+            // transform doesn't affect layout, so this is safe to read before
+            // the target transforms below are set.
+            const newHeight = newSlide.offsetHeight;
+
+            // Force layout so the starting positions above are actually
+            // committed before the target transform/height below are applied
+            // -- otherwise the browser can coalesce everything into one paint
+            // and the slide would just appear with no animation at all.
             void newSlide.offsetHeight;
 
-            viewport.style.height = Math.max(oldHeight, newSlide.offsetHeight) + 'px';
+            viewport.style.height = newHeight + 'px';
             oldSlide.style.transform = 'translateX(100%)';
             newSlide.style.transform = 'translateX(0)';
 
@@ -755,7 +763,6 @@
                 oldSlide.remove();
                 newSlide.classList.remove('hero-slide--anim');
                 newSlide.style.transform = '';
-                viewport.style.height = '';
                 heroSlideEl = newSlide;
                 heroTransitioning = false;
             };
@@ -763,9 +770,21 @@
             // ancestor with display:none) never fires it, so a timeout
             // guarantees cleanup either way rather than leaving two slides
             // stacked forever.
-            newSlide.addEventListener('transitionend', finish, { once: true });
+            newSlide.addEventListener('transitionend', (e) => {
+                if (e.propertyName === 'transform') finish();
+            }, { once: true });
             setTimeout(finish, 450);
         }
+
+        // If the window resizes while idle (e.g. rotating a phone), the
+        // current slide's natural height can change as its text rewraps --
+        // recompute the pinned height so it doesn't stay locked to a stale
+        // value from before the resize.
+        window.addEventListener('resize', () => {
+            if (heroTransitioning || !heroSlideEl) return;
+            const viewport = document.getElementById('heroReviewViewport');
+            if (viewport.style.height) viewport.style.height = heroSlideEl.scrollHeight + 'px';
+        });
 
         function advanceHeroReview() {
             showHeroReview((heroReviewIndex + 1) % heroReviews.length);
