@@ -151,6 +151,11 @@
         @media (prefers-reduced-motion: reduce) {
             .stamp { animation: none; opacity: 1; }
         }
+        /* Same fix as index.html: the corner overhang causes real horizontal
+           scroll at narrow widths -- pull it in below 400px. */
+        @media (max-width: 400px) {
+            .stamp { width: 58px; height: 58px; top: -12px; right: -4px; }
+        }
         .hero-review-viewport {
             position: relative;
             overflow: hidden;

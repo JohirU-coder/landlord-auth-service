@@ -272,6 +272,14 @@
         @media (prefers-reduced-motion: reduce) {
             .stamp { animation: none; opacity: 1; }
         }
+        /* The corner overhang above is meant to land inside the page's own
+           gutter, but at narrow widths there isn't enough gutter left to
+           absorb it -- confirmed live (Chrome DevTools MCP) as a real 4px
+           horizontal-scroll bug at both 320px and 390px. Pulling the badge
+           in (smaller, less overhang) below 400px removes it. */
+        @media (max-width: 400px) {
+            .stamp { width: 58px; height: 58px; top: -12px; right: -4px; }
+        }
 
         /* Hero review slideshow -- "push" transition: the incoming review
            slides in from the left and physically pushes the outgoing one
@@ -401,9 +409,9 @@
 
                 <!-- Desktop nav links -->
                 <div class="hidden md:flex items-center ml-10 space-x-8">
-                    <a href="#features" class="px-3 py-2 text-sm font-medium transition-colors" style="color: var(--ink)" data-i18n="index:nav.features">Features</a>
-                    <a href="#how-it-works" class="px-3 py-2 text-sm font-medium transition-colors" style="color: var(--ink)" data-i18n="index:nav.howItWorks">How It Works</a>
-                    <a href="#about" class="px-3 py-2 text-sm font-medium transition-colors" style="color: var(--ink)" data-i18n="index:nav.about">About</a>
+                    <a href="#features" class="px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap" style="color: var(--ink)" data-i18n="index:nav.features">Features</a>
+                    <a href="#how-it-works" class="px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap" style="color: var(--ink)" data-i18n="index:nav.howItWorks">How It Works</a>
+                    <a href="#about" class="px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap" style="color: var(--ink)" data-i18n="index:nav.about">About</a>
                     <button onclick="window.location.href='./auth.html'" class="btn btn-primary" style="padding: 10px 20px; font-size: .9rem" data-i18n="common:nav.signUp">Sign Up</button>
                 </div>
 
