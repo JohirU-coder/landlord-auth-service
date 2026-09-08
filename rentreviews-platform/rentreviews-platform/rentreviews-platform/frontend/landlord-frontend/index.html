@@ -391,6 +391,14 @@
         }
 
         .nav-scrolled { background: var(--paper-raised) !important; }
+
+        /* Nav links previously set color via an inline style, which a class-
+           based :hover rule can never win against -- confirmed live that
+           hovering/tapping Features, How It Works, and About did nothing at
+           all. A real color + a real hover target now. */
+        .nav-link { color: var(--ink); transition: color .15s ease; }
+        .nav-link:hover { color: var(--forest-deep); }
+        .nav-link:active { color: var(--forest-deeper); }
     </style>
 </head>
 <body>
@@ -409,9 +417,9 @@
 
                 <!-- Desktop nav links -->
                 <div class="hidden md:flex items-center ml-10 space-x-8">
-                    <a href="#features" class="px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap" style="color: var(--ink)" data-i18n="index:nav.features">Features</a>
-                    <a href="#how-it-works" class="px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap" style="color: var(--ink)" data-i18n="index:nav.howItWorks">How It Works</a>
-                    <a href="#about" class="px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap" style="color: var(--ink)" data-i18n="index:nav.about">About</a>
+                    <a href="#features" class="nav-link px-3 py-2 text-sm font-medium whitespace-nowrap" data-i18n="index:nav.features">Features</a>
+                    <a href="#how-it-works" class="nav-link px-3 py-2 text-sm font-medium whitespace-nowrap" data-i18n="index:nav.howItWorks">How It Works</a>
+                    <a href="#about" class="nav-link px-3 py-2 text-sm font-medium whitespace-nowrap" data-i18n="index:nav.about">About</a>
                     <button onclick="window.location.href='./auth.html'" class="btn btn-primary" style="padding: 10px 20px; font-size: .9rem" data-i18n="common:nav.signUp">Sign Up</button>
                 </div>
 
@@ -420,8 +428,7 @@
                     <!-- Language Selector -->
                     <div class="relative inline-block text-left" id="languageSelector">
                         <button id="languageSelectorBtn"
-                                class="flex items-center space-x-2 px-3 py-2 text-sm font-medium transition-colors"
-                                style="color: var(--ink)"
+                                class="nav-link flex items-center space-x-2 px-3 py-2 text-sm font-medium"
                                 aria-label="Select language">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -457,9 +464,9 @@
 
             <!-- Mobile menu panel -->
             <div id="mobileMenu" class="hidden md:hidden pb-4 space-y-1">
-                <a href="#features" class="block px-3 py-2 text-base font-medium" style="color: var(--ink)" data-i18n="index:nav.features">Features</a>
-                <a href="#how-it-works" class="block px-3 py-2 text-base font-medium" style="color: var(--ink)" data-i18n="index:nav.howItWorks">How It Works</a>
-                <a href="#about" class="block px-3 py-2 text-base font-medium" style="color: var(--ink)" data-i18n="index:nav.about">About</a>
+                <a href="#features" class="nav-link block px-3 py-2 text-base font-medium" data-i18n="index:nav.features">Features</a>
+                <a href="#how-it-works" class="nav-link block px-3 py-2 text-base font-medium" data-i18n="index:nav.howItWorks">How It Works</a>
+                <a href="#about" class="nav-link block px-3 py-2 text-base font-medium" data-i18n="index:nav.about">About</a>
                 <button onclick="window.location.href='./auth.html'" class="btn btn-primary w-full mt-2" data-i18n="common:nav.signUp">Sign Up</button>
             </div>
         </div>
