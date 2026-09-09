@@ -291,20 +291,45 @@
            grows slightly and fades out while the incoming one grows in from
            slightly smaller than full size, both at once in the same spot
            (as opposed to a push, which slides the two past each other
-           sideways). */
+           sideways).
+
+           The viewport has a fixed height per breakpoint instead of being
+           resized to fit whichever review is currently showing -- animating
+           that height (the previous approach) moved every bit of page
+           content below the hero on every single auto-advance, reported
+           live as "the entire page moves." Fixed at the tallest realistic
+           case per width tier (measured directly against real review text
+           and a synthetic worst-case string, not guessed): a review card
+           this narrow needs meaningfully more height for the same text
+           than one at its full 480px cap, since narrower text wraps to more
+           lines. .hero-slide fills that fixed height and pins the name/
+           stars row to the bottom via flexbox, so short and long reviews
+           both anchor their meta row at the same spot instead of it
+           trailing directly under a variable-length quote. */
         .hero-review-viewport {
             position: relative;
             overflow: hidden;
-            transition: height .4s cubic-bezier(.4,0,.2,1);
+            height: 280px;
+        }
+        @media (max-width: 640px) {
+            .hero-review-viewport { height: 420px; }
+        }
+        @media (max-width: 360px) {
+            .hero-review-viewport { height: 500px; }
+        }
+        .hero-slide {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .hero-slide--anim {
             position: absolute;
             top: 0; left: 0;
             width: 100%;
-            transition: opacity .45s ease, transform .45s ease;
+            transition: opacity .5s cubic-bezier(.16,1,.3,1), transform .5s cubic-bezier(.16,1,.3,1);
         }
         @media (prefers-reduced-motion: reduce) {
-            .hero-review-viewport { transition: none; }
             .hero-slide--anim { transition: none; }
         }
         /* The dot itself stays a small 6px mark visually -- the button's own
@@ -683,8 +708,8 @@
                             </svg>
                         </div>
                         <div class="hero-review-viewport" id="heroReviewViewport">
-                            <div id="heroReviewSlide">
-                                <p class="font-display font-medium mb-5" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink); padding-right: 64px">
+                            <div id="heroReviewSlide" class="hero-slide">
+                                <p class="font-display font-medium" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink); padding-right: 64px">
                                     Loading a recent review…
                                 </p>
                                 <div class="flex items-center justify-between pt-4" style="border-top: 1px solid var(--stone-line)">
@@ -1037,7 +1062,7 @@
             // user content gets rendered as HTML rather than set via
             // textContent.
             return `
-                <p class="font-display font-medium mb-5" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink); padding-right: 64px">“${escapeHtml(text)}”</p>
+                <p class="font-display font-medium" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink); padding-right: 64px">“${escapeHtml(text)}”</p>
                 <div class="pt-4" style="border-top: 1px solid var(--stone-line)">
                     <div class="flex items-center justify-between">
                         <span class="text-sm font-medium" style="color: var(--ink)">${escapeHtml(whoText)}</span>
@@ -1056,7 +1081,7 @@
 
         function renderHeroFallback() {
             heroSlideEl.innerHTML = `
-                <p class="font-display font-medium mb-5" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink); padding-right: 64px">“${escapeHtml(t('index:hero.fallbackQuote'))}”</p>
+                <p class="font-display font-medium" style="font-size: 1.2rem; line-height: 1.42; color: var(--ink); padding-right: 64px">“${escapeHtml(t('index:hero.fallbackQuote'))}”</p>
                 <div class="flex items-center justify-between pt-4" style="border-top: 1px solid var(--stone-line)">
                     <span class="text-sm" style="color: var(--text-muted)">${escapeHtml(t('index:hero.fallbackReviewer'))}</span>
                     <span style="color: var(--brass); letter-spacing: 1px;">★★★★★</span>
@@ -1095,32 +1120,21 @@
             const viewport = document.getElementById('heroReviewViewport');
             const oldSlide = heroSlideEl;
             const newSlide = document.createElement('div');
+            newSlide.className = 'hero-slide';
             newSlide.innerHTML = buildHeroSlideHtml(heroReviews[index]);
             viewport.appendChild(newSlide);
-
-            // Height is always pinned to an explicit pixel value, never reset
-            // to '' (auto) -- CSS can't animate to/from auto, so doing that
-            // after the transition made the card visibly snap to the wrong
-            // height for an instant on every slide whose review text was a
-            // different length than the one before it.
-            viewport.style.height = oldSlide.offsetHeight + 'px';
 
             oldSlide.classList.add('hero-slide--anim');
             newSlide.classList.add('hero-slide--anim');
             newSlide.style.opacity = '0';
             newSlide.style.transform = 'scale(.92)';
 
-            // transform doesn't affect layout, so this is safe to read before
-            // the target transforms below are set.
-            const newHeight = newSlide.offsetHeight;
-
             // Force layout so the starting positions above are actually
-            // committed before the target transform/height below are applied
-            // -- otherwise the browser can coalesce everything into one paint
+            // committed before the target transform below is applied --
+            // otherwise the browser can coalesce everything into one paint
             // and the slide would just appear with no animation at all.
             void newSlide.offsetHeight;
 
-            viewport.style.height = newHeight + 'px';
             oldSlide.style.opacity = '0';
             oldSlide.style.transform = 'scale(1.08)';
             newSlide.style.opacity = '1';
@@ -1143,18 +1157,8 @@
             newSlide.addEventListener('transitionend', (e) => {
                 if (e.propertyName === 'transform') finish();
             }, { once: true });
-            setTimeout(finish, 450);
+            setTimeout(finish, 550);
         }
-
-        // If the window resizes while idle (e.g. rotating a phone), the
-        // current slide's natural height can change as its text rewraps --
-        // recompute the pinned height so it doesn't stay locked to a stale
-        // value from before the resize.
-        window.addEventListener('resize', () => {
-            if (heroTransitioning || !heroSlideEl) return;
-            const viewport = document.getElementById('heroReviewViewport');
-            if (viewport.style.height) viewport.style.height = heroSlideEl.scrollHeight + 'px';
-        });
 
         function advanceHeroReview() {
             showHeroReview((heroReviewIndex + 1) % heroReviews.length);
