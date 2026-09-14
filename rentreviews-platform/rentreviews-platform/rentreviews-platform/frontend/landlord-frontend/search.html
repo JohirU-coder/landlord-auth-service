@@ -2431,8 +2431,8 @@
                                 <button id="addressPreviewReviewBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors">
                                     ${t('search:addressPreview.writeFirstReview')}
                                 </button>
-                                <button id="addressPreviewSaveBtn" class="w-full border border-gray-300 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors mt-3">
-                                    🤍 <span class="save-btn-label">Save Property</span>
+                                <button id="addressPreviewSaveBtn" data-saved="false" class="w-full border border-gray-300 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors mt-3">
+                                    <span class="save-btn-icon">🤍</span> <span class="save-btn-label">Save Property</span>
                                 </button>
                             </div>
                         </div>
@@ -2545,16 +2545,50 @@
             }
         }
 
+        function setUnlistedSaveBtnState(btn, isSaved) {
+            btn.dataset.saved = isSaved ? 'true' : 'false';
+            btn.querySelector('.save-btn-icon').textContent = isSaved ? '❤️' : '🤍';
+            btn.querySelector('.save-btn-label').textContent = isSaved ? 'Saved ✓' : 'Save Property';
+            btn.classList.toggle('bg-green-50', isSaved);
+            btn.classList.toggle('border-green-400', isSaved);
+            btn.classList.toggle('text-green-700', isSaved);
+        }
+
         // Saving an address that isn't a real property yet reuses the exact
         // same /properties/community creation step as "write first review" --
         // that endpoint is idempotent (looks up by address+zip before
         // inserting), so calling it from both buttons never creates
         // duplicates. This is what actually gives the address a property_id
         // to save against, since nothing exists in the DB until this point.
+        // The created id is cached on the button itself so toggling back off
+        // (unsaving) doesn't need to hit /properties/community again.
         async function handleSaveUnlistedAddress(geo, btn) {
             const token = localStorage.getItem('rentreviews_token');
             if (!token) {
                 window.location.href = `./auth.html?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+                return;
+            }
+
+            const isSaved = btn.dataset.saved === 'true';
+
+            // Already saved (and therefore already has a real property_id) --
+            // just unsave, no need to touch /properties/community again.
+            if (isSaved) {
+                const propertyId = btn.dataset.propertyId;
+                btn.disabled = true;
+                try {
+                    const response = await fetch(`${API_BASE_URL}/properties/${propertyId}/save`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    setUnlistedSaveBtnState(btn, false);
+                } catch (error) {
+                    console.error('Error unsaving property:', error);
+                    alert(t('search:addressPreview.addFailedNetwork'));
+                } finally {
+                    btn.disabled = false;
+                }
                 return;
             }
 
@@ -2563,7 +2597,6 @@
                 return;
             }
 
-            const label = btn.querySelector('.save-btn-label');
             btn.disabled = true;
             try {
                 const createResponse = await fetch(`${API_BASE_URL}/properties/community`, {
@@ -2585,9 +2618,8 @@
                 });
                 if (!saveResponse.ok) throw new Error(`HTTP ${saveResponse.status}`);
 
-                btn.dataset.saved = 'true';
-                label.textContent = 'Saved ✓';
-                btn.classList.add('bg-green-50', 'border-green-400', 'text-green-700');
+                btn.dataset.propertyId = propertyId;
+                setUnlistedSaveBtnState(btn, true);
             } catch (error) {
                 console.error('Error saving unlisted address:', error);
                 alert(t('search:addressPreview.addFailedNetwork'));
