@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = process.env.PORT || 3003;
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Validate required environment variables
 if (!process.env.DATABASE_URL || !process.env.JWT_SECRET) {
@@ -18,7 +19,11 @@ if (!process.env.DATABASE_URL || !process.env.JWT_SECRET) {
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  // Railway's managed Postgres presents a self-signed cert on this proxy
+  // endpoint, so rejectUnauthorized: true fails every connection (verified
+  // directly against production). Traffic is still encrypted -- this is
+  // Railway's standard connection posture, not a rollback of TLS entirely.
+  ssl: isProduction ? { rejectUnauthorized: false } : false
 });
 
 // Database connection validation
@@ -30,6 +35,9 @@ pool.on('error', (err) => {
   console.error('❌ Database connection error:', err);
   process.exit(1);
 });
+
+// Trust Railway's reverse proxy
+app.set('trust proxy', 1);
 
 // Authentication Middleware
 const authenticateToken = (req, res, next) => {
@@ -128,7 +136,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '1mb' }));
 
 // Enhanced validation schema for review creation
 const createReviewSchema = Joi.object({

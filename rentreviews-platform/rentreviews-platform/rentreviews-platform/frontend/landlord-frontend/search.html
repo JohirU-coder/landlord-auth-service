@@ -837,10 +837,6 @@
         //  - Photon: fast, but its free index has real coverage gaps for some
         //    addresses (confirmed by direct testing — some NJ addresses have
         //    zero Photon entries anywhere nearby).
-        //  - Our own backend (/geocode/suggestions, backed by Nominatim): the
-        //    same accurate source used for the actual search, so if an
-        //    address is findable at all, it shows up here even when Photon
-        //    has nothing.
         // Photon and Nominatim are filtered to results with at least a real
         // street name — a bare city/region match isn't specific enough to
         // identify a single property — but NOT to ones with a house number.
@@ -867,13 +863,12 @@
 
             let listedAddresses = [];
             let photonAddresses = [];
-            let backendAddresses = [];
-            let pendingSources = 3;
+            let pendingSources = 2;
 
             const renderMerged = () => {
                 const merged = [];
                 const seen = new Set();
-                for (const item of [...listedAddresses, ...backendAddresses, ...photonAddresses]) {
+                for (const item of [...listedAddresses, ...photonAddresses]) {
                     const key = item.label.toLowerCase().replace(/[^a-z0-9]/g, '');
                     if (seen.has(key)) continue;
                     seen.add(key);
@@ -883,7 +878,7 @@
                 const shown = merged.slice(0, 15);
 
                 if (shown.length === 0) {
-                    // All three sources have genuinely found nothing yet vs.
+                    // Both sources have genuinely found nothing yet vs.
                     // still finding nothing after every source has answered
                     // are different states -- still-searching shouldn't
                     // flash a wrong "not found" a moment before a real
@@ -941,27 +936,6 @@
                     renderMerged();
                 });
 
-            fetch(`${API_BASE_URL}/geocode/suggestions?q=${encodeURIComponent(query)}`, { signal })
-                .then(r => r.ok ? r.json() : null)
-                .then(data => {
-                    backendAddresses = (data?.suggestions || [])
-                        .map(s => ({
-                            label: formatBackendSuggestion(s),
-                            address: s.address,
-                            city: s.city,
-                            nearby: s.latitude != null && s.longitude != null && isWithinBiasRadius(s.latitude, s.longitude),
-                            listed: false,
-                            hasHouseNumber: Boolean(s.hasHouseNumber)
-                        }));
-                })
-                .catch(error => {
-                    if (error.name !== 'AbortError') console.error('Error fetching backend suggestions:', error);
-                })
-                .finally(() => {
-                    if (signal.aborted) return;
-                    pendingSources--;
-                    renderMerged();
-                });
         }
 
         function showSuggestionsLoading() {

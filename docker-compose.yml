@@ -1,3 +1,6 @@
+# Local development only. Railway does not read this file -- each service
+# there builds from its own Dockerfile (see backend/*/Dockerfile and
+# frontend/landlord-frontend/Dockerfile), configured independently.
 version: '3.9'
 
 services:
@@ -42,8 +45,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    ports:
-      - "5432:5432"
+    # No host port mapping -- auth-service reaches this over the compose
+    # network at postgres:5432. Publishing 5432 here would expose the
+    # database on whatever host runs `docker compose up`. If you need a
+    # local psql client against it, use `docker compose exec postgres psql`
+    # or a temporary `docker compose port postgres 5432` instead.
 
 volumes:
   postgres_data:

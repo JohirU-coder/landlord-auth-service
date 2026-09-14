@@ -18,9 +18,25 @@ try {
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+const isProduction = process.env.NODE_ENV === 'production';
 
-if (!process.env.JWT_SECRET || !process.env.DATABASE_URL) {
-  console.error('❌ Required environment variables missing (JWT_SECRET, DATABASE_URL)');
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32 || !process.env.DATABASE_URL) {
+  console.error('❌ Required environment variables missing or insecure (JWT_SECRET must be at least 32 characters, DATABASE_URL)');
+  process.exit(1);
+}
+
+if (isProduction && (!process.env.ADMIN_SECRET || process.env.ADMIN_SECRET.length < 32)) {
+  console.error('❌ ADMIN_SECRET must be configured with at least 32 random characters in production');
+  process.exit(1);
+}
+
+if (isProduction && (!process.env.FRONTEND_URL || !process.env.FRONTEND_URL.startsWith('https://'))) {
+  console.error('❌ FRONTEND_URL must be an HTTPS URL in production');
+  process.exit(1);
+}
+
+if (isProduction && (!process.env.RESEND_API_KEY || !process.env.FROM_EMAIL)) {
+  console.error('❌ RESEND_API_KEY and FROM_EMAIL are required in production');
   process.exit(1);
 }
 
@@ -29,7 +45,11 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  // Railway's managed Postgres presents a self-signed cert on this proxy
+  // endpoint, so rejectUnauthorized: true fails every connection (verified
+  // directly against production). Traffic is still encrypted -- this is
+  // Railway's standard connection posture, not a rollback of TLS entirely.
+  ssl: isProduction ? { rejectUnauthorized: false } : false
 });
 
 pool.on('connect', () => console.log('✅ Database connected'));
@@ -102,7 +122,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '1mb' }));
 
 // Request logging
 app.use((req, res, next) => {
@@ -194,6 +214,9 @@ const generateSecureToken = () => crypto.randomBytes(32).toString('hex');
 // Email helpers
 const sendEmail = async (to, subject, html) => {
   if (!resendClient) {
+    if (isProduction) {
+      throw new Error('Email provider is not configured');
+    }
     // Dev mode: log instead of sending
     console.log(`\n📧 [DEV EMAIL] To: ${to} | Subject: ${subject}`);
     const urlMatch = html.match(/href="(https?:\/\/[^"]+)"/);

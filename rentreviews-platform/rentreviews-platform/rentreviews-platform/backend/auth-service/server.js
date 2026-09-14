@@ -20,10 +20,26 @@ try {
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Validate required environment variables
-if (!process.env.JWT_SECRET || !process.env.DATABASE_URL) {
-  console.error('❌ Required environment variables missing (JWT_SECRET, DATABASE_URL)');
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32 || !process.env.DATABASE_URL) {
+  console.error('❌ Required environment variables missing or insecure (JWT_SECRET must be at least 32 characters, DATABASE_URL)');
+  process.exit(1);
+}
+
+if (isProduction && (!process.env.ADMIN_SECRET || process.env.ADMIN_SECRET.length < 32)) {
+  console.error('❌ ADMIN_SECRET must be configured with at least 32 random characters in production');
+  process.exit(1);
+}
+
+if (isProduction && (!process.env.FRONTEND_URL || !process.env.FRONTEND_URL.startsWith('https://'))) {
+  console.error('❌ FRONTEND_URL must be an HTTPS URL in production');
+  process.exit(1);
+}
+
+if (isProduction && (!process.env.SENDGRID_API_KEY || !process.env.FROM_EMAIL)) {
+  console.error('❌ SENDGRID_API_KEY and FROM_EMAIL are required in production');
   process.exit(1);
 }
 
@@ -31,7 +47,11 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  // Railway's managed Postgres presents a self-signed cert on this proxy
+  // endpoint, so rejectUnauthorized: true fails every connection (verified
+  // directly against production). Traffic is still encrypted -- this is
+  // Railway's standard connection posture, not a rollback of TLS entirely.
+  ssl: isProduction ? { rejectUnauthorized: false } : false
 });
 
 // Database connection validation
@@ -130,7 +150,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
 
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '1mb' }));
 
 // Enhanced Input Validation Schemas
 const registerSchema = Joi.object({
@@ -293,6 +313,9 @@ const sendPasswordResetEmail = async (email, token) => {
   `;
 
   if (!sgMail || !process.env.SENDGRID_API_KEY) {
+    if (isProduction) {
+      throw new Error('Email provider is not configured');
+    }
     console.log(`\n📧 [DEV EMAIL] To: ${email} | Subject: ${subject}\n${resetUrl}\n`);
     return;
   }
@@ -329,6 +352,9 @@ const sendVerificationEmail = async (email, token) => {
   `;
 
   if (!sgMail || !process.env.SENDGRID_API_KEY) {
+    if (isProduction) {
+      throw new Error('Email provider is not configured');
+    }
     console.log(`\n📧 [DEV EMAIL] To: ${email} | Subject: ${subject}\n${verifyUrl}\n`);
     return;
   }

@@ -10,18 +10,28 @@ const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
+const isProduction = process.env.NODE_ENV === 'production';
 
 // JWT Secret (add this to your Railway environment variables)
 const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  console.error('❌ JWT_SECRET environment variable is required');
+if (!JWT_SECRET || JWT_SECRET.length < 32 || !process.env.DATABASE_URL) {
+  console.error('❌ JWT_SECRET must be at least 32 characters and DATABASE_URL is required');
+  process.exit(1);
+}
+
+if (isProduction && (!process.env.ADMIN_SECRET || process.env.ADMIN_SECRET.length < 32)) {
+  console.error('❌ ADMIN_SECRET must be configured with at least 32 random characters in production');
   process.exit(1);
 }
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  // Railway's managed Postgres presents a self-signed cert on this proxy
+  // endpoint, so rejectUnauthorized: true fails every connection (verified
+  // directly against production). Traffic is still encrypted -- this is
+  // Railway's standard connection posture, not a rollback of TLS entirely.
+  ssl: isProduction ? { rejectUnauthorized: false } : false
 });
 
 // Trust Railway's reverse proxy
@@ -91,7 +101,14 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '1mb' }));
+
+const requireAdminSecret = (req, res, next) => {
+  if (!process.env.ADMIN_SECRET || req.headers['x-admin-secret'] !== process.env.ADMIN_SECRET) {
+    return res.status(403).json({ error: 'Forbidden', message: 'Admin access required' });
+  }
+  next();
+};
 
 // Input Validation Schemas
 const registerSchema = Joi.object({
@@ -188,7 +205,7 @@ app.get('/', (req, res) => {
 });
 
 // Database Migration Endpoint
-app.get('/migrate', async (req, res) => {
+app.get('/migrate', requireAdminSecret, async (req, res) => {
     try {
         console.log('Starting database migration...');
         
@@ -251,7 +268,7 @@ app.get('/migrate', async (req, res) => {
 });
 
 // Additional endpoint to check current table structure
-app.get('/check-schema', async (req, res) => {
+app.get('/check-schema', requireAdminSecret, async (req, res) => {
     try {
         const schemaQuery = `
             SELECT column_name, data_type, is_nullable, column_default
@@ -279,7 +296,7 @@ app.get('/check-schema', async (req, res) => {
 });
 
 // Database setup endpoint
-app.get('/setup-database', async (req, res) => {
+app.get('/setup-database', requireAdminSecret, async (req, res) => {
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (

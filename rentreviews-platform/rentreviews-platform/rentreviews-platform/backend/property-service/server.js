@@ -10,6 +10,7 @@ const { geocodeAddress } = require('./geocode');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Validate required environment variables
 if (!process.env.DATABASE_URL || !process.env.JWT_SECRET) {
@@ -19,7 +20,11 @@ if (!process.env.DATABASE_URL || !process.env.JWT_SECRET) {
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  // Railway's managed Postgres presents a self-signed cert on this proxy
+  // endpoint, so rejectUnauthorized: true fails every connection (verified
+  // directly against production). Traffic is still encrypted -- this is
+  // Railway's standard connection posture, not a rollback of TLS entirely.
+  ssl: isProduction ? { rejectUnauthorized: false } : false
 });
 
 // Database connection validation
@@ -31,6 +36,9 @@ pool.on('error', (err) => {
   console.error('❌ Database connection error:', err);
   process.exit(1);
 });
+
+// Trust Railway's reverse proxy
+app.set('trust proxy', 1);
 
 // Authentication Middleware
 const authenticateToken = (req, res, next) => {
@@ -120,7 +128,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '1mb' }));
 
 // Enhanced validation schema for property creation
 const createPropertySchema = Joi.object({
@@ -156,6 +164,7 @@ const updatePropertySchema = Joi.object({
 
 // Validation schema for property search (enhanced)
 const searchPropertiesSchema = Joi.object({
+  q: Joi.string().trim().min(2).max(200),
   city: Joi.string().trim().min(2).max(100),
   state: Joi.string().trim().min(2).max(50),
   zip_code: Joi.string().trim().pattern(/^\d{5}(-\d{4})?$/),
@@ -169,7 +178,9 @@ const searchPropertiesSchema = Joi.object({
   max_sqft: Joi.number().integer().positive().max(50000),
   landlord_verified: Joi.boolean(),
   verification_status: Joi.string().valid('verified', 'community_submitted', 'pending_verification'),
-  sort_by: Joi.string().valid('rent_asc', 'rent_desc', 'newest', 'oldest', 'sqft_asc', 'sqft_desc'),
+  sort_by: Joi.string().valid('rent_asc', 'rent_desc', 'newest', 'oldest', 'sqft_asc', 'sqft_desc', 'distance'),
+  lat: Joi.number().min(-90).max(90),
+  lng: Joi.number().min(-180).max(180),
   limit: Joi.number().integer().min(1).max(100).default(20),
   offset: Joi.number().integer().min(0).default(0)
 }).custom((value, helpers) => {
@@ -770,6 +781,35 @@ app.get('/properties/my', authenticateToken, requireRole(['landlord']), async (r
   }
 });
 
+// GET /properties/suggestions - Fast address suggestions for autocomplete (PUBLIC)
+// Keep this query intentionally small: autocomplete does not need joins,
+// review aggregates, or full property descriptions.
+app.get('/properties/suggestions', async (req, res) => {
+  const { error, value } = Joi.object({
+    q: Joi.string().trim().min(2).max(200).required()
+  }).validate(req.query);
+
+  if (error) {
+    return sendErrorResponse(res, 400, 'Invalid search parameters', 'A search query of at least 2 characters is required');
+  }
+
+  try {
+    const query = value.q.replace(/[%_]/g, '\\$&');
+    const result = await pool.query(`
+      SELECT address, city, state, zip_code, latitude, longitude
+      FROM properties
+      WHERE CONCAT_WS(' ', address, city, state, zip_code) ILIKE $1 ESCAPE '\\'
+      ORDER BY created_at DESC
+      LIMIT 8
+    `, [`%${query}%`]);
+
+    sendSuccessResponse(res, 200, { suggestions: result.rows });
+  } catch (error) {
+    console.error('Error fetching property suggestions:', error);
+    sendErrorResponse(res, 500, 'Internal server error', 'Failed to fetch property suggestions');
+  }
+});
+
 // GET /properties/:id - Get a specific property by ID (PUBLIC)
 app.get('/properties/:id', async (req, res) => {
   try {
@@ -853,15 +893,22 @@ app.get('/properties', async (req, res) => {
     }
 
     const {
-      city, state, zip_code, min_rent, max_rent, min_bedrooms, max_bedrooms,
+      q, city, state, zip_code, min_rent, max_rent, min_bedrooms, max_bedrooms,
       min_bathrooms, max_bathrooms, min_sqft, max_sqft, landlord_verified,
-      verification_status, sort_by = 'newest', limit = 20, offset = 0
+      verification_status, lat, lng, sort_by = 'newest', limit = 20, offset = 0
     } = value;
 
     // Build dynamic WHERE clause
     let whereConditions = [];
     let queryParams = [];
     let paramCount = 0;
+
+    if (q) {
+      paramCount++;
+      const escapedQuery = q.replace(/[%_]/g, '\\$&');
+      whereConditions.push(`CONCAT_WS(' ', p.address, p.city, p.state, p.zip_code) ILIKE $${paramCount} ESCAPE '\\'`);
+      queryParams.push(`%${escapedQuery}%`);
+    }
 
     // Add filters based on provided parameters
     if (city) {
@@ -946,6 +993,7 @@ app.get('/properties', async (req, res) => {
     const whereClause = whereConditions.length > 0 
       ? `WHERE ${whereConditions.join(' AND ')}`
       : '';
+    const filterParams = [...queryParams];
 
     // Build ORDER BY clause
     let orderClause;
@@ -964,6 +1012,18 @@ app.get('/properties', async (req, res) => {
         break;
       case 'sqft_desc':
         orderClause = 'ORDER BY p.square_feet DESC NULLS LAST';
+        break;
+      case 'distance':
+        if (lat === undefined || lng === undefined) {
+          return sendErrorResponse(res, 400, 'Invalid search parameters', 'lat and lng are required when sorting by distance');
+        }
+        paramCount++;
+        const latitudeParam = `$${paramCount}`;
+        queryParams.push(lat);
+        paramCount++;
+        const longitudeParam = `$${paramCount}`;
+        queryParams.push(lng);
+        orderClause = `ORDER BY CASE WHEN p.latitude IS NULL OR p.longitude IS NULL THEN 1 ELSE 0 END, ((p.latitude - ${latitudeParam}) ^ 2 + (p.longitude - ${longitudeParam}) ^ 2)`;
         break;
       case 'newest':
       default:
@@ -1025,7 +1085,7 @@ app.get('/properties', async (req, res) => {
     // Execute both queries
     const [searchResult, countResult] = await Promise.all([
       pool.query(searchQuery, queryParams),
-      pool.query(countQuery, queryParams.slice(0, -2)) // Remove limit and offset for count
+      pool.query(countQuery, filterParams)
     ]);
 
     const properties = searchResult.rows;
