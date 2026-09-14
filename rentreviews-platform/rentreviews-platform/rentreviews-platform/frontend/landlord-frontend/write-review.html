@@ -319,7 +319,7 @@
         </div>
 
         <!-- Landlord Information -->
-        <div class="form-section">
+        <div class="form-section" id="landlordInfoSection">
             <h2 class="text-2xl font-bold text-gray-900 mb-2" data-i18n="writeReview:landlordInfo.title">Landlord Information</h2>
             <p class="text-xs text-gray-400 mb-6" data-i18n="writeReview:landlordInfo.notPersistedNote">Not shown publicly or saved to your review yet — for our records only.</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -513,7 +513,7 @@
         </div>
 
         <!-- Photo Upload -->
-        <div class="form-section">
+        <div class="form-section" id="photoUploadSection">
             <h2 class="text-2xl font-bold text-gray-900 mb-2" data-i18n="writeReview:photos.title">Property Photos</h2>
             <p class="text-sm text-gray-500 mb-6" data-i18n="writeReview:photos.subtitle">Optionally upload 1–2 photos of the property (max 10 MB each).</p>
 
@@ -608,6 +608,11 @@
 
         // Pre-fill form with property data
         function prefillPropertyData() {
+            if (editReviewId) {
+                loadReviewForEdit();
+                return;
+            }
+
             const propertyData = getPropertyFromURL();
 
             if (propertyData) {
@@ -628,6 +633,79 @@
                     const banner = document.getElementById('unverifiedWarningBanner');
                     if (banner) banner.classList.remove('hidden');
                 }
+            }
+        }
+
+        // Editing an existing review — ?editReviewId=X. There's no single-review
+        // GET endpoint, so this reuses /reviews/my-reviews (a user's own review
+        // count is always small) and finds the matching id client-side.
+        const editReviewId = new URLSearchParams(window.location.search).get('editReviewId');
+
+        function setStarRating(type, value) {
+            ratings[type] = value;
+            const group = document.querySelector(`.rating-stars[data-rating="${type}"]`);
+            if (!group) return;
+            group.querySelectorAll('.star').forEach((s, i) => {
+                s.classList.toggle('active', i < value);
+            });
+        }
+
+        async function loadReviewForEdit() {
+            if (!requireAuth()) return;
+
+            const token = localStorage.getItem('rentreviews_token');
+            try {
+                const response = await fetch(`${REVIEW_API_BASE_URL}/reviews/my-reviews?limit=50`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                const review = (data.reviews || []).find(r => String(r.id) === String(editReviewId));
+
+                if (!review) {
+                    alert("Couldn't find that review, or it isn't yours to edit.");
+                    window.location.href = './my-reviews.html';
+                    return;
+                }
+
+                // Property is fixed once a review exists -- shown read-only.
+                document.getElementById('propertyAddress').value = review.property?.address || '';
+                document.getElementById('propertyCity').value = review.property?.city || '';
+                document.getElementById('propertyState').value = review.property?.state || '';
+                ['propertyAddress', 'propertyCity', 'propertyState', 'propertyZip'].forEach(id => {
+                    const el = document.getElementById(id);
+                    el.readOnly = true;
+                    el.classList.add('bg-gray-100');
+                });
+                document.getElementById('landlordInfoSection')?.classList.add('hidden');
+                document.getElementById('photoUploadSection')?.classList.add('hidden');
+
+                setStarRating('overall', review.ratings?.overall || 0);
+                setStarRating('communication', review.ratings?.communication || 0);
+                setStarRating('maintenance', review.ratings?.maintenance || 0);
+                setStarRating('condition', review.ratings?.property_condition || 0);
+                setStarRating('value', review.ratings?.value || 0);
+
+                document.getElementById('reviewTitle').value = review.title || '';
+                document.getElementById('reviewTitle').dispatchEvent(new Event('input', { bubbles: true }));
+                document.getElementById('reviewText').value = review.review_text || '';
+                document.getElementById('reviewText').dispatchEvent(new Event('input', { bubbles: true }));
+                if (review.move_in_date) document.getElementById('moveInDate').value = review.move_in_date.slice(0, 10);
+                if (review.move_out_date) document.getElementById('moveOutDate').value = review.move_out_date.slice(0, 10);
+                document.getElementById('wouldRecommend').checked = !!review.would_recommend;
+                document.getElementById('anonymous').checked = !!review.anonymous;
+
+                const header = document.getElementById('headerTitle');
+                if (header) header.textContent = 'Edit Your Review';
+                const subtitle = document.querySelector('#headerTitle')?.nextElementSibling;
+                if (subtitle) subtitle.textContent = `Editing your review of ${review.property?.address || 'this property'}`;
+
+                const submitBtn = document.getElementById('submitReview');
+                if (submitBtn) submitBtn.textContent = 'Update Review';
+            } catch (error) {
+                console.error('Error loading review for edit:', error);
+                alert("Couldn't load that review. Please try again.");
+                window.location.href = './my-reviews.html';
             }
         }
 
@@ -934,10 +1012,11 @@
             setSubmitLoading(true);
 
             try {
-                const propertyId = await resolvePropertyId(propertyData, address, city, state, zip);
+                // Editing skips property resolution entirely -- a review's
+                // property can't change, and the fields are read-only anyway.
+                const propertyId = editReviewId ? null : await resolvePropertyId(propertyData, address, city, state, zip);
 
-                const payload = {
-                    property_id: propertyId,
+                const sharedFields = {
                     overall_rating: ratings.overall,
                     communication_rating: ratings.communication,
                     maintenance_rating: ratings.maintenance,
@@ -950,25 +1029,36 @@
                     ...(moveInDate ? { move_in_date: moveInDate } : {}),
                     move_out_date: moveOutDate || null,
                     would_recommend: wouldRecommend,
-                    anonymous,
-                    photos: selectedPhotos.map(p => p.dataURL)
+                    anonymous
                 };
 
+                const payload = editReviewId
+                    ? sharedFields
+                    : { property_id: propertyId, ...sharedFields, photos: selectedPhotos.map(p => p.dataURL) };
+
                 const token = localStorage.getItem('rentreviews_token');
-                const response = await fetch(`${REVIEW_API_BASE_URL}/reviews`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(payload)
-                });
+                const response = await fetch(
+                    editReviewId ? `${REVIEW_API_BASE_URL}/reviews/${editReviewId}` : `${REVIEW_API_BASE_URL}/reviews`,
+                    {
+                        method: editReviewId ? 'PUT' : 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(payload)
+                    }
+                );
 
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    alert(t('writeReview:validation.successMessage', { address }));
-                    window.location.href = './search.html';
+                    if (editReviewId) {
+                        alert('Review updated successfully!');
+                        window.location.href = './my-reviews.html';
+                    } else {
+                        alert(t('writeReview:validation.successMessage', { address }));
+                        window.location.href = './search.html';
+                    }
                     return;
                 }
 

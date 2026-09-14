@@ -388,7 +388,7 @@
             <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <!-- Reviews Written -->
-                <div class="bg-white overflow-hidden shadow-lg rounded-lg">
+                <a href="my-reviews.html" class="bg-white overflow-hidden shadow-lg rounded-lg block hover:shadow-xl transition-shadow cursor-pointer">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -403,10 +403,10 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Properties Saved -->
-                <div class="bg-white overflow-hidden shadow-lg rounded-lg">
+                <a href="saved-properties.html" class="bg-white overflow-hidden shadow-lg rounded-lg block hover:shadow-xl transition-shadow cursor-pointer">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
@@ -415,13 +415,13 @@
                                 </div>
                             </div>
                             <div class="ml-4">
-                                <div class="text-3xl font-bold text-gray-900">0</div>
+                                <div id="propertiesSavedCount" class="text-3xl font-bold text-gray-900">0</div>
                                 <div class="text-sm font-medium text-gray-500" data-i18n="dashboard:stats.propertiesSaved">Properties Saved</div>
                                 <div class="text-xs text-gray-400 mt-1" data-i18n="dashboard:stats.propertiesHint">Keep track of places you're interested in</div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Account Status -->
                 <div class="bg-white overflow-hidden shadow-lg rounded-lg">
@@ -546,6 +546,7 @@
                 this.token = null;
                 this.API_BASE_URL = (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) || 'http://localhost:8080';
                 this.REVIEW_API_BASE_URL = (window.APP_CONFIG && window.APP_CONFIG.REVIEW_API_BASE_URL) || 'http://localhost:3003';
+                this.PROPERTY_API_BASE_URL = (window.APP_CONFIG && window.APP_CONFIG.PROPERTY_API_BASE_URL) || 'http://localhost:3002';
                 this.init();
             }
 
@@ -559,10 +560,29 @@
                 if (!sessionValid) return;
                 this.setupEventListeners();
                 this.hideLoadingOverlay();
-                // Independent of profile loading -- reviews are their own
-                // resource on a different service, and shouldn't block or be
-                // blocked by profile fetch/cache logic above.
+                // Independent of profile loading -- reviews/saved properties are
+                // their own resources on different services, and shouldn't block
+                // or be blocked by profile fetch/cache logic above.
                 this.loadMyReviews();
+                this.loadSavedPropertiesCount();
+            }
+
+            async loadSavedPropertiesCount() {
+                const countEl = document.getElementById('propertiesSavedCount');
+                try {
+                    const token = localStorage.getItem('rentreviews_token');
+                    if (!token) return;
+
+                    const response = await fetch(`${this.PROPERTY_API_BASE_URL}/properties/saved`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                    const data = await response.json();
+                    if (countEl) countEl.textContent = String((data.properties || []).length);
+                } catch (error) {
+                    console.error('⚠️ Error loading saved properties count:', error);
+                }
             }
 
             async loadUserData() {

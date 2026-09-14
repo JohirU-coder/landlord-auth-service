@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Properties - RentReviews</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="./i18n/i18n-config.js"></script>
+    <script src="./config.js"></script>
+    <script src="./session-guard.js"></script>
+
+    <style>
+        :root {
+            --ink: #2b362f;
+            --paper: #f7f7f0;
+            --paper-raised: #ffffff;
+            --forest: #4f8a5b;
+            --forest-deep: #3d6e48;
+            --brass: #d1a13e;
+            --brick: #c15b3f;
+            --stone-line: #e3e0d3;
+            --text-muted: #5c6259;
+        }
+
+        body { font-family: 'Public Sans', sans-serif; background-color: var(--paper); }
+        h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.01em; }
+
+        .card { background: var(--paper-raised); border: 1px solid var(--stone-line); border-radius: 3px; }
+        .btn-forest { background: var(--forest); color: white; }
+        .btn-forest:hover { background: var(--forest-deep); }
+        .btn-danger { border: 1px solid var(--stone-line); color: var(--brick); background: var(--paper-raised); }
+        .btn-danger:hover { border-color: var(--brick); background: #fdf1ee; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b sticky top-0 z-50" style="border-color: var(--stone-line);">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="./dashboard.html" class="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--forest);">
+                            <span class="text-white font-bold text-sm">⭐</span>
+                        </div>
+                        <span class="ml-3 text-xl font-bold" style="color: var(--ink);">RentReviews</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="./dashboard.html" class="text-sm font-medium px-3 py-2" style="color: var(--text-muted);">Dashboard</a>
+                    <a href="./search.html" class="text-sm font-medium px-3 py-2" style="color: var(--text-muted);">Search</a>
+                    <button id="logoutBtn" class="px-4 py-2 rounded-lg text-sm font-medium" style="border: 1px solid var(--stone-line); color: var(--ink);">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="py-12" style="background: var(--forest);">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl font-bold text-white mb-3">Saved Properties</h1>
+            <p class="text-lg" style="color: #dcece0;">Places you've bookmarked to look at again</p>
+        </div>
+    </div>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div id="loadingState" class="text-center py-16" style="color: var(--text-muted);">Loading your saved properties…</div>
+
+        <div id="emptyState" class="hidden text-center py-16">
+            <p class="text-xl mb-4" style="color: var(--text-muted);">You haven't saved any properties yet.</p>
+            <a href="./search.html" class="inline-block px-6 py-3 rounded-lg font-medium btn-forest">Search properties</a>
+        </div>
+
+        <div id="propertiesList" class="hidden grid gap-6 sm:grid-cols-2"></div>
+    </main>
+
+    <script>
+        const PROPERTY_API_BASE_URL = (window.APP_CONFIG && window.APP_CONFIG.PROPERTY_API_BASE_URL) || 'http://localhost:3002';
+
+        const token = localStorage.getItem('rentreviews_token');
+        if (!token) {
+            window.location.href = './auth.html';
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str == null ? '' : String(str);
+            return div.innerHTML;
+        }
+
+        function starString(rating) {
+            const r = Math.round(rating || 0);
+            return '★'.repeat(r) + '☆'.repeat(5 - r);
+        }
+
+        async function loadSaved() {
+            try {
+                const response = await fetch(`${PROPERTY_API_BASE_URL}/properties/saved`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                const properties = data.properties || [];
+
+                document.getElementById('loadingState').classList.add('hidden');
+
+                if (properties.length === 0) {
+                    document.getElementById('emptyState').classList.remove('hidden');
+                    return;
+                }
+
+                const listEl = document.getElementById('propertiesList');
+                listEl.innerHTML = properties.map(renderPropertyCard).join('');
+                listEl.classList.remove('hidden');
+
+                properties.forEach(p => wireCard(p.id));
+            } catch (error) {
+                console.error('Error loading saved properties:', error);
+                document.getElementById('loadingState').textContent = "Something went wrong loading your saved properties. Please try again later.";
+            }
+        }
+
+        function renderPropertyCard(p) {
+            const address = [p.address, p.city, p.state].filter(Boolean).join(', ');
+            const rating = p.avg_rating ? Number(p.avg_rating) : 0;
+
+            return `
+                <div class="card p-5" data-property-id="${p.id}">
+                    <h3 class="font-semibold text-lg mb-1" style="color: var(--ink);">${escapeHtml(address)}</h3>
+                    <p class="text-sm mb-2" style="color: var(--text-muted);">${escapeHtml(p.zip_code || '')}</p>
+                    ${p.review_count > 0 ? `
+                        <div class="flex items-center gap-2 mb-3">
+                            <span style="color: var(--brass);">${starString(rating)}</span>
+                            <span class="text-sm" style="color: var(--text-muted);">${p.review_count} review${p.review_count === 1 ? '' : 's'}</span>
+                        </div>
+                    ` : `<p class="text-sm mb-3" style="color: var(--text-muted);">No reviews yet</p>`}
+                    <div class="flex items-center gap-3">
+                        <a href="./search.html?propertyId=${p.id}" class="text-sm font-medium px-4 py-2 rounded-lg btn-forest">View Property</a>
+                        <button class="unsave-btn text-sm font-medium px-4 py-2 rounded-lg btn-danger">Unsave</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function wireCard(propertyId) {
+            const card = document.querySelector(`[data-property-id="${propertyId}"]`);
+            if (!card) return;
+            card.querySelector('.unsave-btn').addEventListener('click', async () => {
+                try {
+                    const response = await fetch(`${PROPERTY_API_BASE_URL}/properties/${propertyId}/save`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    card.remove();
+                    if (!document.querySelector('#propertiesList [data-property-id]')) {
+                        document.getElementById('propertiesList').classList.add('hidden');
+                        document.getElementById('emptyState').classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Error unsaving property:', error);
+                    alert('Failed to unsave property. Please try again.');
+                }
+            });
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('rentreviews_token');
+            localStorage.removeItem('rentreviews_user');
+            window.location.href = './auth.html';
+        });
+
+        loadSaved();
+    </script>
+</body>
+</html>

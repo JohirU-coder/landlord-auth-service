@@ -1847,6 +1847,10 @@
                         
                         <!-- Action Buttons -->
                         <div class="flex flex-col gap-3">
+                            <button id="savePropertyBtn" data-property-id="${property.id}"
+                                    class="w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                                🔖 <span class="save-btn-label">Save Property</span>
+                            </button>
                             <div class="flex gap-3">
                                 <button class="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
                                         onclick="window.location.href='./write-review.html?property=${encodeURIComponent(JSON.stringify({
@@ -1902,6 +1906,8 @@
                 loadRecentReviewsIntoModal(property.id, modalContent);
             }
 
+            wireSavePropertyButton(property.id, modalContent);
+
             // 360° Street View — loaded on demand (not by default) since an
             // embedded panorama iframe is much heavier than a static image.
             const streetViewBtn = modalContent.querySelector('#streetViewToggleBtn');
@@ -1915,6 +1921,60 @@
                     wireStreetViewFullscreenButtons(mediaContainer);
                 });
             }
+        }
+
+        async function wireSavePropertyButton(propertyId, modalContent) {
+            const btn = modalContent.querySelector('#savePropertyBtn');
+            if (!btn) return;
+            const label = btn.querySelector('.save-btn-label');
+
+            const setSavedState = (isSaved) => {
+                btn.dataset.saved = isSaved ? 'true' : 'false';
+                label.textContent = isSaved ? 'Saved ✓' : 'Save Property';
+                btn.classList.toggle('bg-green-50', isSaved);
+                btn.classList.toggle('border-green-400', isSaved);
+                btn.classList.toggle('text-green-700', isSaved);
+            };
+
+            const token = localStorage.getItem('rentreviews_token');
+            if (token) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/properties/saved`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        const isSaved = (data.properties || []).some(p => p.id === propertyId);
+                        setSavedState(isSaved);
+                    }
+                } catch (error) {
+                    console.error('Error checking saved status:', error);
+                }
+            }
+
+            btn.addEventListener('click', async () => {
+                const currentToken = localStorage.getItem('rentreviews_token');
+                if (!currentToken) {
+                    window.location.href = `./auth.html?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+                    return;
+                }
+
+                const isSaved = btn.dataset.saved === 'true';
+                btn.disabled = true;
+                try {
+                    const response = await fetch(`${API_BASE_URL}/properties/${propertyId}/save`, {
+                        method: isSaved ? 'DELETE' : 'POST',
+                        headers: { 'Authorization': `Bearer ${currentToken}` }
+                    });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    setSavedState(!isSaved);
+                } catch (error) {
+                    console.error('Error toggling saved property:', error);
+                    alert('Something went wrong. Please try again.');
+                } finally {
+                    btn.disabled = false;
+                }
+            });
         }
 
         async function loadRecentReviewsIntoModal(propertyId, modalContent) {
@@ -1933,6 +1993,8 @@
                 container.innerHTML = reviews.length > 0
                     ? reviews.map(renderReviewHtml).join('')
                     : `<p class="text-gray-500 text-center py-8">${t('search:propertyDetails.noReviewsMessage')}</p>`;
+
+                reviews.forEach(review => wireReviewReplies(review, container));
             } catch (error) {
                 console.error('Error loading reviews:', error);
                 container.innerHTML = `<p class="text-gray-400 text-center py-8">${t('search:propertyDetails.reviewsLoadError')}</p>`;
@@ -1950,7 +2012,7 @@
                 : '';
 
             return `
-                <div class="border-b border-gray-200 pb-4 mb-4 last:border-b-0">
+                <div class="border-b border-gray-200 pb-4 mb-4 last:border-b-0" data-review-id="${review.id}">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center">
                             <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
@@ -1978,8 +2040,99 @@
                             <p class="text-sm text-gray-700">${escapeHtml(review.landlord_response.text || '')}</p>
                         </div>
                     ` : ''}
+                    <button class="replies-toggle-btn text-sm font-medium text-indigo-600 hover:text-indigo-800 mt-3">
+                        <span class="replies-count-label">${review.reply_count || 0}</span> ${review.reply_count === 1 ? 'reply' : 'replies'} — view / add
+                    </button>
+                    <div class="replies-section hidden mt-2 pl-4 border-l-2 border-gray-100">
+                        <div class="replies-list space-y-2 mb-2 text-sm"></div>
+                        <div class="flex gap-2">
+                            <input type="text" class="reply-input flex-1 px-3 py-1.5 border border-gray-300 rounded-lg text-sm" placeholder="Write a reply…" maxlength="1000">
+                            <button class="reply-submit-btn px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700">Reply</button>
+                        </div>
+                    </div>
                 </div>
             `;
+        }
+
+        function renderReplyHtml(reply) {
+            const name = `${reply.author?.first_name || ''} ${(reply.author?.last_name || '')[0] || ''}${reply.author?.last_name ? '.' : ''}`.trim() || 'User';
+            const role = reply.author?.role === 'landlord' ? 'Landlord' : 'Renter';
+            const roleColor = reply.author?.role === 'landlord' ? 'text-amber-700 bg-amber-50' : 'text-green-700 bg-green-50';
+            return `
+                <div class="bg-gray-50 rounded-lg p-2.5">
+                    <span class="font-medium text-gray-800">${escapeHtml(name)}</span>
+                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full ml-1 ${roleColor}">${role}</span>
+                    <p class="text-gray-600 mt-1">${escapeHtml(reply.reply_text)}</p>
+                </div>
+            `;
+        }
+
+        function wireReviewReplies(review, container) {
+            const card = container.querySelector(`[data-review-id="${review.id}"]`);
+            if (!card) return;
+
+            const repliesSection = card.querySelector('.replies-section');
+            const repliesList = card.querySelector('.replies-list');
+            const toggleBtn = card.querySelector('.replies-toggle-btn');
+            const countLabel = card.querySelector('.replies-count-label');
+            let loaded = false;
+
+            async function loadReplies() {
+                try {
+                    const response = await fetch(`${REVIEW_API_BASE_URL}/reviews/${review.id}/replies`);
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    const data = await response.json();
+                    const replies = data.replies || [];
+                    repliesList.innerHTML = replies.length > 0
+                        ? replies.map(renderReplyHtml).join('')
+                        : `<p class="text-gray-400">No replies yet.</p>`;
+                    countLabel.textContent = String(replies.length);
+                    loaded = true;
+                } catch (error) {
+                    console.error('Error loading replies:', error);
+                    repliesList.innerHTML = `<p class="text-gray-400">Couldn't load replies.</p>`;
+                }
+            }
+
+            toggleBtn.addEventListener('click', () => {
+                repliesSection.classList.toggle('hidden');
+                if (!repliesSection.classList.contains('hidden') && !loaded) loadReplies();
+            });
+
+            const replyInput = card.querySelector('.reply-input');
+            const replySubmitBtn = card.querySelector('.reply-submit-btn');
+            replySubmitBtn.addEventListener('click', async () => {
+                const text = replyInput.value.trim();
+                if (text.length < 2) return;
+
+                const token = localStorage.getItem('rentreviews_token');
+                if (!token) {
+                    window.location.href = `./auth.html?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+                    return;
+                }
+
+                replySubmitBtn.disabled = true;
+                try {
+                    const response = await fetch(`${REVIEW_API_BASE_URL}/reviews/${review.id}/replies`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ reply_text: text })
+                    });
+                    if (!response.ok) {
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.message || `HTTP ${response.status}`);
+                    }
+                    replyInput.value = '';
+                    loaded = false;
+                    repliesSection.classList.remove('hidden');
+                    loadReplies();
+                } catch (error) {
+                    console.error('Error posting reply:', error);
+                    alert('Failed to post reply: ' + error.message);
+                } finally {
+                    replySubmitBtn.disabled = false;
+                }
+            });
         }
 
         function showClaimModal(property) {
