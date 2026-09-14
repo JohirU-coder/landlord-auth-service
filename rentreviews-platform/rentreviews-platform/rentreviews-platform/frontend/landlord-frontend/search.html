@@ -2431,6 +2431,9 @@
                                 <button id="addressPreviewReviewBtn" class="w-full bg-indigo-600 text-white py-3 rounded-xl font-semibold hover:bg-indigo-700 transition-colors">
                                     ${t('search:addressPreview.writeFirstReview')}
                                 </button>
+                                <button id="addressPreviewSaveBtn" class="w-full border border-gray-300 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 transition-colors mt-3">
+                                    🤍 <span class="save-btn-label">Save Property</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -2438,6 +2441,9 @@
 
                 document.getElementById('addressPreviewReviewBtn').addEventListener('click', () => {
                     handleWriteFirstReview(geo);
+                });
+                document.getElementById('addressPreviewSaveBtn').addEventListener('click', (e) => {
+                    handleSaveUnlistedAddress(geo, e.currentTarget);
                 });
 
                 const preview360Btn = document.getElementById('addressPreview360Btn');
@@ -2536,6 +2542,57 @@
                 // check before assuming it needs to be redone from scratch.
                 alert(t('search:addressPreview.addFailedNetwork'));
                 resetButton();
+            }
+        }
+
+        // Saving an address that isn't a real property yet reuses the exact
+        // same /properties/community creation step as "write first review" --
+        // that endpoint is idempotent (looks up by address+zip before
+        // inserting), so calling it from both buttons never creates
+        // duplicates. This is what actually gives the address a property_id
+        // to save against, since nothing exists in the DB until this point.
+        async function handleSaveUnlistedAddress(geo, btn) {
+            const token = localStorage.getItem('rentreviews_token');
+            if (!token) {
+                window.location.href = `./auth.html?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+                return;
+            }
+
+            if (!geo.city || !geo.state || !geo.zip_code) {
+                alert(t('search:addressPreview.incompleteAddress'));
+                return;
+            }
+
+            const label = btn.querySelector('.save-btn-label');
+            btn.disabled = true;
+            try {
+                const createResponse = await fetch(`${API_BASE_URL}/properties/community`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ address: geo.address, city: geo.city, state: geo.state, zip_code: geo.zip_code })
+                });
+                const createData = await createResponse.json().catch(() => null);
+                if (!createResponse.ok || !createData || !createData.success) {
+                    const reason = createData?.message || createData?.error;
+                    alert(reason ? `${t('search:addressPreview.addFailed')} (${reason})` : t('search:addressPreview.addFailed'));
+                    return;
+                }
+
+                const propertyId = createData.property.id;
+                const saveResponse = await fetch(`${API_BASE_URL}/properties/${propertyId}/save`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!saveResponse.ok) throw new Error(`HTTP ${saveResponse.status}`);
+
+                btn.dataset.saved = 'true';
+                label.textContent = 'Saved ✓';
+                btn.classList.add('bg-green-50', 'border-green-400', 'text-green-700');
+            } catch (error) {
+                console.error('Error saving unlisted address:', error);
+                alert(t('search:addressPreview.addFailedNetwork'));
+            } finally {
+                btn.disabled = false;
             }
         }
 
