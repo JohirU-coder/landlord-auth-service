@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RentReviews Logo Export</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest: #4f8a5b;
+    --forest-deep: #3d6e48;
+    --paper: #f7f7f0;
+    --ink: #2b362f;
+    --brass: #d1a13e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #808080; }
+
+  .export {
+    display: block;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ---------- 1. Avatar: full-bleed square, no rounding (profile pics) ---------- */
+  #avatar {
+    width: 1200px;
+    height: 1200px;
+    background: var(--forest);
+  }
+  #avatar .star-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #avatar svg { width: 62%; height: 62%; }
+
+  /* ---------- 2. App icon: rounded square (favicon-style contexts) ---------- */
+  #appicon {
+    width: 1200px;
+    height: 1200px;
+    background: var(--paper);
+  }
+  #appicon .tile {
+    position: absolute;
+    inset: 90px;
+    background: var(--forest);
+    border-radius: 264px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #appicon svg { width: 56%; height: 56%; }
+
+  /* ---------- 3. Horizontal lockup, light ground ---------- */
+  #lockup-light {
+    width: 2400px;
+    height: 640px;
+    background: var(--paper);
+    display: flex;
+    align-items: center;
+    padding: 0 140px;
+    gap: 56px;
+  }
+  #lockup-light .mark {
+    flex-shrink: 0;
+    width: 280px;
+    height: 280px;
+    background: var(--forest);
+    border-radius: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #lockup-light .mark svg { width: 56%; height: 56%; }
+  #lockup-light .word {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 168px;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    line-height: 1;
+  }
+  #lockup-light .tagline {
+    font-family: 'Public Sans', sans-serif;
+    font-weight: 500;
+    font-size: 40px;
+    color: var(--forest-deep);
+    letter-spacing: 0.01em;
+    margin-top: 22px;
+  }
+  #lockup-light .word-col { display: flex; flex-direction: column; justify-content: center; }
+
+  /* ---------- 4. Horizontal lockup, dark ground ---------- */
+  #lockup-dark {
+    width: 2400px;
+    height: 640px;
+    background: var(--forest-deep);
+    display: flex;
+    align-items: center;
+    padding: 0 140px;
+    gap: 56px;
+  }
+  #lockup-dark .mark {
+    flex-shrink: 0;
+    width: 280px;
+    height: 280px;
+    background: var(--paper);
+    border-radius: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #lockup-dark .mark svg { width: 56%; height: 56%; fill: var(--forest-deep); }
+  #lockup-dark .word {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 168px;
+    letter-spacing: -0.01em;
+    color: var(--paper);
+    line-height: 1;
+  }
+  #lockup-dark .tagline {
+    font-family: 'Public Sans', sans-serif;
+    font-weight: 500;
+    font-size: 40px;
+    color: #cfe0d2;
+    letter-spacing: 0.01em;
+    margin-top: 22px;
+  }
+  #lockup-dark .word-col { display: flex; flex-direction: column; justify-content: center; }
+
+  .spacer { height: 40px; }
+</style>
+</head>
+<body>
+
+<div id="avatar" class="export" role="img" aria-label="avatar">
+  <div class="star-wrap">
+    <svg viewBox="0 0 100 100" fill="#f7f7f0" aria-hidden="true">
+      <path d="M50 20 L58.6 42.1 L82 44.8 L64 60.3 L69.4 83.2 L50 71 L30.6 83.2 L36 60.3 L18 44.8 L41.4 42.1 Z"/>
+    </svg>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<div id="appicon" class="export" role="img" aria-label="appicon">
+  <div class="tile">
+    <svg viewBox="0 0 100 100" fill="#f7f7f0" aria-hidden="true">
+      <path d="M50 20 L58.6 42.1 L82 44.8 L64 60.3 L69.4 83.2 L50 71 L30.6 83.2 L36 60.3 L18 44.8 L41.4 42.1 Z"/>
+    </svg>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<div id="lockup-light" class="export" role="img" aria-label="lockup-light">
+  <div class="mark">
+    <svg viewBox="0 0 100 100" fill="#f7f7f0" aria-hidden="true">
+      <path d="M50 20 L58.6 42.1 L82 44.8 L64 60.3 L69.4 83.2 L50 71 L30.6 83.2 L36 60.3 L18 44.8 L41.4 42.1 Z"/>
+    </svg>
+  </div>
+  <div class="word-col">
+    <div class="word">RentReviews</div>
+    <div class="tagline">Ask the neighbors first.</div>
+  </div>
+</div>
+<div class="spacer"></div>
+
+<div id="lockup-dark" class="export" role="img" aria-label="lockup-dark">
+  <div class="mark">
+    <svg viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M50 20 L58.6 42.1 L82 44.8 L64 60.3 L69.4 83.2 L50 71 L30.6 83.2 L36 60.3 L18 44.8 L41.4 42.1 Z"/>
+    </svg>
+  </div>
+  <div class="word-col">
+    <div class="word">RentReviews</div>
+    <div class="tagline">Ask the neighbors first.</div>
+  </div>
+</div>
+
+</body>
+</html>
