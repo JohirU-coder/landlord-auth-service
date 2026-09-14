@@ -209,7 +209,7 @@
                 <div class="flex items-center">
                     <a href="./dashboard.html" class="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity">
                         <div class="bg-gradient-to-r from-indigo-600 to-purple-600 w-8 h-8 rounded-lg flex items-center justify-center">
-                            <span class="text-white font-bold text-sm">⭐</span>
+                            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5l2.6 6.3 6.8.55-5.2 4.5 1.6 6.65L12 15.9l-5.8 3.6 1.6-6.65-5.2-4.5 6.8-.55L12 1.5z"/></svg>
                         </div>
                         <span class="ml-3 text-xl font-bold text-gray-900" style="font-family: 'Fraunces', serif">RentReviews</span>
                     </a>
@@ -435,8 +435,8 @@
                     <span class="price-badge text-white px-3 py-1 rounded-full text-lg font-bold"></span>
                 </div>
                 <div class="absolute top-4 right-4">
-                    <button class="bg-white bg-opacity-20 p-2 rounded-full hover:bg-opacity-30 transition-colors">
-                        <span class="text-white">❤️</span>
+                    <button class="favorite-btn bg-white bg-opacity-20 p-2 rounded-full hover:bg-opacity-30 transition-colors" aria-label="Save property" title="Save property">
+                        <span class="text-white">🤍</span>
                     </button>
                 </div>
                 <div class="absolute bottom-4 left-4 text-white">
@@ -639,7 +639,72 @@
         document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
             setupNavigation();
+            loadSavedPropertyIds();
         });
+
+        // Fetched once up front (rather than once per card) so every
+        // property card's bookmark icon can render its correct saved/unsaved
+        // state synchronously, no matter how many results come back.
+        const savedPropertyIds = new Set();
+        async function loadSavedPropertyIds() {
+            const token = localStorage.getItem('rentreviews_token');
+            if (!token) return;
+            try {
+                const response = await fetch(`${API_BASE_URL}/properties/saved`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) return;
+                const data = await response.json();
+                (data.properties || []).forEach(p => savedPropertyIds.add(p.id));
+                // Cards already rendered before this resolved (a very fast
+                // search right after page load) get their icon corrected now.
+                document.querySelectorAll('.favorite-btn[data-property-id]').forEach(btn => {
+                    const id = parseInt(btn.dataset.propertyId);
+                    if (savedPropertyIds.has(id)) setFavoriteBtnState(btn, true);
+                });
+            } catch (error) {
+                console.error('Error loading saved property ids:', error);
+            }
+        }
+
+        function setFavoriteBtnState(btn, isSaved) {
+            btn.dataset.saved = isSaved ? 'true' : 'false';
+            btn.querySelector('span').textContent = isSaved ? '❤️' : '🤍';
+            btn.classList.toggle('bg-white', isSaved);
+            btn.classList.toggle('bg-opacity-90', isSaved);
+        }
+
+        function wireFavoriteButton(property, template) {
+            const btn = template.querySelector('.favorite-btn');
+            if (!btn) return;
+            btn.dataset.propertyId = property.id;
+            setFavoriteBtnState(btn, savedPropertyIds.has(property.id));
+
+            btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const token = localStorage.getItem('rentreviews_token');
+                if (!token) {
+                    window.location.href = `./auth.html?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+                    return;
+                }
+
+                const isSaved = btn.dataset.saved === 'true';
+                btn.disabled = true;
+                try {
+                    const response = await fetch(`${API_BASE_URL}/properties/${property.id}/save`, {
+                        method: isSaved ? 'DELETE' : 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    if (isSaved) savedPropertyIds.delete(property.id); else savedPropertyIds.add(property.id);
+                    setFavoriteBtnState(btn, !isSaved);
+                } catch (error) {
+                    console.error('Error toggling saved property:', error);
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+        }
 
         function setupEventListeners() {
             searchBtn.addEventListener('click', handleSearch);
@@ -1439,6 +1504,8 @@
 
         function createPropertyCard(property) {
             const template = propertyCardTemplate.content.cloneNode(true);
+
+            wireFavoriteButton(property, template);
 
             // Show a real review photo if one exists for this property, instead
             // of the gradient placeholder.
@@ -2632,7 +2699,7 @@
                 <div>
                     <div class="flex items-center mb-6">
                         <div class="w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
-                            <span class="text-white font-bold text-sm">⭐</span>
+                            <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5l2.6 6.3 6.8.55-5.2 4.5 1.6 6.65L12 15.9l-5.8 3.6 1.6-6.65-5.2-4.5 6.8-.55L12 1.5z"/></svg>
                         </div>
                         <span class="ml-3 text-xl font-bold">RentReviews</span>
                     </div>
