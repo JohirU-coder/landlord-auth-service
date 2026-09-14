@@ -1087,6 +1087,14 @@ app.post('/refresh', authenticateToken, (req, res) => {
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
+
+  if (err.type === 'entity.too.large') {
+    return sendErrorResponse(res, 413, 'Payload too large', 'Request body exceeds the 1MB limit');
+  }
+  if (err.type === 'entity.parse.failed') {
+    return sendErrorResponse(res, 400, 'Invalid request', 'Request body is not valid JSON');
+  }
+
   sendErrorResponse(res, 500, 'Internal server error', 'Something went wrong');
 });
 
