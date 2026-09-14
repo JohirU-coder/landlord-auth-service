@@ -137,8 +137,14 @@
         .hero-search-submit:disabled { opacity: .65; cursor: default; }
         .hero-search-submit:focus-visible { outline: 2px solid var(--brass); outline-offset: -2px; }
         @media (max-width: 480px) {
+            /* The icon and input must stay on the same flex row -- giving
+               the input its own flex-basis: 100% here (as this used to)
+               made it too wide to fit next to the icon, so flex-wrap
+               shoved the icon onto its own orphaned row above the input
+               instead of sitting inline at its left edge. Only the submit
+               button should drop to its own row on mobile. */
             .hero-search-bar { flex-wrap: wrap; }
-            .hero-search-input { flex-basis: 100%; padding-left: 10px; }
+            .hero-search-input { padding-left: 10px; }
             .hero-search-submit { flex: 1 0 100%; padding: 14px; }
         }
 
